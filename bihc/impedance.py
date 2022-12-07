@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 
-class Impedance():
+from bihc.plot import Plot
+
+class Impedance(Plot):
     
     def __init__(self, f, CST_file=0):
         self.isResonatorImpedance=False
