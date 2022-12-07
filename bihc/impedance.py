@@ -6,14 +6,13 @@ from bihc.plot import Plot
 
 class Impedance(Plot):
     
-    def __init__(self, f=np.linspace(0,2e9,1e5), CST_file=0):
+    def __init__(self, f=np.linspace(0.1,2e9,int(1e5)), CST_file=0):
         self.isResonatorImpedance=False
         self.isRWImpedance=False
         self.f=f
         self.Zr=np.zeros(len(f))
         if CST_file!=0:
-            self.getImpedanceFromCST(CST_file)
-          
+            self.getImpedanceFromCST(CST_file)          
         
     def getResonatorImpedance(self,Rs,Qr,fr):
          

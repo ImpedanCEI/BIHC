@@ -97,8 +97,8 @@ class Plot():
     def plotImpedance(self,fMin=0,fMax=2e9):
         
         plt.figure()
-        plt.plot(self.df['f']/1e9,self.df['Zr'],label='Re[Z]')
-        plt.plot(self.df['f']/1e9,self.df['Zi'],color='r',label='Im[Z]',alpha=0.7)
+        plt.plot(self.f/1e9,self.Zr,label='Re[Z]')
+        plt.plot(self.f/1e9,self.Zi,color='r',label='Im[Z]',alpha=0.7)
         plt.tick_params(axis='both', which='major')
         plt.xlim(fMin/1e9,fMax/1e9)
         plt.ylim(0, )
@@ -112,23 +112,23 @@ class Plot():
     def plotSpectrumAndImpedance(self, Z):
 
         [f,S]=self.spectrum
-        Zreal=Z.df['Zr']
-        Zf=Z.df['f']
+        Zreal=Z.Zr
+        Zf=Z.f
 
-        if np.max(f)>np.max(Z.df['f']):
+        if np.max(f)>np.max(Z.f):
             mask1=f>=0
-            mask2=f<=np.max(Z.df['f'])
+            mask2=f<=np.max(Z.f)
             mask=mask1*mask2
             f=f[mask]
-            Zreal=np.interp(f,Z.df['f'],Z.df['Zr'])
+            Zreal=np.interp(f,Z.f,Z.Zr)
             S=S[mask]
             
-        elif np.max(f)<np.max(Z.df['f']):
-            mask1=Z.df['f']>=0
-            mask2=Z.df['f']<=np.max(f)
+        elif np.max(f)<np.max(Z.f):
+            mask1=Z.f>=0
+            mask2=Z.f<=np.max(f)
             mask=mask1*mask2
-            Zf=Z.df['f'][mask]
-            Zreal=Z.df['Zr'][mask]
+            Zf=Z.f[mask]
+            Zreal=Z.Zr[mask]
             mask3= f>=0
             f=f[mask3]
             S=S[mask3]
