@@ -4,8 +4,9 @@ class Power():
 
     def getPloss(self,Z):
 
-        if(self._NbIsComputed==False):
-            self.setNbFromFillNumber()
+# I am commenting these two lines, think I found them already commented in the original code
+#        if(self._NbIsComputed==False):
+#            self.setNbFromFillNumber()
 
         e=1.621e-19
         t=self.longitudinalProfile[0]
