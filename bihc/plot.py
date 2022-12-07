@@ -2,6 +2,13 @@ import matplotlib as plt
 import numpy as np
 import pytimber
 
+#customize plots
+from matplotlib import rcParams, cycler
+plt.style.use('ggplot')
+rcParams['lines.linewidth'] = 2
+rcParams['xtick.labelsize'] = 'xx-large'
+rcParams['ytick.labelsize'] = 'xx-large'
+
 class Plot():
 
     def plotLongitudinalProfile(self, tmin=-1, tmax=-1):

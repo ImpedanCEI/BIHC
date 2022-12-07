@@ -5,5 +5,5 @@ from . import beam
 
 
 from .beam import Beam
-#from .impedance import Impedance
+from .impedance import Impedance
 #from .power import Power
