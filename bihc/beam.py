@@ -132,6 +132,8 @@ class Beam(Impedance, Power, Plot):
     @property
     def spectrum(self):
         if self._isSpectrumReady:
+            [f.s] = self._spectrum
+            self.powerSpectrum=[f, np.abs(s)**2]
             return self._spectrum
         else:
             [t,s]=self.longitudinalProfile
