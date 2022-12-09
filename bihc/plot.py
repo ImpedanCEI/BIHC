@@ -5,9 +5,9 @@ import pytimber
 #customize plots
 from matplotlib import rcParams, cycler
 plt.style.use('ggplot')
-rcParams['lines.linewidth'] = 2
-rcParams['xtick.labelsize'] = 'xx-large'
-rcParams['ytick.labelsize'] = 'xx-large'
+rcParams['lines.linewidth'] = 1.5
+rcParams['xtick.labelsize'] = 'x-large'
+rcParams['ytick.labelsize'] = 'x-large'
 
 class Plot():
 
@@ -56,7 +56,7 @@ class Plot():
         plt.show()
 
 
-    def plotSpectrumFromTimber(startDate,beamNumber):
+    def plotPowerSpectrumFromTimber(startDate,beamNumber):
         db=pytimber.LoggingDB()
         
         if(beamNumber==1):

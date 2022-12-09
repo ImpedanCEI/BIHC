@@ -132,6 +132,8 @@ class Beam(Impedance, Power, Plot):
     @property
     def spectrum(self):
         if self._isSpectrumReady:
+            [f,s] = self._spectrum
+            self.powerSpectrum=[f, np.abs(s)**2]
             return self._spectrum
         else:
             [t,s]=self.longitudinalProfile
@@ -147,6 +149,7 @@ class Beam(Impedance, Power, Plot):
             print ('DC component: ', np.max(np.abs(S)))  
             f = np.linspace(-fc/2, fc/2 - deltaF, len(S))      #vector of K point from min_value to max_value (Domain in frequency)
             self._spectrum=[f, np.abs(S)]
+            self.powerSpectrum=[f, np.abs(S)**2]
             self._isSpectrumReady=True
             
             return self._spectrum
