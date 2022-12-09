@@ -32,7 +32,7 @@ class Beam(Impedance, Power, Plot):
         self.ppbk = ppbk
 
         self._bunchShape = bunchShape # Bunche shape (analytical function)
-        self._q = qvalue #q value for the q-gaussian distribution 1>q>3
+        self.q = qvalue #q value for the q-gaussian distribution 1>q>3
         self.J = 1
         self.Nb = Nb # Number of particles per bunch
         self.fillMode = fillMode
@@ -152,7 +152,7 @@ class Beam(Impedance, Power, Plot):
             return self._spectrum
         
     @spectrum.setter
-    def spectrum(self, newSpectrum):
+    def spectrum(self, newSpectrum): # TODO we want to assign the spectrum
 #        self._spectrum=newSpectrum
         raise Exception("Spectrum can not be assigned")
                        
