@@ -9,10 +9,22 @@ from bihc.plot import Plot
 class Beam(Impedance, Power, Plot):
     '''Defining the beam characteristics.
 
-    Enables to create a beam with certain characteristics. The beam can be
+    Enables to create a beam object with certain characteristics. The beam can be
     created from an existing fill stored in Timber or from a self defined
     filling scheme. It is possible to assign the bunch lenght, the bunch
-    shape, the total intensity.
+    profile shape, the total intensity and the number of beams (1 or 2).
+
+    Parameters
+    ----------
+    M : int, default 3564
+        Maximum number of buckets
+    A : int, default 1
+        Normalized amplitude for bunch profiles
+    fillNumber : int, default 0
+        fill number relative to a particular beam fill of the machine
+    
+        
+
     '''
 
     def __init__(self, M=3564, A=1, fillNumber=0,
