@@ -20,8 +20,6 @@ class Beam(Impedance, Power, Plot):
         Maximum number of buckets
     A : int, default 1
         Normalized amplitude for bunch profiles
-    fillNumber : int, default 0
-        Fill number relative to a particular beam fill of the machine
     bunchLength : float, default 1.2e-9
         Beam longitudinal bunch length in seconds [s]
     bunchShape : str, default 'GAUSSIAN'
@@ -34,6 +32,8 @@ class Beam(Impedance, Power, Plot):
         Beam intensity in number of protons per bunch
     beamNumber : int, default 1
         Number of beams for the power loss computation (1 or 2)
+    fillNumber : int, default 0
+        Fill number relative to a particular beam fill of the machine
     fillMode : str, default 'FLATTOP'
         Timber label to extract data at a certain energy 'INJ', 'FLATTOP', 'STABLE'
     fillingScheme : list of bool, default [False]*3564
@@ -119,16 +119,15 @@ class Beam(Impedance, Power, Plot):
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
         
-        # Se hai dato un fillNumber, cioé è diverso da 0 che è il default allora chiama
-        # il metodo setBeamFromFillNumber, altrimenti, se avevi dato un filling scheme,
-        # e questo significa che il vettore non è di tutti 0, e controllo sommando tutti 
-        # i valori tra di loro, allora chiama setCustomBeamWithFillingScheme, infine, terza
-        # opzione è il setCustomBeam
+        # Computes the beam longitudinal profile 
         if fillNumber > 0:
+            #if user specifies a fill number, data is extracted from timber
             self.setBeamFromFillNumber(fillNumber, fillMode, beamNumber)
         elif sum(self._fillingScheme) > 0:
+            #if the array is not all False values
             self.setCustomBeamWithFillingScheme()
         else:
+            #if the array is all False values
             self.setCustomBeam()
    
     @property
@@ -172,6 +171,16 @@ class Beam(Impedance, Power, Plot):
 
     @property
     def spectrum(self):
+        '''spectrum (property)
+
+        Computes spectrum and power spectrum from the 
+        longitudinal beam profile using Numpy fft
+
+        Returns
+        -------
+        spectrum : numpy.ndarray list 
+            Beam spectrum in frequency. Returns the list of numpy arrays [frequency, spectrum]
+        '''
         self.powerSpectrum = []
         if self._isSpectrumReady:
             [f,s] = self._spectrum
@@ -202,7 +211,13 @@ class Beam(Impedance, Power, Plot):
         raise Exception("Spectrum can not be assigned")
                        
     def _setBunches(self):
+        '''_setBunches method
 
+        Computes the longitudinal profile of the bunches 
+        with the shape specified in the class instance
+
+         'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN' 
+        '''
         if((self.realMachineLength) and (self.d*self.M>self.T_1_TURN)):
             self.d=self.T_1_TURN/self.M
             print("d has been resized to ", self.d ," because it was to big to fill ",self.M," buckets in the real machine length")
@@ -325,11 +340,33 @@ class Beam(Impedance, Power, Plot):
         self.longitudinalProfile=[t,s]
 
 
-    def setBeamFromFillNumber(self,fillNumber,fillMode='FLATTOP',beamNumber=1):
+    def setBeamFromFillNumber(self, fillNumber, fillMode='FLATTOP', beamNumber=1):
+        '''Set beam from fill number
+
+        Retrieves beam fill information from Timber provided a fill Number
+        It requires to install `pytimber` python package
+        For more information refer to bihc installation guide
+
+        **Parameters will override class instantiation**
+
+        Parameters
+        ----------
+        beamNumber : int, default 1
+            Number of beams for the power loss computation (1 or 2)
+        fillNumber : int, default 0
+            Fill number relative to a particular beam fill of the machine
+        fillMode : str, default 'FLATTOP'
+            Timber label to extract data at a certain energy 'INJ', 'FLATTOP', 'STABLE'
+
+        Raises
+        ------
+        Exception
+            pytimber could not be imported
+        '''
         try:
             import pytimber
         except:
-            print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
+            print('This method uses pytimber. Please follow the installation guide to set it in your python environment')
 
         self._fillNumber=fillNumber
         self.fillMode=fillMode
@@ -399,7 +436,13 @@ class Beam(Impedance, Power, Plot):
         self._setBunches()
         
     def setCustomBeam(self):
+        '''Set custom beam without a filling scheme
 
+        Sets beam with all bunches set to True for all bucket 
+        slots with the bunch length, bunch shape and offset 
+        defined in class instance
+
+        '''
         self.isATimberFill=False
 
         self._fillingScheme[0:self.M]=[True]*self.M
@@ -410,6 +453,13 @@ class Beam(Impedance, Power, Plot):
 
         
     def setCustomBeamWithFillingScheme(self):
+        '''Set custom beam with a filling scheme
+
+        Sets beam with bunches where the filling scheme list 
+        is set to true, and empty when False; for every bucket
+        slots, and with the bunch length, bunch shape and offset 
+        defined in class instance
+        '''
         print('Setting custom beam from filling scheme')
         if(len(self._fillingScheme)>self.M):
             sys.exit("ERROR : the length of the fillingScheme exceed the slot that you set (M)")
@@ -430,10 +480,23 @@ class Beam(Impedance, Power, Plot):
         self._setBunches()
         
     def setNbFromFillNumber(self):
+        '''Set Intensity from fill number
+
+        Retrieves intensity  information from Timber provided a fill Number
+        It requires to install `pytimber` python package
+        For more information refer to bihc installation guide
+
+        **Parameters will override class instantiation**
+
+        Raises
+        ------
+        Exception
+            pytimber could not be imported
+        '''
         try:
             import pytimber
         except:
-            print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
+            print('This method uses pytimber. Please follow the installation guide to set it in your python environment')
 
         db=pytimber.LoggingDB()
         bunchIntensities='LHC.BCTFR.A6R4.B'+str(self._beamNumber)+':BUNCH_INTENSITY'
@@ -464,7 +527,17 @@ class Beam(Impedance, Power, Plot):
         print ("Nb calculated at: ", pytimber.dumpdate(t2))
  
     def setBeamsFromSumWithShift(self, beam1, beam2, shift):
+        ''' Set beam object from the sum of two beam objects
         
+        Parameters
+        ----------
+        beam1 : Beam object
+            First beam to add
+        beam2 : Beam object
+            Second beam to add
+        shift : float
+            Time shift between beam 1 and beam 2 in seconds [s]
+        '''
         [t1,s1]=beam1.longitudinalProfile
         [t2,s2]=beam2.longitudinalProfile
         deltaT=t1[1]-t1[0]
