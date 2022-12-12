@@ -21,10 +21,40 @@ class Beam(Impedance, Power, Plot):
     A : int, default 1
         Normalized amplitude for bunch profiles
     fillNumber : int, default 0
-        fill number relative to a particular beam fill of the machine
-    
-        
+        Fill number relative to a particular beam fill of the machine
+    bunchLength : float, default 1.2e-9
+        Beam longitudinal bunch length in seconds [s]
+    bunchShape : str, default 'GAUSSIAN'
+        Beam profile shape : 'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN'         
+    qvalue : float, default 1.2
+        q-Gaussian q-value for the 'q-GAUSSIAN' beam profile opt
+    phi : float, default 0
+        Offset of the bunch profile distribution in time [s]
+    Nb : float, default 2.3e11
+        Beam intensity in number of protons per bunch
+    beamNumber : int, default 1
+        Number of beams for the power loss computation (1 or 2)
+    fillMode : str, default 'FLATTOP'
+        Timber label to extract data at a certain energy 'INJ', 'FLATTOP', 'STABLE'
+    fillingScheme : list of bool, default [False]*3564
+        Bool values to define the bunch filling scheme with length the number of buckets
+    machine : str, default 'LHC'
+        Name of the machine to operate with : 'PS', 'SPS', 'LHC'
+    realMachineLength : bool, default True
+        Flag to adapt bucket size to real machine length
+    ppbk : int, default 250
+        Number of time samples per bucket
 
+    Attributes
+    ----------
+    longitudinalProfile : numpy.ndarray list
+        Beam longitudinal distribution in time, normalized. Returns the list of numpy arrays [time, profile]
+    spectrum : numpy.ndarray list 
+        Beam spectrum in frequency. Returns the list of numpy arrays [frequency, spectrum]
+    powerSpectrum : numpy.ndarray list
+        Beam power spectrum in frequency. Returns the list of numpy arrays [frequency, powerspectrum]
+    totalBeamCharge : float
+        Beam charge computed from intensity and number of filled slots, in Coulombs [C]
     '''
 
     def __init__(self, M=3564, A=1, fillNumber=0,
