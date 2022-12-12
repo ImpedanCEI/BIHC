@@ -1,5 +1,4 @@
 import numpy as np
-import pytimber
 import sys
 import math
 
@@ -285,6 +284,11 @@ class Beam(Impedance, Power, Plot):
 
 
     def setBeamFromFillNumber(self,fillNumber,fillMode='FLATTOP',beamNumber=1):
+        try:
+            import pytimber
+        except:
+            print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
+
         self._fillNumber=fillNumber
         self.fillMode=fillMode
         self._beamNumber=beamNumber
@@ -384,7 +388,11 @@ class Beam(Impedance, Power, Plot):
         self._setBunches()
         
     def setNbFromFillNumber(self):
-        
+        try:
+            import pytimber
+        except:
+            print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
+
         db=pytimber.LoggingDB()
         bunchIntensities='LHC.BCTFR.A6R4.B'+str(self._beamNumber)+':BUNCH_INTENSITY'
         if(self._fillNumber!=0):

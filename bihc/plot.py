@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt 
 import numpy as np
-import pytimber
 
 #customize plots
 from matplotlib import rcParams, cycler
@@ -57,6 +56,10 @@ class Plot():
 
 
     def plotPowerSpectrumFromTimber(startDate,beamNumber):
+        try:
+            import pytimber
+        except:
+            print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
         db=pytimber.LoggingDB()
         
         if(beamNumber==1):
