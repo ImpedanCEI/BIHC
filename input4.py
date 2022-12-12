@@ -1,4 +1,13 @@
-# Example: using an LHC fill number to obtain beam parameters
+'''
+This example shows how to produce some impedance curves using some built in
+methods. This is an alternative to importing an impedance curve from CST.
+
+
+@date: Created on 09/12/2022
+@author: lsito
+'''
+
+#TODO Adding more resontors impedances and the impedance from 
 import bihc
 
 import matplotlib as mpl
@@ -6,37 +15,21 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-# Beam new is the new version of Francesco's library. It has been modified.
-# from beam_new import Beam, Impedance
+# Data retrival from timber, with different bunch profile shapes
+Z_RW = bihc.Impedance()
+Z_R = bihc.Impedance()
 
-mpl.style.use(['ggplot'])
+Z_RW.getRWImpedance(L=1, b=12e-3, sigma=2.5e7)
+Z_R.getResonatorImpedance(Rs=1, Qr=50, fr=1e9)
 
-# Data retrival from timber
-b_6675 = bihc.Beam(fillNumber=6675, bunchShape='BINOMIAL')
-#b_6675=Beam( M=1320, bunchLength=4*0.05/3e8, d = 25e-9, phi=0, realMachineLength=True, Nb=0.6e11, bunchShape='GAUSSIAN', beamNumber=1, fillMode='FLATTOP', machine='LHC')
-[f,S] = b_6675.spectrum
+# Automatic plotting
+Z_RW.plotImpedance()
+Z_R.plotImpedance()
 
-# Impedance plot
-impedance_file = 'Impedance_file.txt'
-
-Z = bihc.Impedance(f)
-Z.getImpedanceFromCST(impedance_file)
-Z.plotImpedance(fMax=Z.f.max())
-
-# Spectrum plot 
-[f,S] = b_6675.spectrum
+# Manual plotting
 plt.figure()
-plt.plot(f/1e9,S, label='Spectrum')
-plt.plot(Z.f/1e9, Z.Zr/Z.Zr.max(), label='Impedance Normalized')
-
-
-# plt.plot(Zt.df.f/1e9, Zt.df.Zr/Zt.df.Zr.max(), label='FLATBOTTOM')
-plt.xlabel('f [GHz]')
-plt.xlim(0,2)
-plt.ylabel('Spectrum [a.u.]')
-plt.ylim(0,)
-plt.legend()
+plt.plot(Z_RW.f, Z_RW.Zr)
+plt.plot(Z_RW.f, Z_RW.Zi)
+plt.plot(Z_R.f, Z_R.Zr)
+plt.plot(Z_R.f, Z_R.Zi)
 plt.show()
-
-# Ploss computation
-print('Fill6675 BBLRC No Port  power loss: %.2f' %b_6675.getPloss(Z)[0], 'W')

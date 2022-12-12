@@ -36,7 +36,8 @@ class Impedance(Plot):
         c=3e8
         f=self.f
         
-        Z=L/(2*np.pi*b)*np.sqrt(Z0*np.abs(2*np.pi*f)/(2*c*sigma))
+        # !n.b. problem with the signum
+        Z=(1+1j*np.sign(f))*L/(2*np.pi*b)*np.sqrt(Z0*np.abs(2*np.pi*f)/(2*c*sigma))
         
         self.Zr=np.real(Z)
         self.Zi=np.imag(Z)
