@@ -1,3 +1,15 @@
+'''
+Plot module to manage built-in plotting functions
+
+It allows to easily plot filling schemes from timber,
+or user defined beams
+
+@date: 12/12/2022
+@author: Francesco Giordano, Elena de la Fuente
+         Leonardo Sito
+'''
+
+
 import matplotlib.pyplot as plt 
 import numpy as np
 
@@ -60,6 +72,7 @@ class Plot():
             import pytimber
         except:
             print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
+
         db=pytimber.LoggingDB()
         
         if(beamNumber==1):

@@ -1,12 +1,46 @@
+'''
+Power module to manage power loss computations
+for one beam and two beams case
+
+Power loss is computed for a given beam or beams
+power spectrum and the specified impedance map in
+frequency
+
+@date: 12/12/2022
+@author: Francesco Giordano, Elena de la Fuente
+         Leonardo Sito
+'''
+
 import numpy as np
 
 class Power():
+'''Power Mixin class
 
+Class to encapsulate power computation methods
+It is inherited by Beam class
+
+Methods
+-------
+getPloss(Z)
+    Computes the power loss for a given impedance object
+get2BeamPloss(Z, phase_shift)
+    Computes the power loss for the 2 beams case for a 
+    given impedance object and a phase shift between the
+    beams
+'''
     def getPloss(self,Z):
+        '''
+        Computes the power loss for a given impedance object
+        Implemented by Francesco Giordano
 
-# I am commenting these two lines, think I found them already commented in the original code
-#        if(self._NbIsComputed==False):
-#            self.setNbFromFillNumber()
+        Parameters
+        ----------
+        Z : object
+            Impedance object returned by Impedance class with 
+            the frequency information of the impedance map given 
+            by the user
+
+        '''
 
         e=1.621e-19
         t=self.longitudinalProfile[0]
@@ -48,7 +82,22 @@ class Power():
         return P_loss, P_density;
 
     def get2BeamPloss(self, Z, phase_shift):
+        '''
+        Computes the power loss for the two beams case
+        given impedance object and the pahse_shift between 
+        the two beams
 
+        Implemented by Francesco Giordano
+
+        Parameters
+        ----------
+        Z : object
+            Impedance object returned by Impedance class with 
+            the frequency information of the impedance map given 
+            by the user
+        phase_shift : float list
+            Phase shift values between the two beams in seconds [s]
+        '''
         e=1.621e-19
         t=self.longitudinalProfile[0]
         f0=1/(t[-1]-t[0])

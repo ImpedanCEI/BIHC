@@ -1,3 +1,21 @@
+'''
+Beam module to manage beam object creation
+from Timber database or specified by custom 
+filling scheme defined by the user
+
+The created beam consists in bunches allocated in 
+the buckets specified by the boolean filling scheme
+defined by user. 
+
+For this, the longitudinal beam profile in time
+and spectrum and power spectrum are calculated
+provided a beam shape and bunch length
+
+@date: 12/12/2022
+@author: Francesco Giordano, Elena de la Fuente
+         Leonardo Sito
+'''
+
 import numpy as np
 import sys
 import math
