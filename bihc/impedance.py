@@ -4,12 +4,59 @@ import csv
 from bihc.plot import Plot
 
 class Impedance(Plot):
+    """Define a Beam Coupling Impedance curve.
+
+    It is possible to define an impedance curve using: (i) the broad-band 
+    resonator model, (ii) the resistive wall impedance of a circular beam pipe, 
+    and (iii) importing an external impedance text file (like the one that can
+    be exported from CST).
+
+    Mixin class for the Beam class.
+    
+    Parameters
+    ----------
+    f : numpy.ndarray, default np.linspace(0.1,2e9,int(1e5))
+        Frequency array of the impedance curve.
+
+        This is the numpy array containing the frequency point of the impedance
+        curve. by default it is a linearly spaced vector going from 0.1 Hz to 2 
+        GHz with 10'000 points.
+
+    CST_file : str, deafult 0
+        File name with extension of the txt file containing the impedance curve.
+    
+    Attributes
+    ----------
+    f : numpy.ndarray, default np.linspace(0.1,2e9,int(1e5))
+        Frequency array of the impedance curve [Hz].
+    Zr : numpy.ndarray
+        Real part of the impedance in the speciefied frequency points [Ohm].
+    Zi : numpy.ndarray
+        Imaginary part of the impedance in the speciefied frequency points [Ohm].
+    fr : float
+        Resonant frequency in the broad-band resonator model [Hz].
+    Rs : float
+        Shunt impedance in the broad-band resonator model [Ohm].
+    Qr : float
+        Quality factor in the broad-band resonator model.
+    b : float
+        Pipe radius in the resisitve wall impedance model [m].
+    sigma : float
+        Electrical conductivity of the pipe in the resistive wall
+        impedance model [Siemens/m].
+    L : float
+        Length of the pipe in the resistive wall impedance model [m].
+    """
     
     def __init__(self, f=np.linspace(0.1,2e9,int(1e5)), CST_file=0):
-        self.isResonatorImpedance=False
-        self.isRWImpedance=False
+    
         self.f=f
         self.Zr=np.zeros(len(f))
+        self.Zi=np.zeros(len(f))
+
+        self.isResonatorImpedance=False
+        self.isRWImpedance=False
+
         if CST_file!=0:
             self.getImpedanceFromCST(CST_file)          
         
