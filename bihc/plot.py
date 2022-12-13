@@ -164,7 +164,7 @@ class Plot():
         plt.legend()
         plt.show()
 
-    def plotSpectrumAndImpedance(self, Z):
+    def plotSpectrumAndImpedance(self, Z): #TODO: not normalize but have 2 y axis
 
         [f,S]=self.spectrum
         Zreal=Z.Zr
@@ -198,12 +198,12 @@ class Plot():
 
         plt.figure()
         plt.plot(f/1e9,S,label='Normalized Spectrum')
-        plt.plot(f/1e9,Zreal/np.max(Zreal), color='r', label='Normalized Impedance [a.u.]')
+        plt.plot(f/1e9,Zreal/np.max(Zreal), color='r', label='Normalized Impedance')
         plt.xlim(0,2)
         plt.ylim(0,)
         plt.tick_params(axis='both', which='major')
         plt.xlabel("f [GHz]")
-        plt.ylabel("Impedance")
+        plt.ylabel("Normalized Impedance / Spectrum [a.u.]")
         plt.grid(True, color='gray', linestyle=':')
         plt.legend()
         plt.show()

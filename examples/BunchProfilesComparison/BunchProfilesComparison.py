@@ -11,12 +11,9 @@ shape. The main differences among different bunch shapes is shown through a plot
 import sys
 sys.path.append('../../')
 
+import matplotlib.pyplot as plt
 import bihc
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
 
 # Data retrival from timber, with different bunch profile shapes
 b_6675_gauss = bihc.Beam(fillNumber=6675, bunchShape='GAUSSIAN')
@@ -39,7 +36,7 @@ plt.tight_layout()
 plt.show()
 
 # Importing an impedance curve
-impedance_file = 'Impedance_file.txt'
+impedance_file = 'PillboxImpedance.txt'
 
 Z = bihc.Impedance(f_gauss)
 Z.getImpedanceFromCST(impedance_file)
