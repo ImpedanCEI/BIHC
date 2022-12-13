@@ -459,7 +459,6 @@ class Beam(Impedance, Power, Plot):
         Sets beam with all bunches set to True for all bucket 
         slots with the bunch length, bunch shape and offset 
         defined in class instance
-
         '''
         self.isATimberFill=False
 

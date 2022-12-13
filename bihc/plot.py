@@ -2,7 +2,8 @@
 Plot module to manage built-in plotting functions
 
 It allows to easily plot filling schemes from timber,
-or user defined beams
+or user defined beams. 
+Uses the custom'bihc.mplstyle' file 
 
 @date: 12/12/2022
 @author: Francesco Giordano, Elena de la Fuente
@@ -13,12 +14,7 @@ or user defined beams
 import matplotlib.pyplot as plt 
 import numpy as np
 
-#customize plots
-from matplotlib import rcParams, cycler
-plt.style.use('ggplot')
-rcParams['lines.linewidth'] = 1.5
-rcParams['xtick.labelsize'] = 'x-large'
-rcParams['ytick.labelsize'] = 'x-large'
+plt.style.use('bihc.mplstyle')
 
 class Plot():
 
