@@ -13,7 +13,7 @@ impedance map
 @author: Leonardo Sito, Elena de la Fuente
 '''
 import sys
-sys.path.append('../../../')
+sys.path.append('../../')
 
 import bihc
 import matplotlib.pyplot as plt

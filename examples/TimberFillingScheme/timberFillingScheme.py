@@ -12,7 +12,7 @@ exported in .txt format
 @author: Elena de la Fuente, Leonardo Sito
 '''
 import sys
-sys.path.append('../../../')
+sys.path.append('../../')
 
 import bihc
 

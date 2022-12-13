@@ -9,11 +9,55 @@ Uses the custom'bihc.mplstyle' file
 @author: Francesco Giordano, Elena de la Fuente
          Leonardo Sito
 '''
-
-import matplotlib.pyplot as plt 
+import os
 import numpy as np
+import matplotlib.pyplot as plt 
+from matplotlib import rcParams, cycler
 
-plt.style.use('bihc.mplstyle')
+rcParams={
+    # Set color cycle: blue, green, yellow, red, violet, gray
+    'axes.prop_cycle' : cycler('color', ['0C5DA5', '00B945', 'FF9500', 'FF2C00', '845B97', '474747', '9e9e9e']),
+
+    # Set default figure size
+    'figure.figsize' : [4.55, 3.42],
+    'figure.dpi': 160,
+    'figure.autolayout': True,
+
+    # Set x axis
+    'xtick.direction' : 'in',
+    'xtick.major.size' : 3,
+    'xtick.major.width' : 0.5,
+    'xtick.minor.size' : 1.5,
+    'xtick.minor.width' : 0.5,
+    'xtick.minor.visible' : True,
+    'xtick.top' : True,
+
+    # Set y axis
+    'ytick.direction' : 'in',
+    'ytick.major.size' : 3,
+    'ytick.major.width' : 0.5,
+    'ytick.minor.size' : 1.5,
+    'ytick.minor.width' : 0.5,
+    'ytick.minor.visible' : True,
+    'ytick.right' : True,
+
+    # Set line widths
+    'axes.linewidth' : 0.5,
+    'grid.linewidth' : 0.5,
+    'lines.linewidth' : 1.,
+
+    # Remove legend frame
+    'legend.frameon' : False,
+
+    # Always save as 'tight'
+    'savefig.bbox' : 'tight',
+    'savefig.pad_inches' : 0.05,
+
+    # Use serif fonts
+    # font.serif : Times,
+    'font.family' : 'serif',
+    'mathtext.fontset' : 'dejavuserif',
+    }
 
 class Plot():
 
