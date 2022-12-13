@@ -6,8 +6,8 @@ It is then used along some parameters of the bunches
 Using some built in methods, the time distribution 
 and beam spectrum are plotted. The manual plotting 
 is also included below.
-Finally, the power loss is calculated for a given 
-Impedance file
+Finally, the power loss is calculated for a simple Pillbox 
+impedance map
 
 @date: Created on 08/12/2022
 @author: Leonardo Sito, Elena de la Fuente
@@ -44,12 +44,13 @@ custom_beam = bihc.Beam(bunchShape='GAUSSIAN', beamNumber=1, fillingScheme=an, N
 custom_beam.plotLongitudinalProfile()
 custom_beam.plotPowerSpectrum()
 
-# Manual plotting
+# Retrieve attributes
 [t,profile] = custom_beam.longitudinalProfile
 [f,spectrum] = custom_beam.spectrum
 [f,pspectrum] = custom_beam.powerSpectrum
 
-plt.style.use('classic')
+# Manual plotting
+plt.style.use('ggplot')
 
 fig, (ax1,ax2) = plt.subplots(2,1)
 
@@ -71,7 +72,7 @@ plt.show()
 
 # Adding power loss
 Z = bihc.Impedance(f)
-Z.getImpedanceFromCST('Impedance_file.txt')
+Z.getImpedanceFromCST('PillboxImpedance.txt')
 
 # Computing the dissipated power value
 print(f'Custom beam power loss: {custom_beam.getPloss(Z)[0]} W')

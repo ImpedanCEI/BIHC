@@ -10,7 +10,6 @@ Uses the custom'bihc.mplstyle' file
          Leonardo Sito
 '''
 
-
 import matplotlib.pyplot as plt 
 import numpy as np
 
@@ -154,8 +153,8 @@ class Plot():
         Zf=f
 
         plt.figure()
-        plt.plot(f/1e9,S,label='normalized spectrum')
-        plt.plot(f/1e9,Zreal, color='r', label='Impedance [ohm]')
+        plt.plot(f/1e9,S,label='Normalized Spectrum')
+        plt.plot(f/1e9,Zreal/np.max(Zreal), color='r', label='Normalized Impedance [a.u.]')
         plt.xlim(0,2)
         plt.ylim(0,)
         plt.tick_params(axis='both', which='major')
