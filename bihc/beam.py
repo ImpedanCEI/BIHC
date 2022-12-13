@@ -136,6 +136,7 @@ class Beam(Impedance, Power, Plot):
         self._fillingScheme=fillingScheme[0:self.M]
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
+        self.LPCfile = LPCfile.split('.')[0]
         self._beamFile = LPCfile
         # Computes the beam longitudinal profile 
         if fillNumber > 0:
@@ -483,16 +484,18 @@ class Beam(Impedance, Power, Plot):
         import csv
 
         self.isATimberFill = False
-        self._fillingScheme = np.zeros(self.M)
+        self._fillingScheme = np.zeros(self.M, dtype=bool)
 
         with open(self._beamFile) as f:
             data = csv.reader(f)
             for row in data:
                 if row[0]: #avoid empty rows
-                self._fillingScheme[int((int(row[0])-1)/10)] = True
+                    self._fillingScheme[int((int(row[0])-1)/10)] = True
 
         self._bunchLength[self._fillingScheme]=self.BUNCH_LENGTH_GLOBAL  #std vector of a single turn in the machine
         self.phi=np.ones(self.M)*self.PHI_GLOBAL
+
+        self._setBunches()
 
     def setCustomBeamWithFillingScheme(self):
         '''Set custom beam with a filling scheme

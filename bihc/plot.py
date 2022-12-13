@@ -202,7 +202,7 @@ class Plot():
         plt.xlim(0,2)
         plt.ylim(0,)
         plt.tick_params(axis='both', which='major')
-        plt.xlabel("f [GHz]")
+        plt.xlabel("frequency [GHz]")
         plt.ylabel("Normalized Impedance / Spectrum [a.u.]")
         plt.grid(True, color='gray', linestyle=':')
         plt.legend()
