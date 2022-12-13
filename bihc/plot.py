@@ -204,7 +204,7 @@ class Plot():
         plt.tick_params(axis='both', which='major')
         plt.xlabel("f [GHz]")
         plt.ylabel("Impedance")
-        plt.grid('on')
+        plt.grid(True, color='gray', linestyle=':')
         plt.legend()
         plt.show()
 
@@ -228,7 +228,7 @@ class Plot():
             plt.plot(t1[mask]*1e6,s1[mask],label='beam1',color='b')
             plt.plot(t2[mask]*1e6,s2[mask],label='beam2',color='r',alpha=0.7)
            #plt.plot(t2[mask]*1e6,(s2+s1)[mask],label='beam1+beam2',color='g',alpha=0.7)
-            plt.grid('on')
+            plt.grid(True, color='gray', linestyle=':')
             plt.ylim(0,)
             plt.xlim(np.min(t1)*1e6,np.max(t1)*1e6)
             plt.tick_params(axis='both', which='major')
