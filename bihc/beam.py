@@ -77,7 +77,7 @@ class Beam(Impedance, Power, Plot):
 
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
-                 ppbk=250,d=0 , Nb=2.3e11, bunchShape='GAUSSIAN', qvalue=1.2, beamNumber=1, 
+                 ppbk=250,d=0 , Nb=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
                  fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC'):
         
         c = 299792458 # Speed of light in vacuum [m/s]
@@ -136,7 +136,7 @@ class Beam(Impedance, Power, Plot):
         self._fillingScheme=fillingScheme[0:self.M]
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
-        
+        self._beamFile = LPCfile
         # Computes the beam longitudinal profile 
         if fillNumber > 0:
             #if user specifies a fill number, data is extracted from timber
@@ -144,6 +144,8 @@ class Beam(Impedance, Power, Plot):
         elif sum(self._fillingScheme) > 0:
             #if the array is not all False values
             self.setCustomBeamWithFillingScheme()
+        elif LPCfile is not None:
+            self.setBeamFromLPC()
         else:
             #if the array is all False values
             self.setCustomBeam()
@@ -468,7 +470,30 @@ class Beam(Impedance, Power, Plot):
             
         self._setBunches()
 
-        
+    def setBeamFromLPC(self):
+        '''Set beam from LPC tool csv output
+
+        Sets beam reading the rows of the .csv file 
+        specified by the user. This .csv file is the
+        ouput of the graphical tool LPC
+
+        For more information check the tool documentation:
+        https://lpc.web.cern.ch/schemeEditor.html
+        '''
+        import csv
+
+        self.isATimberFill = False
+        self._fillingScheme = np.zeros(self.M)
+
+        with open(self._beamFile) as f:
+            data = csv.reader(f)
+            for row in data:
+                if row[0]: #avoid empty rows
+                self._fillingScheme[int((int(row[0])-1)/10)] = True
+
+        self._bunchLength[self._fillingScheme]=self.BUNCH_LENGTH_GLOBAL  #std vector of a single turn in the machine
+        self.phi=np.ones(self.M)*self.PHI_GLOBAL
+
     def setCustomBeamWithFillingScheme(self):
         '''Set custom beam with a filling scheme
 
