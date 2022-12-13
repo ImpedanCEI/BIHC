@@ -8,6 +8,9 @@ shape. The main differences among different bunch shapes is shown through a plot
 @author: lsito
 '''
 # Example: using an LHC fill number to obtain beam parameters
+import sys
+sys.path.append('../../../')
+
 import bihc
 
 import matplotlib as mpl
