@@ -1,5 +1,22 @@
+'''
+Beam module to manage beam object creation
+from Timber database or specified by custom 
+filling scheme defined by the user
+
+The created beam consists in bunches allocated in 
+the buckets specified by the boolean filling scheme
+defined by user. 
+
+For this, the longitudinal beam profile in time
+and spectrum and power spectrum are calculated
+provided a beam shape and bunch length
+
+@date: 12/12/2022
+@author: Francesco Giordano, Elena de la Fuente
+         Leonardo Sito
+'''
+
 import numpy as np
-import pytimber
 import sys
 import math
 
@@ -10,10 +27,52 @@ from bihc.plot import Plot
 class Beam(Impedance, Power, Plot):
     '''Defining the beam characteristics.
 
-    Enables to create a beam with certain characteristics. The beam can be
+    Enables to create a beam object with certain characteristics. The beam can be
     created from an existing fill stored in Timber or from a self defined
     filling scheme. It is possible to assign the bunch lenght, the bunch
-    shape, the total intensity.
+    profile shape, the total intensity and the number of beams (1 or 2).
+
+    Parameters
+    ----------
+    M : int, default 3564
+        Maximum number of buckets
+    A : int, default 1
+        Normalized amplitude for bunch profiles
+    bunchLength : float, default 1.2e-9
+        Beam longitudinal bunch length in seconds [s]
+    bunchShape : str, default 'GAUSSIAN'
+        Beam profile shape : 'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN'         
+    qvalue : float, default 1.2
+        q-Gaussian q-value for the 'q-GAUSSIAN' beam profile opt
+    phi : float, default 0
+        Offset of the bunch profile distribution in time [s]
+    Nb : float, default 2.3e11
+        Beam intensity in number of protons per bunch
+    beamNumber : int, default 1
+        Number of beams for the power loss computation (1 or 2)
+    fillNumber : int, default 0
+        Fill number relative to a particular beam fill of the machine
+    fillMode : str, default 'FLATTOP'
+        Timber label to extract data at a certain energy 'INJ', 'FLATTOP', 'STABLE'
+    fillingScheme : list of bool, default [False]*3564
+        Bool values to define the bunch filling scheme with length the number of buckets
+    machine : str, default 'LHC'
+        Name of the machine to operate with : 'PS', 'SPS', 'LHC'
+    realMachineLength : bool, default True
+        Flag to adapt bucket size to real machine length
+    ppbk : int, default 250
+        Number of time samples per bucket
+
+    Attributes
+    ----------
+    longitudinalProfile : numpy.ndarray list
+        Beam longitudinal distribution in time, normalized. Returns the list of numpy arrays [time, profile]
+    spectrum : numpy.ndarray list 
+        Beam spectrum in frequency. Returns the list of numpy arrays [frequency, spectrum]
+    powerSpectrum : numpy.ndarray list
+        Beam power spectrum in frequency. Returns the list of numpy arrays [frequency, powerspectrum]
+    totalBeamCharge : float
+        Beam charge computed from intensity and number of filled slots, in Coulombs [C]
     '''
 
     def __init__(self, M=3564, A=1, fillNumber=0,
@@ -32,7 +91,7 @@ class Beam(Impedance, Power, Plot):
         self.ppbk = ppbk
 
         self._bunchShape = bunchShape # Bunche shape (analytical function)
-        self._q = qvalue #q value for the q-gaussian distribution 1>q>3
+        self.q = qvalue #q value for the q-gaussian distribution 1>q>3
         self.J = 1
         self.Nb = Nb # Number of particles per bunch
         self.fillMode = fillMode
@@ -78,16 +137,15 @@ class Beam(Impedance, Power, Plot):
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
         
-        # Se hai dato un fillNumber, cioé è diverso da 0 che è il default allora chiama
-        # il metodo setBeamFromFillNumber, altrimenti, se avevi dato un filling scheme,
-        # e questo significa che il vettore non è di tutti 0, e controllo sommando tutti 
-        # i valori tra di loro, allora chiama setCustomBeamWithFillingScheme, infine, terza
-        # opzione è il setCustomBeam
+        # Computes the beam longitudinal profile 
         if fillNumber > 0:
+            #if user specifies a fill number, data is extracted from timber
             self.setBeamFromFillNumber(fillNumber, fillMode, beamNumber)
         elif sum(self._fillingScheme) > 0:
+            #if the array is not all False values
             self.setCustomBeamWithFillingScheme()
         else:
+            #if the array is all False values
             self.setCustomBeam()
    
     @property
@@ -131,7 +189,20 @@ class Beam(Impedance, Power, Plot):
 
     @property
     def spectrum(self):
+        '''spectrum (property)
+
+        Computes spectrum and power spectrum from the 
+        longitudinal beam profile using Numpy fft
+
+        Returns
+        -------
+        spectrum : numpy.ndarray list 
+            Beam spectrum in frequency. Returns the list of numpy arrays [frequency, spectrum]
+        '''
+        self.powerSpectrum = []
         if self._isSpectrumReady:
+            [f,s] = self._spectrum
+            self.powerSpectrum=[f, np.abs(s)**2]
             return self._spectrum
         else:
             [t,s]=self.longitudinalProfile
@@ -147,17 +218,24 @@ class Beam(Impedance, Power, Plot):
             print ('DC component: ', np.max(np.abs(S)))  
             f = np.linspace(-fc/2, fc/2 - deltaF, len(S))      #vector of K point from min_value to max_value (Domain in frequency)
             self._spectrum=[f, np.abs(S)]
+            self.powerSpectrum=[f, np.abs(S)**2]
             self._isSpectrumReady=True
             
             return self._spectrum
         
     @spectrum.setter
-    def spectrum(self, newSpectrum):
+    def spectrum(self, newSpectrum): # TODO we want to assign the spectrum
 #        self._spectrum=newSpectrum
         raise Exception("Spectrum can not be assigned")
                        
     def _setBunches(self):
+        '''_setBunches method
 
+        Computes the longitudinal profile of the bunches 
+        with the shape specified in the class instance
+
+         'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN' 
+        '''
         if((self.realMachineLength) and (self.d*self.M>self.T_1_TURN)):
             self.d=self.T_1_TURN/self.M
             print("d has been resized to ", self.d ," because it was to big to fill ",self.M," buckets in the real machine length")
@@ -280,7 +358,34 @@ class Beam(Impedance, Power, Plot):
         self.longitudinalProfile=[t,s]
 
 
-    def setBeamFromFillNumber(self,fillNumber,fillMode='FLATTOP',beamNumber=1):
+    def setBeamFromFillNumber(self, fillNumber, fillMode='FLATTOP', beamNumber=1):
+        '''Set beam from fill number
+
+        Retrieves beam fill information from Timber provided a fill Number
+        It requires to install `pytimber` python package
+        For more information refer to bihc installation guide
+
+        **Parameters will override class instantiation**
+
+        Parameters
+        ----------
+        beamNumber : int, default 1
+            Number of beams for the power loss computation (1 or 2)
+        fillNumber : int, default 0
+            Fill number relative to a particular beam fill of the machine
+        fillMode : str, default 'FLATTOP'
+            Timber label to extract data at a certain energy 'INJ', 'FLATTOP', 'STABLE'
+
+        Raises
+        ------
+        Exception
+            pytimber could not be imported
+        '''
+        try:
+            import pytimber
+        except:
+            print('This method uses pytimber. Please follow the installation guide to set it in your python environment')
+
         self._fillNumber=fillNumber
         self.fillMode=fillMode
         self._beamNumber=beamNumber
@@ -349,7 +454,12 @@ class Beam(Impedance, Power, Plot):
         self._setBunches()
         
     def setCustomBeam(self):
+        '''Set custom beam without a filling scheme
 
+        Sets beam with all bunches set to True for all bucket 
+        slots with the bunch length, bunch shape and offset 
+        defined in class instance
+        '''
         self.isATimberFill=False
 
         self._fillingScheme[0:self.M]=[True]*self.M
@@ -360,6 +470,13 @@ class Beam(Impedance, Power, Plot):
 
         
     def setCustomBeamWithFillingScheme(self):
+        '''Set custom beam with a filling scheme
+
+        Sets beam with bunches where the filling scheme list 
+        is set to true, and empty when False; for every bucket
+        slots, and with the bunch length, bunch shape and offset 
+        defined in class instance
+        '''
         print('Setting custom beam from filling scheme')
         if(len(self._fillingScheme)>self.M):
             sys.exit("ERROR : the length of the fillingScheme exceed the slot that you set (M)")
@@ -380,7 +497,24 @@ class Beam(Impedance, Power, Plot):
         self._setBunches()
         
     def setNbFromFillNumber(self):
-        
+        '''Set Intensity from fill number
+
+        Retrieves intensity  information from Timber provided a fill Number
+        It requires to install `pytimber` python package
+        For more information refer to bihc installation guide
+
+        **Parameters will override class instantiation**
+
+        Raises
+        ------
+        Exception
+            pytimber could not be imported
+        '''
+        try:
+            import pytimber
+        except:
+            print('This method uses pytimber. Please follow the installation guide to set it in your python environment')
+
         db=pytimber.LoggingDB()
         bunchIntensities='LHC.BCTFR.A6R4.B'+str(self._beamNumber)+':BUNCH_INTENSITY'
         if(self._fillNumber!=0):
@@ -410,7 +544,17 @@ class Beam(Impedance, Power, Plot):
         print ("Nb calculated at: ", pytimber.dumpdate(t2))
  
     def setBeamsFromSumWithShift(self, beam1, beam2, shift):
+        ''' Set beam object from the sum of two beam objects
         
+        Parameters
+        ----------
+        beam1 : Beam object
+            First beam to add
+        beam2 : Beam object
+            Second beam to add
+        shift : float
+            Time shift between beam 1 and beam 2 in seconds [s]
+        '''
         [t1,s1]=beam1.longitudinalProfile
         [t2,s2]=beam2.longitudinalProfile
         deltaT=t1[1]-t1[0]

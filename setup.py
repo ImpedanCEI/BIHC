@@ -24,15 +24,12 @@ setup(
     url="https://github.com/LeonardoSito/BIHC",
     project_urls={"Bug Tracker": "https://github.com/LeonardoSito/BIHC/issues"},
     install_requires = [
-					'numpy',
-					'matplotlib',
-					'scipy',
-					'pandas',
-					'pytimber',
-						]
-    ],
+                    'numpy',
+                    'matplotlib',
+                    'scipy',
+                       ],
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         "Programming Language :: Python :: 3",
