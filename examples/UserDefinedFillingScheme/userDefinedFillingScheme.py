@@ -12,6 +12,8 @@ impedance map
 @date: Created on 08/12/2022
 @author: Leonardo Sito, Elena de la Fuente
 '''
+import sys
+sys.path.append('../../../')
 
 import bihc
 import matplotlib.pyplot as plt
