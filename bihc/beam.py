@@ -78,7 +78,7 @@ class Beam(Impedance, Power, Plot):
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
                  ppbk=250,d=0 , Nb=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
-                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC'):
+                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', verbose=True):
         
         c = 299792458 # Speed of light in vacuum [m/s]
         
@@ -99,7 +99,7 @@ class Beam(Impedance, Power, Plot):
         
         self._isSpectrumReady = False
         self.isATimberFill    = False
-         
+        self.verbose = verbose 
         self._machine=machine # Select the machine you are working with
 
         # Some parameters are set in a different way depending on the machine you are working with
@@ -118,7 +118,8 @@ class Beam(Impedance, Power, Plot):
             
         if self.M > self.BUCKET_MAX:
             self.M = self.BUCKET_MAX
-            print('Number of bucket that could be filled set to: ', self.M)
+            if self.verbose:
+                print('Number of bucket that could be filled set to: ', self.M)
         
         BETA_R = np.sqrt(1 - (1/GAMMA_R**2))
         self.T_1_TURN = RING_CIRCUMFERENCE/(c*BETA_R)
@@ -136,7 +137,6 @@ class Beam(Impedance, Power, Plot):
         self._fillingScheme=fillingScheme[0:self.M]
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
-        self.LPCfile = LPCfile.split('.')[0]
         self._beamFile = LPCfile
         # Computes the beam longitudinal profile 
         if fillNumber > 0:
@@ -146,6 +146,7 @@ class Beam(Impedance, Power, Plot):
             #if the array is not all False values
             self.setCustomBeamWithFillingScheme()
         elif LPCfile is not None:
+            self.LPCfile = LPCfile.split('.')[0]
             self.setBeamFromLPC()
         else:
             #if the array is all False values
@@ -217,8 +218,9 @@ class Beam(Impedance, Power, Plot):
             S=np.fft.fftshift(S)
             S=S*deltaT
             deltaF=fc/len(s)
-    
-            print ('DC component: ', np.max(np.abs(S)))  
+        
+            if self.verbose:
+                print ('DC component: ', np.max(np.abs(S)))  
             f = np.linspace(-fc/2, fc/2 - deltaF, len(S))      #vector of K point from min_value to max_value (Domain in frequency)
             self._spectrum=[f, np.abs(S)]
             self.powerSpectrum=[f, np.abs(S)**2]
@@ -352,11 +354,12 @@ class Beam(Impedance, Power, Plot):
         s_integr=np.sum(s)*dt
     
         mask=self._bunchLength!=0
-        print ('Average bunch length = ', np.mean(self._bunchLength[mask])*4, 's')
-        print ('Integral of s = ' , s_integr)
-        print ("Buckets filled : ", self.filledSlots)
-        print ('Nb: ',self.Nb)
-        print ("Total beam charge: ", self.totalBeamCharge, "C")
+        if self.verbose:
+            print ('Average bunch length = ', np.mean(self._bunchLength[mask])*4, 's')
+            print ('Integral of s = ' , s_integr)
+            print ("Buckets filled : ", self.filledSlots)
+            print ('Nb: ',self.Nb)
+            print ("Total beam charge: ", self.totalBeamCharge, "C")
         
         self.longitudinalProfile=[t,s]
 
@@ -408,7 +411,8 @@ class Beam(Impedance, Power, Plot):
             
         t1=fill['beamModes'][MODE]['startTime']
         t2=fill['beamModes'][MODE]['endTime']
-        print ('Mode selected: ',self.fillMode, 'starts at: ', pytimber.dumpdate(t1), 'ends at',pytimber.dumpdate(t2))
+        if self.verbose:
+            print ('Mode selected: ',self.fillMode, 'starts at: ', pytimber.dumpdate(t1), 'ends at',pytimber.dumpdate(t2))
     
         fb=db.get(filledBuckets,ts,t2)
         timeStamps,fb=fb[filledBuckets]
@@ -428,7 +432,8 @@ class Beam(Impedance, Power, Plot):
             if np.sum(std[i])!=0:
                 break
             i=i-1
-        print ('Date of the loaded data:', pytimber.dumpdate(timeStamps[i]))
+        if self.verbose:
+            print ('Date of the loaded data:', pytimber.dumpdate(timeStamps[i]))
         std=std[i]
         
         self.beamDate=pytimber.dumpdate(timeStamps[i])
@@ -568,8 +573,9 @@ class Beam(Impedance, Power, Plot):
         mask=A!=0
         self.Nb=np.mean(A[mask])
         self._NbIsComputed=True
-        print ("Nb updated: " , self.Nb/1e11, "e11")
-        print ("Nb calculated at: ", pytimber.dumpdate(t2))
+        if self.verbose:
+            print ("Nb updated: " , self.Nb/1e11, "e11")
+            print ("Nb calculated at: ", pytimber.dumpdate(t2))
  
     def setBeamsFromSumWithShift(self, beam1, beam2, shift):
         ''' Set beam object from the sum of two beam objects

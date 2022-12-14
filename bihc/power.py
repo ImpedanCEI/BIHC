@@ -78,7 +78,10 @@ class Power():
 
         P=f0*e*S*self.filledSlots*self.Nb
         P_density=2*(P**2)*Zreal
-        P_loss=np.sum(P_density)  
+        P_loss=np.sum(P_density) 
+        if self.verbose:
+            print(f'Computed Power loss: {P_loss} W') 
+
         return P_loss, P_density;
 
     def get2BeamPloss(self, Z, phase_shift):
@@ -140,4 +143,7 @@ class Power():
 #           P_density_list.append(P_density)
             P_loss.append(np.sum(P_density))  
 
+        if self.verbose:
+            print(f'Computed Power loss: {P_loss} W') 
+            
         return P_loss;# f, P_density_list;

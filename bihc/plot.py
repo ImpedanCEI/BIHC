@@ -74,10 +74,10 @@ class Plot():
         
         plt.figure()
         plt.plot(t*1e6,s/1e6,label=label)
-        plt.grid(True)
+
+        plt.title('Beam Longitudinal Profile')
         plt.ylim(0,np.max(s)/1e6)
-        plt.xlim(tmin*1e6, tmax*1e6)
-            
+        plt.xlim(tmin*1e6, tmax*1e6)            
         plt.tick_params(axis='both', which='major')
         plt.xlabel(r'time $[\mu s]$')
         plt.ylabel(r'Longitudinal time distribution $[1/\mu s]$')
@@ -87,31 +87,35 @@ class Plot():
 
 
     def plotPowerSpectrum(self, fmin=0, fmax=2, save=True, transparent=True):
+        
+        [f,S]=self.spectrum
 
+        plt.figure()
         if (self._fillNumber!=0):
             label='fill: '+str(self._fillNumber)
         else:
             label=''
-        
-        [f,S]=self.spectrum
-        
-        plt.figure()
+
         plt.plot(f/1e9,S**2,label=label)
-        plt.grid('on')
-        plt.ylim(0,)
+
+        plt.title('Beam Power Spectrum')
+        plt.grid(True, color='gray', linestyle=':')
+        plt.ylim(0,1)
         plt.xlim(fmin,fmax)
         plt.tick_params(axis='both', which='major')
         plt.xlabel("f [GHz]")
         plt.ylabel("Power Spectrum")
-        plt.legend()
-        plt.show()
 
+        if label:
+            plt.legend()
+
+        plt.show()
 
     def plotPowerSpectrumFromTimber(startDate,beamNumber):
         try:
             import pytimber
         except:
-            print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
+            print('This method uses pytimber. Please follow the installation guide to set it in your python environment')
 
         db=pytimber.LoggingDB()
         

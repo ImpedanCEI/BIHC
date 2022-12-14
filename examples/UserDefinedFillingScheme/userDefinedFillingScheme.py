@@ -40,7 +40,7 @@ an1 = bt+ st +bt+ st+ bt+ st+ bt+ stt
 an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
 
 # Data retrival from timber
-custom_beam = bihc.Beam(bunchShape='GAUSSIAN', beamNumber=1, fillingScheme=an, Nb=Np, d=t0)
+custom_beam = bihc.Beam(bunchShape='GAUSSIAN', beamNumber=1, fillingScheme=an, Nb=Np, d=t0, verbose=False)
 
 # built-in plotting
 custom_beam.plotLongitudinalProfile()
@@ -52,24 +52,23 @@ custom_beam.plotPowerSpectrum()
 [f,pspectrum] = custom_beam.powerSpectrum
 
 # Manual plotting
-plt.style.use('ggplot')
-
 fig, (ax1,ax2) = plt.subplots(2,1)
 
-ax1.plot(t*1e9, profile, c='r', label='profile')
+ax1.plot(t*1e9, profile, c='b', label='profile')
 ax1.set_ylabel('Intensity [p/b]')
 ax1.set_xlabel('time [ns]')
 ax1.legend()
 
 ax2.plot(f/1e9, spectrum, c='b', label='spectrum')
 ax2.plot(f/1e9, pspectrum, c='r', label='power spectrum')
+ax2.set_xlim(0, 2)
 ax2.set_ylabel('normalized amplitude')
 ax2.set_xlabel('frequency [GHz]')
 ax2.legend()
 
 fig.suptitle('User defined filling scheme')
-fig.tight_layout()
 fig.set_size_inches(12,6)
+fig.tight_layout()
 plt.show()
 
 # Adding power loss

@@ -20,9 +20,9 @@ import bihc
 file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
 
 # Data retrival from timber, with different bunch profile shapes
-b_gauss= bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN')
-b_bin = bihc.Beam(LPCfile=file, bunchShape='BINOMIAL')
-b_cos = bihc.Beam(LPCfile=file, bunchShape='COS2')
+b_gauss= bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN', verbose=False)
+b_bin = bihc.Beam(LPCfile=file, bunchShape='BINOMIAL', verbose=False)
+b_cos = bihc.Beam(LPCfile=file, bunchShape='COS2', verbose=False)
 
 # Storing spectra 
 [f_gauss, S_gauss] = b_gauss.spectrum
