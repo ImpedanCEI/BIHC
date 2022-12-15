@@ -1,33 +1,32 @@
 '''
 Power module to manage power loss computations
-for one beam and two beams case
+for one beam and two beams case.
 
-Power loss is computed for a given beam or beams
+Power loss is computed for a given beam (or beams)
 power spectrum and the specified impedance map in
-frequency
+frequency.
 
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
 import numpy as np
 
 class Power():
-'''Power Mixin class
+    '''Power Mixin class
 
-Class to encapsulate power computation methods
-It is inherited by Beam class
+    Class to encapsulate power computation methods
+    It is inherited by Beam class
 
-Methods
--------
-getPloss(Z)
-    Computes the power loss for a given impedance object
-get2BeamPloss(Z, phase_shift)
-    Computes the power loss for the 2 beams case for a 
-    given impedance object and a phase shift between the
-    beams
-'''
+    Methods
+    -------
+    getPloss(Z)
+        Computes the power loss for a given impedance object
+    get2BeamPloss(Z, phase_shift)
+        Computes the power loss for the 2 beams case for a 
+        given impedance object and a phase shift between the
+        beams
+    '''
     def getPloss(self,Z):
         '''
         Computes the power loss for a given impedance object
@@ -78,7 +77,10 @@ get2BeamPloss(Z, phase_shift)
 
         P=f0*e*S*self.filledSlots*self.Nb
         P_density=2*(P**2)*Zreal
-        P_loss=np.sum(P_density)  
+        P_loss=np.sum(P_density) 
+        if self.verbose:
+            print(f'Computed Power loss: {P_loss} W') 
+
         return P_loss, P_density;
 
     def get2BeamPloss(self, Z, phase_shift):
@@ -139,5 +141,8 @@ get2BeamPloss(Z, phase_shift)
             P_density=4*(P**2)*Zreal*(1-np.cos(2*np.pi*f*shift))
 #           P_density_list.append(P_density)
             P_loss.append(np.sum(P_density))  
+
+        if self.verbose:
+            print(f'Computed Power loss: {P_loss} W') 
 
         return P_loss;# f, P_density_list;

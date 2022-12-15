@@ -2,19 +2,61 @@
 Plot module to manage built-in plotting functions
 
 It allows to easily plot filling schemes from timber,
-or user defined beams. 
-Uses the custom'bihc.mplstyle' file 
+or user defined beams. It has customized rcParams for
+scientific plotting.
 
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
-
-
-import matplotlib.pyplot as plt 
+import os
 import numpy as np
+import matplotlib.pyplot as plt 
+from matplotlib import rcParams, cycler
 
-plt.style.use('bihc.mplstyle')
+rcParams={
+    # Set color cycle: blue, green, yellow, red, violet, gray
+    'axes.prop_cycle' : cycler('color', ['0C5DA5', '00B945', 'FF9500', 'FF2C00', '845B97', '474747', '9e9e9e']),
+
+    # Set default figure size
+    'figure.figsize' : [4.55, 3.42],
+    'figure.dpi': 160,
+    'figure.autolayout': True,
+
+    # Set x axis
+    'xtick.direction' : 'in',
+    'xtick.major.size' : 3,
+    'xtick.major.width' : 0.5,
+    'xtick.minor.size' : 1.5,
+    'xtick.minor.width' : 0.5,
+    'xtick.minor.visible' : True,
+    'xtick.top' : True,
+
+    # Set y axis
+    'ytick.direction' : 'in',
+    'ytick.major.size' : 3,
+    'ytick.major.width' : 0.5,
+    'ytick.minor.size' : 1.5,
+    'ytick.minor.width' : 0.5,
+    'ytick.minor.visible' : True,
+    'ytick.right' : True,
+
+    # Set line widths
+    'axes.linewidth' : 0.5,
+    'grid.linewidth' : 0.5,
+    'lines.linewidth' : 1.,
+
+    # Remove legend frame
+    'legend.frameon' : False,
+
+    # Always save as 'tight'
+    'savefig.bbox' : 'tight',
+    'savefig.pad_inches' : 0.05,
+
+    # Use serif fonts
+    # font.serif : Times,
+    'font.family' : 'serif',
+    'mathtext.fontset' : 'dejavuserif',
+    }
 
 class Plot():
 
@@ -31,43 +73,48 @@ class Plot():
         
         plt.figure()
         plt.plot(t*1e6,s/1e6,label=label)
-        plt.grid(True)
+
+        plt.title('Beam Longitudinal Profile')
         plt.ylim(0,np.max(s)/1e6)
-        plt.xlim(tmin*1e6, tmax*1e6)
-            
+        plt.xlim(tmin*1e6, tmax*1e6)            
         plt.tick_params(axis='both', which='major')
-        plt.xlabel(r't $[\mu s]$')
+        plt.xlabel(r'time $[\mu s]$')
         plt.ylabel(r'Longitudinal time distribution $[1/\mu s]$')
         plt.legend(loc='upper right')
+        plt.grid(True, color='gray', linestyle=':')
         plt.show()
 
 
     def plotPowerSpectrum(self, fmin=0, fmax=2, save=True, transparent=True):
+        
+        [f,S]=self.spectrum
 
+        plt.figure()
         if (self._fillNumber!=0):
             label='fill: '+str(self._fillNumber)
         else:
             label=''
-        
-        [f,S]=self.spectrum
-        
-        plt.figure()
+
         plt.plot(f/1e9,S**2,label=label)
-        plt.grid('on')
-        plt.ylim(0,)
+
+        plt.title('Beam Power Spectrum')
+        plt.grid(True, color='gray', linestyle=':')
+        plt.ylim(0,1)
         plt.xlim(fmin,fmax)
         plt.tick_params(axis='both', which='major')
         plt.xlabel("f [GHz]")
         plt.ylabel("Power Spectrum")
-        plt.legend()
-        plt.show()
 
+        if label:
+            plt.legend()
+
+        plt.show()
 
     def plotPowerSpectrumFromTimber(startDate,beamNumber):
         try:
             import pytimber
         except:
-            print('This method uses pytimbe. Please follow the installation guide to set it in your python environment')
+            print('This method uses pytimber. Please follow the installation guide to set it in your python environment')
 
         db=pytimber.LoggingDB()
         
@@ -96,7 +143,7 @@ class Plot():
         plt.plot(f, S, color='b',label=pytimber.dumpdate(timeStamps[-1]))
         ply.xlim(0,2)
         plt.ylim(np.min(S),np.max(S))
-        plt.grid('on')
+        plt.grid(True, color='gray', linestyle=':')
         plt.tick_params(axis='both', which='major')
         plt.xlabel('f [GHz]')
         plt.ylabel('Power spectrum [a.u.]')
@@ -117,11 +164,11 @@ class Plot():
         plt.title('Impedance')
         plt.xlabel('f [GHz]')
         plt.ylabel(r'Z $[\Omega]$')
-        plt.grid(True)
+        plt.grid(True, color='gray', linestyle=':')
         plt.legend()
         plt.show()
 
-    def plotSpectrumAndImpedance(self, Z):
+    def plotSpectrumAndImpedance(self, Z): #TODO: not normalize but have 2 y axis
 
         [f,S]=self.spectrum
         Zreal=Z.Zr
@@ -154,14 +201,14 @@ class Plot():
         Zf=f
 
         plt.figure()
-        plt.plot(f/1e9,S,label='normalized spectrum')
-        plt.plot(f/1e9,Zreal, color='r', label='Impedance [ohm]')
+        plt.plot(f/1e9,S,label='Normalized Spectrum')
+        plt.plot(f/1e9,Zreal/np.max(Zreal), color='r', label='Normalized Impedance')
         plt.xlim(0,2)
         plt.ylim(0,)
         plt.tick_params(axis='both', which='major')
-        plt.xlabel("f [GHz]")
-        plt.ylabel("Impedance")
-        plt.grid('on')
+        plt.xlabel("frequency [GHz]")
+        plt.ylabel("Normalized Impedance / Spectrum [a.u.]")
+        plt.grid(True, color='gray', linestyle=':')
         plt.legend()
         plt.show()
 
@@ -185,11 +232,11 @@ class Plot():
             plt.plot(t1[mask]*1e6,s1[mask],label='beam1',color='b')
             plt.plot(t2[mask]*1e6,s2[mask],label='beam2',color='r',alpha=0.7)
            #plt.plot(t2[mask]*1e6,(s2+s1)[mask],label='beam1+beam2',color='g',alpha=0.7)
-            plt.grid('on')
+            plt.grid(True, color='gray', linestyle=':')
             plt.ylim(0,)
             plt.xlim(np.min(t1)*1e6,np.max(t1)*1e6)
             plt.tick_params(axis='both', which='major')
-            plt.xlabel("t [us]",fontsize=18)
+            plt.xlabel("time [us]",fontsize=18)
             plt.ylabel("Longitudinal Profile [a.u.]")
             plt.legend()
             plt.show()
@@ -207,11 +254,11 @@ class Plot():
         plt.plot(t1*1e6,s1,label='beam1',color='b')
         plt.plot(t2*1e6,s2,label='beam2',color='r',alpha=0.7)
 #        plt.plot(t2*1e6,(s2+s1)[mask],label='beam1+beam2',color='g',alpha=0.7)
-        plt.grid('on')
+        plt.grid(True, color='gray', linestyle=':')
         plt.ylim(0,)
         plt.xlim(np.min(t1)*1e6,np.max(t1)*1e6)
         plt.tick_params(axis='both', which='major')
-        plt.xlabel("t [us]",fontsize=18)
+        plt.xlabel("time [us]",fontsize=18)
         plt.ylabel("Longitudinal Profile [a.u.]")
         plt.legend(fontsize=16)
         plt.show()

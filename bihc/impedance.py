@@ -6,9 +6,8 @@ circular pipe) or (ii) broad-band resonator model.
 The created impedance consists in a list of numpy.ndarray: the first element is
 the frequency vector, the second is the impedance.
 
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
 import numpy as np
@@ -137,7 +136,7 @@ class Impedance(Plot):
         return [self.f, self.Zr+1j*self.Zi]
         
     def getImpedanceFromCST(self, path, unit='GHz', skip_header=2, skip_footer=0):
-    """Creating the impedance curve from CST file.
+        """Creating the impedance curve from CST file.
 
         This methods creates an impedance curve using a txt file, usually
         exported from CST.

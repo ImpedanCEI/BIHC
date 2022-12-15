@@ -1,19 +1,16 @@
 '''
 Beam module to manage beam object creation
 from Timber database or specified by custom 
-filling scheme defined by the user
+filling scheme defined by the user.
 
 The created beam consists in bunches allocated in 
 the buckets specified by the boolean filling scheme
-defined by user. 
+defined by user. For this, the longitudinal beam profile 
+in time and spectrum and power spectrum are calculated
+provided a beam shape and bunch length.
 
-For this, the longitudinal beam profile in time
-and spectrum and power spectrum are calculated
-provided a beam shape and bunch length
-
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
 import numpy as np
@@ -46,6 +43,8 @@ class Beam(Impedance, Power, Plot):
         q-Gaussian q-value for the 'q-GAUSSIAN' beam profile opt
     phi : float, default 0
         Offset of the bunch profile distribution in time [s]
+    d : float, default 0
+        The time length (space) of one bucket
     Nb : float, default 2.3e11
         Beam intensity in number of protons per bunch
     beamNumber : int, default 1
@@ -62,6 +61,8 @@ class Beam(Impedance, Power, Plot):
         Flag to adapt bucket size to real machine length
     ppbk : int, default 250
         Number of time samples per bucket
+    verbose : bool, default True
+        Flag to control console output
 
     Attributes
     ----------
@@ -77,8 +78,8 @@ class Beam(Impedance, Power, Plot):
 
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
-                 ppbk=250,d=0 , Nb=2.3e11, bunchShape='GAUSSIAN', qvalue=1.2, beamNumber=1, 
-                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC'):
+                 ppbk=250,d=0, Nb=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
+                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', verbose=True):
         
         c = 299792458 # Speed of light in vacuum [m/s]
         
@@ -99,7 +100,7 @@ class Beam(Impedance, Power, Plot):
         
         self._isSpectrumReady = False
         self.isATimberFill    = False
-         
+        self.verbose = verbose 
         self._machine=machine # Select the machine you are working with
 
         # Some parameters are set in a different way depending on the machine you are working with
@@ -118,7 +119,8 @@ class Beam(Impedance, Power, Plot):
             
         if self.M > self.BUCKET_MAX:
             self.M = self.BUCKET_MAX
-            print('Number of bucket that could be filled set to: ', self.M)
+            if self.verbose:
+                print('Number of bucket that could be filled set to: ', self.M)
         
         BETA_R = np.sqrt(1 - (1/GAMMA_R**2))
         self.T_1_TURN = RING_CIRCUMFERENCE/(c*BETA_R)
@@ -136,7 +138,7 @@ class Beam(Impedance, Power, Plot):
         self._fillingScheme=fillingScheme[0:self.M]
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
-        
+        self._beamFile = LPCfile
         # Computes the beam longitudinal profile 
         if fillNumber > 0:
             #if user specifies a fill number, data is extracted from timber
@@ -144,6 +146,9 @@ class Beam(Impedance, Power, Plot):
         elif sum(self._fillingScheme) > 0:
             #if the array is not all False values
             self.setCustomBeamWithFillingScheme()
+        elif LPCfile is not None:
+            self.LPCfile = LPCfile.split('.')[0]
+            self.setBeamFromLPC()
         else:
             #if the array is all False values
             self.setCustomBeam()
@@ -214,8 +219,9 @@ class Beam(Impedance, Power, Plot):
             S=np.fft.fftshift(S)
             S=S*deltaT
             deltaF=fc/len(s)
-    
-            print ('DC component: ', np.max(np.abs(S)))  
+        
+            if self.verbose:
+                print ('DC component: ', np.max(np.abs(S)))  
             f = np.linspace(-fc/2, fc/2 - deltaF, len(S))      #vector of K point from min_value to max_value (Domain in frequency)
             self._spectrum=[f, np.abs(S)]
             self.powerSpectrum=[f, np.abs(S)**2]
@@ -349,11 +355,12 @@ class Beam(Impedance, Power, Plot):
         s_integr=np.sum(s)*dt
     
         mask=self._bunchLength!=0
-        print ('Average bunch length = ', np.mean(self._bunchLength[mask])*4, 's')
-        print ('Integral of s = ' , s_integr)
-        print ("Buckets filled : ", self.filledSlots)
-        print ('Nb: ',self.Nb)
-        print ("Total beam charge: ", self.totalBeamCharge, "C")
+        if self.verbose:
+            print ('Average bunch length = ', np.mean(self._bunchLength[mask])*4, 's')
+            print ('Integral of s = ' , s_integr)
+            print ("Buckets filled : ", self.filledSlots)
+            print ('Nb: ',self.Nb)
+            print ("Total beam charge: ", self.totalBeamCharge, "C")
         
         self.longitudinalProfile=[t,s]
 
@@ -405,7 +412,8 @@ class Beam(Impedance, Power, Plot):
             
         t1=fill['beamModes'][MODE]['startTime']
         t2=fill['beamModes'][MODE]['endTime']
-        print ('Mode selected: ',self.fillMode, 'starts at: ', pytimber.dumpdate(t1), 'ends at',pytimber.dumpdate(t2))
+        if self.verbose:
+            print ('Mode selected: ',self.fillMode, 'starts at: ', pytimber.dumpdate(t1), 'ends at',pytimber.dumpdate(t2))
     
         fb=db.get(filledBuckets,ts,t2)
         timeStamps,fb=fb[filledBuckets]
@@ -425,7 +433,8 @@ class Beam(Impedance, Power, Plot):
             if np.sum(std[i])!=0:
                 break
             i=i-1
-        print ('Date of the loaded data:', pytimber.dumpdate(timeStamps[i]))
+        if self.verbose:
+            print ('Date of the loaded data:', pytimber.dumpdate(timeStamps[i]))
         std=std[i]
         
         self.beamDate=pytimber.dumpdate(timeStamps[i])
@@ -468,7 +477,32 @@ class Beam(Impedance, Power, Plot):
             
         self._setBunches()
 
-        
+    def setBeamFromLPC(self):
+        '''Set beam from LPC tool csv output
+
+        Sets beam reading the rows of the .csv file 
+        specified by the user. This .csv file is the
+        ouput of the graphical tool LPC
+
+        For more information check the tool documentation:
+        https://lpc.web.cern.ch/schemeEditor.html
+        '''
+        import csv
+
+        self.isATimberFill = False
+        self._fillingScheme = np.zeros(self.M, dtype=bool)
+
+        with open(self._beamFile) as f:
+            data = csv.reader(f)
+            for row in data:
+                if row[0]: #avoid empty rows
+                    self._fillingScheme[int((int(row[0])-1)/10)] = True
+
+        self._bunchLength[self._fillingScheme]=self.BUNCH_LENGTH_GLOBAL  #std vector of a single turn in the machine
+        self.phi=np.ones(self.M)*self.PHI_GLOBAL
+
+        self._setBunches()
+
     def setCustomBeamWithFillingScheme(self):
         '''Set custom beam with a filling scheme
 
@@ -540,8 +574,9 @@ class Beam(Impedance, Power, Plot):
         mask=A!=0
         self.Nb=np.mean(A[mask])
         self._NbIsComputed=True
-        print ("Nb updated: " , self.Nb/1e11, "e11")
-        print ("Nb calculated at: ", pytimber.dumpdate(t2))
+        if self.verbose:
+            print ("Nb updated: " , self.Nb/1e11, "e11")
+            print ("Nb calculated at: ", pytimber.dumpdate(t2))
  
     def setBeamsFromSumWithShift(self, beam1, beam2, shift):
         ''' Set beam object from the sum of two beam objects
