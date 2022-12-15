@@ -6,9 +6,8 @@ circular pipe) or (ii) broad-band resonator model.
 The created impedance consists in a list of numpy.ndarray: the first element is
 the frequency vector, the second is the impedance.
 
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
 import numpy as np

@@ -9,8 +9,8 @@ is also included below.
 Finally, the power loss is calculated for a simple Pillbox 
 impedance map
 
-@date: Created on 08/12/2022
-@author: Leonardo Sito, Elena de la Fuente
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 import sys
 sys.path.append('../../')

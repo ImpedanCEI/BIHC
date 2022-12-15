@@ -1,14 +1,13 @@
 '''
 Power module to manage power loss computations
-for one beam and two beams case
+for one beam and two beams case.
 
-Power loss is computed for a given beam or beams
+Power loss is computed for a given beam (or beams)
 power spectrum and the specified impedance map in
-frequency
+frequency.
 
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
 import numpy as np
@@ -145,5 +144,5 @@ class Power():
 
         if self.verbose:
             print(f'Computed Power loss: {P_loss} W') 
-            
+
         return P_loss;# f, P_density_list;

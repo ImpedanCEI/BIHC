@@ -6,8 +6,8 @@ the same impedance curve.
 It plots the impact of the different bunch shapes in the 
 beam spectrum and computes the difference in power loss
 
-@date: Created on 08/12/2022
-@author: Elena de la Fuente, Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
 import sys

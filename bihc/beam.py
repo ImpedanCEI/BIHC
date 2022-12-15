@@ -1,19 +1,16 @@
 '''
 Beam module to manage beam object creation
 from Timber database or specified by custom 
-filling scheme defined by the user
+filling scheme defined by the user.
 
 The created beam consists in bunches allocated in 
 the buckets specified by the boolean filling scheme
-defined by user. 
+defined by user. For this, the longitudinal beam profile 
+in time and spectrum and power spectrum are calculated
+provided a beam shape and bunch length.
 
-For this, the longitudinal beam profile in time
-and spectrum and power spectrum are calculated
-provided a beam shape and bunch length
-
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
 import numpy as np
@@ -46,6 +43,8 @@ class Beam(Impedance, Power, Plot):
         q-Gaussian q-value for the 'q-GAUSSIAN' beam profile opt
     phi : float, default 0
         Offset of the bunch profile distribution in time [s]
+    d : float, default 0
+        The time length (space) of one bucket
     Nb : float, default 2.3e11
         Beam intensity in number of protons per bunch
     beamNumber : int, default 1
@@ -62,6 +61,8 @@ class Beam(Impedance, Power, Plot):
         Flag to adapt bucket size to real machine length
     ppbk : int, default 250
         Number of time samples per bucket
+    verbose : bool, default True
+        Flag to control console output
 
     Attributes
     ----------
@@ -77,7 +78,7 @@ class Beam(Impedance, Power, Plot):
 
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
-                 ppbk=250,d=0 , Nb=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
+                 ppbk=250,d=0, Nb=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
                  fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', verbose=True):
         
         c = 299792458 # Speed of light in vacuum [m/s]

@@ -2,12 +2,11 @@
 Plot module to manage built-in plotting functions
 
 It allows to easily plot filling schemes from timber,
-or user defined beams. 
-Uses the custom'bihc.mplstyle' file 
+or user defined beams. It has customized rcParams for
+scientific plotting.
 
-@date: 12/12/2022
-@author: Francesco Giordano, Elena de la Fuente
-         Leonardo Sito
+* date: 12/12/2022
+* author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 import os
 import numpy as np
