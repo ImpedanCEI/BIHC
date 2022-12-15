@@ -64,7 +64,8 @@ The push setting makes some operations more straightforward. The second addresse
 ```
 git clone https://github.com/LeonardoSito/BIHC.git
 ```
-#### Users: pip install (==Available soon!==)
+#### Users: pip install 
+(Available soon)
 ```
 pip install bihc
 ```
