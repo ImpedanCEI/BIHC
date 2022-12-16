@@ -27,7 +27,6 @@ setup(
                     'numpy',
                     'matplotlib',
                     'scipy',
-                    'myst-parser',
                        ],
     classifiers=[
         'Development Status :: 3 - Alpha',
