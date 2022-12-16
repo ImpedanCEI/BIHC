@@ -13,7 +13,6 @@
 import sys, os
 sys.path.insert(0, os.path.abspath('../../BIHC/'))
 sys.path.insert(0, os.path.abspath('../'))
-import bihc
 
 # -- Project information -----------------------------------------------------
 
