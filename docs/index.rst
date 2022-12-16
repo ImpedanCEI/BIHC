@@ -8,7 +8,7 @@ Beam Induced Heating Computation (BIHC) tool is a package that allows the extima
 
 The dissipated power value depends on the characteristics of the particle beam (beam spectrum and intensity) and on the characteristics of the consdiered accelerator component (beam-coupling impedance).
 
-The source code is available in the `WAKIS GitHub repository <https://github.com/lsito/BIHC>`_.
+The source code is available in the `BIHC GitHub repository <https://github.com/lsito/BIHC>`_.
 
 .. attention::
    This documentation is currently under development

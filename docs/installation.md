@@ -2,10 +2,12 @@
 
 In this section is explained how to set up the python environment to use the BIHC package both in lxplus and in a local machine.
 
-:::warning
-This documentation is still in development
-:::
-
+<div class="warning">
+<div class="admonition-title">
+Warning
+</div>
+This documentation is currently under development
+</div>
 ## Installation in CERN lxplus
 
 Connect to CERN lxplus via ssh. Avoid connecting to lxplus8, the code will induce in Kerberos issues. Kerberos logging will expire 4h after each connection and needs to be renewed.

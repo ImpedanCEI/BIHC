@@ -6,9 +6,9 @@ It plots the comparison of three different
 filling shcemes and computes the power loss
 
 @date: Created on 08/12/2022
-@author: lsito
+@author: Leonardo Sito, Elena de la Fuente
 '''
-# Example: using an LHC fill number to obtain beam parameters
+
 import sys
 sys.path.append('../../')
 

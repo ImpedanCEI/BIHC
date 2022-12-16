@@ -107,15 +107,23 @@ class Beam(Impedance, Power, Plot):
         if self._machine== 'LHC':
             self.BUCKET_MAX=3564
             RING_CIRCUMFERENCE = 26658.883                 #[m]
-            GAMMA_R = 7461
+            GAMMA_R = 7461 # flat top
                         
         elif self._machine=='SPS':
-            pass
+            self.BUCKET_MAX = 920
+            RING_CIRCUMFERENCE = 6895                #[m]
+            if self.fillMode == 'FLATTOP':
+                GAMMA_R = 251 # flat top 236 GeV
+            else:
+                GAMMA_R = 27.7 # flat bottom value 26 GeV
 
         elif self._machine== 'PS':
             self.BUCKET_MAX=21
             RING_CIRCUMFERENCE=628
             GAMMA_R = 27.7366 #28.7185  # p=26GeV
+
+        elif self._machine== 'PSB': #TODO
+            pass
             
         if self.M > self.BUCKET_MAX:
             self.M = self.BUCKET_MAX
