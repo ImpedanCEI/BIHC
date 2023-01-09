@@ -5,7 +5,7 @@ The dissipated power value depends on the characteristics of the particle beam (
 
 Check :file_folder: examples/ on how to use!
 
-Documentation is avaiable in [bihc.readthedocs.io](bihc.readthedocs.io)
+Documentation is avaiable in [bihc.readthedocs.io](https://bihc.readthedocs.io/en/latest/)
 
 **Fist release coming soon** (January 2023)
 
