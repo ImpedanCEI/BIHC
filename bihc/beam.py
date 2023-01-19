@@ -57,6 +57,8 @@ class Beam(Impedance, Power, Plot):
         Bool values to define the bunch filling scheme with length the number of buckets
     machine : str, default 'LHC'
         Name of the machine to operate with : 'PS', 'SPS', 'LHC'
+    spectrum : str, default 'numeric'
+        Whether to calculate the spectrum with a numerical FFT 'numeric', or the analytical formula 'analytic'
     realMachineLength : bool, default True
         Flag to adapt bucket size to real machine length
     ppbk : int, default 250
@@ -79,7 +81,7 @@ class Beam(Impedance, Power, Plot):
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
                  ppbk=250,d=0, Nb=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
-                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', verbose=True):
+                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', verbose=True):
         
         c = 299792458 # Speed of light in vacuum [m/s]
         
@@ -102,24 +104,24 @@ class Beam(Impedance, Power, Plot):
         self.isATimberFill    = False
         self.verbose = verbose 
         self._machine=machine # Select the machine you are working with
-
+        self._spectrumtype=spectrum
         # Some parameters are set in a different way depending on the machine you are working with
-        if self._machine== 'LHC':
-            self.BUCKET_MAX=3564
-            RING_CIRCUMFERENCE = 26658.883                 #[m]
-            GAMMA_R = 7461 # flat top
+        if self._machine == 'LHC':
+            self.BUCKET_MAX = 3564
+            RING_CIRCUMFERENCE = 26658.883   #[m]
+            GAMMA_R = 7461                   # flat top
                         
-        elif self._machine=='SPS':
+        elif self._machine =='SPS':
             self.BUCKET_MAX = 920
-            RING_CIRCUMFERENCE = 6895                #[m]
+            RING_CIRCUMFERENCE = 6895          #[m]
             if self.fillMode == 'FLATTOP':
-                GAMMA_R = 251 # flat top 236 GeV
+                GAMMA_R = 251    # flat top 236 GeV
             else:
-                GAMMA_R = 27.7 # flat bottom value 26 GeV
+                GAMMA_R = 27.7   # flat bottom value 26 GeV
 
-        elif self._machine== 'PS':
-            self.BUCKET_MAX=21
-            RING_CIRCUMFERENCE=628
+        elif self._machine == 'PS':
+            self.BUCKET_MAX = 21
+            RING_CIRCUMFERENCE = 628
             GAMMA_R = 27.7366 #28.7185  # p=26GeV
 
         elif self._machine== 'PSB': #TODO
@@ -205,7 +207,8 @@ class Beam(Impedance, Power, Plot):
         '''spectrum (property)
 
         Computes spectrum and power spectrum from the 
-        longitudinal beam profile using Numpy fft
+        longitudinal beam profile using Numpy fft or 
+        the analytical fomula (C. Zannini)
 
         Returns
         -------
@@ -218,19 +221,58 @@ class Beam(Impedance, Power, Plot):
             self.powerSpectrum=[f, np.abs(s)**2]
             return self._spectrum
         else:
-            [t,s]=self.longitudinalProfile
-            deltaT=t[10]-t[9] 
-            fc=1/deltaT                                        #in frequency we have a periodic signal of period fc where fc is 1/deltaT where the sampling step
-                                                               #We are interested only in the range between -fc/2 and fc/2 ( In particular (0,fc/2) beacouse x is real)
     
-            S=np.fft.fft(s,len(s))
-            S=np.fft.fftshift(S)
-            S=S*deltaT
-            deltaF=fc/len(s)
-        
+            if self._spectrumtype == 'numeric':
+                [t,s]=self.longitudinalProfile
+                deltaT=t[10]-t[9] 
+                fc=1/deltaT                                        #in frequency we have a periodic signal of period fc where fc is 1/deltaT where the sampling step
+                                                               #We are interested only in the range between -fc/2 and fc/2 ( In particular (0,fc/2) beacouse x is real)
+                S=np.fft.fft(s,len(s))
+                S=np.fft.fftshift(S)
+                S=S*deltaT
+                deltaF=fc/len(s)
+                f = np.linspace(-fc/2, fc/2 - deltaF, len(S))      #vector of K point from min_value to max_value (Domain in frequency)
+
+            else: #analytic formula (C.Zannini)
+                an = self._fillingScheme
+                t0 = self.d
+                frev = 1/self.T_1_TURN
+                n = np.arange(1,self.M+1)
+                wrev = 2*np.pi*frev
+                sigma = self.BUNCH_LENGTH_GLOBAL*4
+                sigmacos= 0.854*sigma
+                sigmapar= 0.744653*sigma
+                F = 1.2413 #?????
+                S = np.zeros(self.M*self.ppbk)
+                c = 299792458
+
+                if(self._bunchShape=='BINOMIAL'):
+                    raise Exception("BINOMIAL is not supported for analytic spectrum calculation")
+
+                elif(self._bunchShape=='GAUSSIAN'):
+                    for p in range(len(S)):
+                        print(p)
+                        lambdas=np.exp(-(p*p*wrev*wrev*sigma*sigma)/(2*c*c))
+                        S[p]=np.abs((1/sum(an))*lambdas*sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+
+                elif(self._bunchShape=='COS2'):
+                    for p in range(len(S)):
+                        Fc=(F^2)*(sigmacos**2)*((p*wrev)**2)/(c**2)
+                        A=p*wrev/c*(-2+Fc)
+                        lambdas=-1.14*np.sqrt(2*np.pi)/np.pi/(sigmacos*A)*(np.sqrt(2/np.pi))*(np.sin((np.pi*sigmacos*p*wrev*F)/(sqrt(2)*c)))
+                        S[p]=np.abs((1/sum(an))*lambdas*sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+
+                elif(self._bunchShape=='PARABOLIC'):
+                    for p in range(len(S)):
+                        CosSin=(np.sqrt(5)*sigmapar*p*wrev/c*np.cos(np.sqrt(5)*sigmapar*p*wrev/c)-np.sin(np.sqrt(5)*sigmapar*p*wrev/c))
+                        lambdas=-3*c^3/((np.sqrt(5)**3)*(sigmapar^3)*(p*wrev)^3)*(CosSin)
+                        S[p]=np.abs((1/sum(an))*lambdas*sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+                   
+                f = np.linspace(1,len(S),len(S))*frev
+
             if self.verbose:
                 print ('DC component: ', np.max(np.abs(S)))  
-            f = np.linspace(-fc/2, fc/2 - deltaF, len(S))      #vector of K point from min_value to max_value (Domain in frequency)
+
             self._spectrum=[f, np.abs(S)]
             self.powerSpectrum=[f, np.abs(S)**2]
             self._isSpectrumReady=True
@@ -277,12 +319,14 @@ class Beam(Impedance, Power, Plot):
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
                     sTemp=2*(sTemp**2.5)/H
-                    
+                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
+
                 elif(self._bunchShape=='GAUSSIAN'):
                     sTemp=1/(self._bunchLength[i] * np.sqrt(2 * np.pi)) *(np.e)**(-((tTemp - self.phi[i])**2)/(2*self._bunchLength[i]**2))  #Gaussian function
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=np.ones(len(sTemp))
                     sTemp=sTemp*mask2*mask
+                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
                     
                 elif(self._bunchShape=='COS2'):
                     tc=self._bunchLength[i]*2.77
@@ -290,6 +334,7 @@ class Beam(Impedance, Power, Plot):
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(abs(tTemp)<tc)
                     sTemp=sTemp*mask2*mask
+                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
 
                 elif(self._bunchShape=='PARABOLIC'):
                     sTemp=(1-(1/(self._bunchLength[i]**2))*(tTemp- self.phi[i])**2)  #Parabolic function 
@@ -297,6 +342,7 @@ class Beam(Impedance, Power, Plot):
                     mask2=(sTemp>0)       
                     sTemp=sTemp*mask*mask2
                     sTemp=sTemp/(sum(sTemp)*deltaD)
+                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
 
                 elif(self._bunchShape=='q-GAUSSIAN'): 
                     
@@ -331,6 +377,7 @@ class Beam(Impedance, Power, Plot):
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
+                    profile_1_bunch = [tTemp, sTemp]
                     
             else:
                 sTemp=np.zeros(len(tTemp))
@@ -370,6 +417,7 @@ class Beam(Impedance, Power, Plot):
             print ('Nb: ',self.Nb)
             print ("Total beam charge: ", self.totalBeamCharge, "C")
         
+        self.profile_1_bunch = profile_1_bunch
         self.longitudinalProfile=[t,s]
 
 

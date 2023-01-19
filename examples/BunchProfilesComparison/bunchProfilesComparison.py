@@ -14,6 +14,7 @@ import sys
 sys.path.append('../../')
 
 import matplotlib.pyplot as plt
+import numpy as np
 import bihc
 
 #LPC beam filling scheme 
@@ -28,6 +29,11 @@ b_cos = bihc.Beam(LPCfile=file, bunchShape='COS2', verbose=False)
 [f_gauss, S_gauss] = b_gauss.spectrum
 [f_bin, S_bin] = b_bin.spectrum
 [f_cos, S_cos] = b_cos.spectrum
+
+# Storing profile
+[t_gauss, s_gauss] = b_gauss.profile_1_bunch
+[t_bin, s_bin] = b_bin.profile_1_bunch
+[t_cos, s_cos] = b_cos.profile_1_bunch
 
 # Plotting 
 fig, axs = plt.subplots(3,1)
