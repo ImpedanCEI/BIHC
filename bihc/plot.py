@@ -8,7 +8,7 @@ scientific plotting.
 * date: 12/12/2022
 * author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
-import os
+import os, sys
 import numpy as np
 import matplotlib.pyplot as plt 
 from matplotlib import rcParams, cycler
@@ -57,6 +57,19 @@ rcParams={
     'font.family' : 'serif',
     'mathtext.fontset' : 'dejavuserif',
     }
+
+def progressbar(it, prefix="", size=60, out=sys.stdout): # Python3.6+
+    count = len(it)
+    def show(j):
+        x = int(size*j/count)
+        percent = int(j/count*100)
+        #print(f"{prefix}[{u'█'*x}{('.'*(size-x))}] {j}/{count}", end='\r', file=out, flush=True)
+        print(f"{prefix}[{u'█'*x}{('.'*(size-x))}] {percent}%", end='\r', file=out, flush=True)
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i+1)
+    print("\n", flush=True, file=out)
 
 class Plot():
 

@@ -40,15 +40,15 @@ for i, prof in enumerate(profiles):
     [ta, sa] = beam_analytic.profile_1_bunch
 
     # plot spectrum
-    axs[i].plot(fn, Sn, 'b', label='numeric')
-    axs[i].plot(fa, Sa, 'r', label='analytic')
+    if len(profiles) > 1: ax = axs[i]
+    else: ax = axs
+
+    ax.plot(fn, Sn, 'b', label='numeric')
+    ax.plot(fa, Sa, 'r', label='analytic')
 
     # plot spectrum envelope
-    sn_i = np.interp(np.linspace(tn[0],tn[-1],len(fn)), tn, sn)
-    sa_i = np.interp(np.linspace(ta[0],ta[-1],len(fa)), ta, sa)
-
-    axs[i].plot(fn, sn_i, 'b', alpha=0.6, label='numeric' )
-    axs[i].plot(fa, sa_i, 'r', alpha=0.6,  label='analytic' )
+    sa_i = beam_analytic.lambdas[1]
+    ax.plot(fa, sa_i, 'r', alpha=0.6,  label='analytic' )
 
     # Compute power loss
 
@@ -60,16 +60,15 @@ for i, prof in enumerate(profiles):
     powern = beam_numeric.getPloss(Z)[0]
     powera = beam_analytic.getPloss(Z)[0]
 
-    axs[i].text(0.3, 0.8, f'Numeric Power loss: {round(powern,2)} W', transform=axs[i].transAxes, color='tab:blue', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
-    axs[i].text(0.5, 0.8, f'Analytic Power loss: {round(powera,2)} W', transform=axs[i].transAxes, color='tab:red', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
+    #ax.text(0.3, 0.8, f'Numeric Power loss: {round(powern,2)} W', transform=ax.transAxes, color='tab:blue', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
+    ax.text(0.3, 0.7, f'Analytic Power loss: {round(powera,2)} W', transform=ax.transAxes, color='tab:red', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
 
     power[prof] = {'numeric': powern, 'analytic': powera}
 
-for ax in axs:
-	ax.set_xlim(0, 2e9)
-	ax.set_ylim(0, 1)
-	ax.set_xlabel('frequency [Hz]')
-	ax.set_ylabel('Spectrum [a.u.]')
+    ax.set_xlim(0, 2e9)
+    ax.set_ylim(0, 1)
+    ax.set_xlabel('frequency [Hz]')
+    ax.set_ylabel('Spectrum [a.u.]')
 
 plt.tight_layout()
 plt.show()

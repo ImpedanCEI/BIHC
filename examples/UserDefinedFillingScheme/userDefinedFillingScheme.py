@@ -1,5 +1,5 @@
 '''
-In this example shows the definition of a filling 
+This example shows the definition of a filling 
 scheme as a list of True or Falses values.
 It is then used along some parameters of the bunches 
 (Number of protons and slot space) to define a Beam object.

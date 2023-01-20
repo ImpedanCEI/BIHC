@@ -234,41 +234,49 @@ class Beam(Impedance, Power, Plot):
                 f = np.linspace(-fc/2, fc/2 - deltaF, len(S))      #vector of K point from min_value to max_value (Domain in frequency)
 
             else: #analytic formula (C.Zannini)
+                print('\033[93m'+'Warning -> Analytic FFT might take a long time to be computed'+'\033[0m')
+                from  bihc.plot import progressbar
+
                 an = self._fillingScheme
                 t0 = self.d
                 frev = 1/self.T_1_TURN
                 n = np.arange(1,self.M+1)
                 wrev = 2*np.pi*frev
-                sigma = self.BUNCH_LENGTH_GLOBAL*4
+                sigma = self.BUNCH_LENGTH_GLOBAL*1e9/4
                 sigmacos= 0.854*sigma
                 sigmapar= 0.744653*sigma
                 F = 1.2413 #?????
-                S = np.zeros(self.M*self.ppbk)
                 c = 299792458
+                A = (1/np.sum(an))
+
+                #S = np.zeros(self.M*self.ppbk) #same length as numeric
+                S = np.zeros(int(2.0e9/frev))
+                lambdas = np.zeros_like(S)
 
                 if(self._bunchShape=='BINOMIAL'):
                     raise Exception("BINOMIAL is not supported for analytic spectrum calculation")
 
                 elif(self._bunchShape=='GAUSSIAN'):
-                    for p in range(len(S)):
-                        print(p)
-                        lambdas=np.exp(-(p*p*wrev*wrev*sigma*sigma)/(2*c*c))
-                        S[p]=np.abs((1/sum(an))*lambdas*sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+                    #for p in range(len(S)):
+                    for p in progressbar(range(len(S)), "Computing analytic FFT: ", 20):
+                        lambdas[p]=np.exp(-(p*p*wrev*wrev*sigma*sigma)/(2*c*c))
+                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
 
                 elif(self._bunchShape=='COS2'):
                     for p in range(len(S)):
                         Fc=(F^2)*(sigmacos**2)*((p*wrev)**2)/(c**2)
                         A=p*wrev/c*(-2+Fc)
-                        lambdas=-1.14*np.sqrt(2*np.pi)/np.pi/(sigmacos*A)*(np.sqrt(2/np.pi))*(np.sin((np.pi*sigmacos*p*wrev*F)/(sqrt(2)*c)))
-                        S[p]=np.abs((1/sum(an))*lambdas*sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+                        lambdas[p]=-1.14*np.sqrt(2*np.pi)/np.pi/(sigmacos*A)*(np.sqrt(2/np.pi))*(np.sin((np.pi*sigmacos*p*wrev*F)/(sqrt(2)*c)))
+                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
 
                 elif(self._bunchShape=='PARABOLIC'):
                     for p in range(len(S)):
                         CosSin=(np.sqrt(5)*sigmapar*p*wrev/c*np.cos(np.sqrt(5)*sigmapar*p*wrev/c)-np.sin(np.sqrt(5)*sigmapar*p*wrev/c))
-                        lambdas=-3*c^3/((np.sqrt(5)**3)*(sigmapar^3)*(p*wrev)^3)*(CosSin)
-                        S[p]=np.abs((1/sum(an))*lambdas*sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
-                   
+                        lambdas[p]=-3*c^3/((np.sqrt(5)**3)*(sigmapar^3)*(p*wrev)^3)*(CosSin)
+                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+                
                 f = np.linspace(1,len(S),len(S))*frev
+                self.lambdas=[f, lambdas]
 
             if self.verbose:
                 print ('DC component: ', np.max(np.abs(S)))  
