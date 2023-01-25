@@ -36,7 +36,7 @@ class Beam(Impedance, Power, Plot):
     A : int, default 1
         Normalized amplitude for bunch profiles
     bunchLength : float, default 1.2e-9
-        Beam longitudinal bunch length in seconds [s]
+        Beam total longitudinal bunch length in seconds [s]
     bunchShape : str, default 'GAUSSIAN'
         Beam profile shape : 'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN'         
     qvalue : float, default 1.2
@@ -112,7 +112,7 @@ class Beam(Impedance, Power, Plot):
             GAMMA_R = 7461                   # flat top
                         
         elif self._machine =='SPS':
-            self.BUCKET_MAX = 920
+            self.BUCKET_MAX = 920 #924 is the correct number
             RING_CIRCUMFERENCE = 6895          #[m]
             if self.fillMode == 'FLATTOP':
                 GAMMA_R = 251    # flat top 236 GeV
@@ -241,12 +241,12 @@ class Beam(Impedance, Power, Plot):
                 t0 = self.d
                 frev = 1/self.T_1_TURN
                 n = np.arange(1,self.M+1)
+                c = 299792458
                 wrev = 2*np.pi*frev
-                sigma = self.BUNCH_LENGTH_GLOBAL*1e9/4
+                sigma = self.BUNCH_LENGTH_GLOBAL*c #sigma in m
                 sigmacos= 0.854*sigma
                 sigmapar= 0.744653*sigma
                 F = 1.2413 #?????
-                c = 299792458
                 A = (1/np.sum(an))
 
                 #S = np.zeros(self.M*self.ppbk) #same length as numeric
@@ -263,16 +263,16 @@ class Beam(Impedance, Power, Plot):
                         S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
 
                 elif(self._bunchShape=='COS2'):
-                    for p in range(len(S)):
-                        Fc=(F^2)*(sigmacos**2)*((p*wrev)**2)/(c**2)
+                    for p in progressbar(range(1,len(S)), "Computing analytic FFT: ", 20): #TODO fix
+                        Fc=(F**2)*(sigmacos**2)*((p*wrev)**2)/(c**2)
                         A=p*wrev/c*(-2+Fc)
-                        lambdas[p]=-1.14*np.sqrt(2*np.pi)/np.pi/(sigmacos*A)*(np.sqrt(2/np.pi))*(np.sin((np.pi*sigmacos*p*wrev*F)/(sqrt(2)*c)))
+                        lambdas[p]=-1.14*np.sqrt(2*np.pi)/np.pi/(sigmacos*A)*(np.sqrt(2/np.pi))*(np.sin((np.pi*sigmacos*p*wrev*F)/(np.sqrt(2)*c)))
                         S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
 
                 elif(self._bunchShape=='PARABOLIC'):
-                    for p in range(len(S)):
+                    for p in progressbar(range(1,len(S)), "Computing analytic FFT: ", 20): #TODO fix
                         CosSin=(np.sqrt(5)*sigmapar*p*wrev/c*np.cos(np.sqrt(5)*sigmapar*p*wrev/c)-np.sin(np.sqrt(5)*sigmapar*p*wrev/c))
-                        lambdas[p]=-3*c^3/((np.sqrt(5)**3)*(sigmapar^3)*(p*wrev)^3)*(CosSin)
+                        lambdas[p]=-3*c**3/((np.sqrt(5)**3)*(sigmapar**3)*(p*wrev)**3)*CosSin
                         S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
                 
                 f = np.linspace(1,len(S),len(S))*frev

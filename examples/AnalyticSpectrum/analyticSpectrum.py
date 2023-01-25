@@ -20,7 +20,7 @@ import bihc
 
 # Beam data with different bunch profile shapes from LPC beam filling scheme 
 file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
-profiles = ['GAUSSIAN']#, 'BINOMIAL', 'COS2']
+profiles = ['GAUSSIAN'] #, 'PARABOLIC', 'COS2'] #only GAUSSIAN works so far
 power={}
 
 # Plotting 
@@ -43,12 +43,12 @@ for i, prof in enumerate(profiles):
     if len(profiles) > 1: ax = axs[i]
     else: ax = axs
 
-    ax.plot(fn, Sn, 'b', label='numeric')
-    ax.plot(fa, Sa, 'r', label='analytic')
+    ax.plot(fa, Sa, 'r+-', label='analytic')
+    ax.plot(fn, Sn, 'bo-', label='numeric')
 
     # plot spectrum envelope
     sa_i = beam_analytic.lambdas[1]
-    ax.plot(fa, sa_i, 'r', alpha=0.6,  label='analytic' )
+    ax.plot(fa, sa_i, 'r', alpha=0.6)
 
     # Compute power loss
 
@@ -60,11 +60,12 @@ for i, prof in enumerate(profiles):
     powern = beam_numeric.getPloss(Z)[0]
     powera = beam_analytic.getPloss(Z)[0]
 
-    #ax.text(0.3, 0.8, f'Numeric Power loss: {round(powern,2)} W', transform=ax.transAxes, color='tab:blue', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
+    ax.text(0.3, 0.8, f'Numeric Power loss: {round(powern,2)} W', transform=ax.transAxes, color='tab:blue', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
     ax.text(0.3, 0.7, f'Analytic Power loss: {round(powera,2)} W', transform=ax.transAxes, color='tab:red', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
 
     power[prof] = {'numeric': powern, 'analytic': powera}
 
+    ax.legend()
     ax.set_xlim(0, 2e9)
     ax.set_ylim(0, 1)
     ax.set_xlabel('frequency [Hz]')
