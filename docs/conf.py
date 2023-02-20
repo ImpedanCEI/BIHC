@@ -34,13 +34,12 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.extlinks',
               'sphinx.ext.intersphinx',
-              'sphinx.ext.mathjax',
+              'sphinx.ext.mathjax', #for eqs
               'sphinx.ext.napoleon', 
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
-              'myst_parser', #for markdown
-              'nbsphinx' #for eqs
+              'myst_parser', #for markdown 
 ] 
 
 autodoc_preserve_defaults = True #preserves default args as in source code

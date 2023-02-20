@@ -36,6 +36,7 @@ The longitudinal beam-coupling impedance is defined as the Fourier transform of 
 \begin{equation}
 Z_z(\omega) = \int_{-\infty}^{\infty} w_z(s) e^{\frac{-j\omega s}{v}} \frac{ds}{v} 
 \end{equation}
+
 Where, $j$ is the imaginary unit, $\omega$ is the angular frequency conjugate variable of the time delay $\tau = \frac{s}{v}$ and, $v$ is the particle velocity.
 
 ## Single Beam and Two counter rotating beams scenarios.
