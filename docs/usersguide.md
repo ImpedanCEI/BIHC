@@ -13,7 +13,7 @@ This documentation is currently under development
 
 This example shows the definition of a filling  scheme as a list of True or Falses values. It is then used along some parameters of the bunches 
 (Number of protons and slot space) to define a Beam object. Using some built in methods, the time distribution and beam spectrum are plotted. The manual plotting is also included below.
-Finally, the power loss is calculated for a simple Pillbox impedance map.
+Finally, the power loss is calculated for a simple Pillbox impedance computed with `CST Stdio`[^1].
 
 ```python
 import bihc
@@ -92,13 +92,10 @@ for a specific LHC fill Number.
 The filling scheme and the bunch parameters are obtained from a fill number through Timber database python interface `pytimber`.
 The impedance curve used is from a generic Pillbox cavity simulated with CST studio and then exported in `.txt` format.
 
-<div class="note">
-<div class="admonition-title">
-Note
-</div>
-This example uses data from the CERN Timber database
-</div>
-
+:::{admonition} Note
+This example uses data from the CERN Timber database and requires access to NxCALS. 
+See the [Installation guide](installation.md) for how to setup `pytimber` to acces the Timber database.
+:::
 
 ```python
 import bihc
@@ -127,7 +124,9 @@ This example shows how to read filling schemes generated
 by the LPC tool, in `.csv` format. It plots the comparison of three different
 filling shcemes and computes the power loss for each of them, displaying it in the plot. 
 
-The LPC files are generated with the online LPC tool available in this [link](https://lpc.web.cern.ch/schemeEditor.html)
+:::{tip}
+The LPC file is generated with the online `LPC tool` available in this [link](https://lpc.web.cern.ch/schemeEditor.html).
+:::
 
 ```python
 import matplotlib.pyplot as plt
@@ -178,11 +177,14 @@ print(f'8b4e_1972b_1967_1178_1886_224bpi_12inj power loss: {beam8b4e.getPloss(Z)
 
 ## Bunch profiles comparison
 
-This example compares different bunch profile shapes using a same filling scheme given by an LPC `.csv` file and the same impedance curve from a genereic Pillbox cavity computed with CST Studio.
+This example compares different bunch profile shapes using a same filling scheme given by an `LPC Tool`generated `.csv` file and the same impedance curve from a genereic Pillbox cavity computed with `CST Studio`.
 
 It plots the impact of the different bunch shapes in the beam spectrum and computes the difference in power loss between the different bunch profiles used. 
 
-The LPC file is generated with the online LPC tool available in this [link](https://lpc.web.cern.ch/schemeEditor.html)
+:::{tip}
+The LPC file is generated with the online `LPC tool` available in this [link](https://lpc.web.cern.ch/schemeEditor.html).
+:::
+
 
 ```python
 import matplotlib.pyplot as plt
@@ -236,4 +238,76 @@ plt.tight_layout()
 plt.show()
 ```
 
+## Analytical vs Numeric spectrum computation
 
+This example compares the dissipated power difference obtained between 
+using a numeric spactrum calculation or the analytic formula by C.Zannini
+using a same filling scheme given by an `LPC Tool` generated `.csv` file and 
+the same impedance curve from a simple Pillbox resonator computed with `CST Studio`.
+
+It plots the impact of the spectrum type chosen: `numeric` or `analytic` in the 
+beam spectrum and computes the difference in power loss.
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+import bihc
+
+
+# Beam data with different bunch profile shapes from LPC beam filling scheme 
+file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
+profiles = ['GAUSSIAN'] 
+power={}
+
+# Plotting 
+fig, axs = plt.subplots(len(profiles),1)
+
+for i, prof in enumerate(profiles):
+
+    beam_numeric = bihc.Beam(LPCfile=file, bunchShape=prof, verbose=False, spectrum='numeric')
+    beam_analytic  = bihc.Beam(LPCfile=file, bunchShape=prof, verbose=False, spectrum='analytic')
+
+    # Storing spectra 
+    [fn, Sn] = beam_numeric.spectrum
+    [fa, Sa] = beam_analytic.spectrum
+
+    # Storing profile
+    [tn, sn] = beam_numeric.profile_1_bunch
+    [ta, sa] = beam_analytic.profile_1_bunch
+
+    # plot spectrum
+    if len(profiles) > 1: ax = axs[i]
+    else: ax = axs
+
+    ax.plot(fa, Sa, 'r+-', label='analytic')
+    ax.plot(fn, Sn, 'bo-', label='numeric')
+
+    # plot spectrum envelope
+    sa_i = beam_analytic.lambdas[1]
+    ax.plot(fa, sa_i, 'r', alpha=0.6)
+
+    # Compute power loss
+
+    # Importing an impedance curve
+    impedance_file = 'PillboxImpedance.txt'
+    Z = bihc.Impedance(fn)
+    Z.getImpedanceFromCST(impedance_file)
+
+    powern = beam_numeric.getPloss(Z)[0]
+    powera = beam_analytic.getPloss(Z)[0]
+
+    ax.text(0.3, 0.8, f'Numeric Power loss: {round(powern,2)} W', transform=ax.transAxes, color='tab:blue', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
+    ax.text(0.3, 0.7, f'Analytic Power loss: {round(powera,2)} W', transform=ax.transAxes, color='tab:red', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
+
+    power[prof] = {'numeric': powern, 'analytic': powera}
+
+    ax.legend()
+    ax.set_xlim(0, 2e9)
+    ax.set_ylim(0, 1)
+    ax.set_xlabel('frequency [Hz]')
+    ax.set_ylabel('Spectrum [a.u.]')
+
+plt.tight_layout()
+plt.show()
+```
+[^1]: CST Studio, [https://www.cst.com](https://www.cst.com)

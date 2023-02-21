@@ -225,8 +225,8 @@ class Beam(Impedance, Power, Plot):
             if self._spectrumtype == 'numeric':
                 [t,s]=self.longitudinalProfile
                 deltaT=t[10]-t[9] 
-                fc=1/deltaT                                        #in frequency we have a periodic signal of period fc where fc is 1/deltaT where the sampling step
-                                                               #We are interested only in the range between -fc/2 and fc/2 ( In particular (0,fc/2) beacouse x is real)
+                fc=1/deltaT                       #in frequency we have a periodic signal of period fc where fc is 1/deltaT where the sampling step
+                                                  #We are interested only in the range between -fc/2 and fc/2 ( In particular (0,fc/2) beacouse x is real)
                 S=np.fft.fft(s,len(s))
                 S=np.fft.fftshift(S)
                 S=S*deltaT

@@ -8,6 +8,7 @@ Warning
 </div>
 This documentation is currently under development
 </div>
+
 ## Installation in CERN lxplus
 
 Connect to CERN lxplus via ssh. Avoid connecting to lxplus8, the code will induce in Kerberos issues. Kerberos logging will expire 4h after each connection and needs to be renewed.
@@ -43,7 +44,7 @@ ldb = pytimber.LoggingDB(source="nxcals")
 ldb.search('LHC%BEAM_ENERGY%')
 ldb.get(ldb.search('LHC%BEAM_ENERGY%')[0], t1='2022-06-15 15:10:30.0000')
 ```
-#### Setup Git in lxplus
+### Setup Git in lxplus
 ```
 git config --list
 ```
@@ -60,11 +61,11 @@ git config --global http.emptyAuth true # Required on CC7
 ```
 The push setting makes some operations more straightforward. The second addresses an issue with large pushes via plain http or krb5. The third addresses an issue with libcurl and krb5.
 
-#### Developers: Download BIHC repository
+### Developers: Download BIHC repository
 ```
 git clone https://github.com/LeonardoSito/BIHC.git
 ```
-#### Users: pip install
+### Users: pip install
 ```
 pip install bihc
 ```

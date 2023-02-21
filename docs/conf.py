@@ -39,16 +39,17 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
               'sphinx.ext.githubpages',
-              'myst_parser', #for markdown 
+              'sphinx_copybutton',
+              'myst_parser', #for markdown
 ] 
 
 autodoc_preserve_defaults = True #preserves default args as in source code
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
-mathjax_path="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
-# The suffix of source filenames.
+myst_enable_extensions = ["dollarmath","html_admonition", "colon_fence"]
 
+# The suffix of source filenames.
 
 source_suffix = {
     '.rst': 'restructuredtext',
@@ -103,11 +104,12 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
+'''
 latex_documents = [
   ('index', 'ReadtheDocsTemplate.tex', u'Read the Docs Template Documentation',
    u'Read the Docs', 'manual'),
 ]
-
+'''
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
 #latex_logo = None
@@ -134,12 +136,13 @@ latex_documents = [
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
+'''
 texinfo_documents = [
   ('index', 'ReadtheDocsTemplate', u'Read the Docs Template Documentation',
    u'Read the Docs', 'ReadtheDocsTemplate', 'One line description of project.',
    'Miscellaneous'),
 ]
-
+'''
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
 

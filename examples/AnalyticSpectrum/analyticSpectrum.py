@@ -1,12 +1,13 @@
 '''
-This example compares different bunch profile shapes 
-using a same filling scheme given by an LPC csv file and 
-the same impedance curve.
+This example compares the dissipated power difference obtained between 
+using a numeric spactrum calculation or the analytic formula by C.Zannini
+using a same filling scheme given by an `LPC Tool` generated `.csv` file and 
+the same impedance curve from a simple Pillbox resonator.
 
-It plots the impact of the different bunch shapes in the 
+It plots the impact of the spectrum type chosen in the 
 beam spectrum and computes the difference in power loss
 
-* date: 12/12/2022
+* date: 21/02/2022
 * author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 '''
 
