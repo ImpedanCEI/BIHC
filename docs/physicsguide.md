@@ -10,8 +10,8 @@ This documentation is currently under development
 </div>
 
 
-## Introduction
-When a particle beam passes into the vacuum chamber of an accelerator component, it will electromagnetically interact with its surroundings. One of the most critical effects that occur is heating due to the passage of the beam, known as Beam-Induced Heating (BIH). 
+## Introduction 
+When a particle beam passes into the vacuum chamber of an accelerator component, it will electromagnetically interact with its surroundings. One of the most critical effects that occur is heating due to the passage of the beam, known as Beam-Induced Heating (BIH) [^1]. 
 
 As a result, an accurate design stage is required to account for this effect.
 
@@ -21,7 +21,7 @@ This code allows the calculation of heating due to Impedance effects in a high-c
 
 The goal of this physics guide is to introduce the definition of all the quantities that are involved in the computation of BIH and to show the mathematical formulations that are implemented in the code. 
 
-## Wakefields and Impedances [^1]
+## Wakefields and Impedances [^2]
 
 The longitudinal wakefunction is defined as:
 
@@ -43,7 +43,7 @@ $$
 
 Where, $j$ is the imaginary unit, $\omega$ is the angular frequency conjugate variable of the time delay $\tau = \frac{s}{v}$ and, $v$ is the particle velocity.
 
-## Single Beam and Two counter rotating beams scenarios. [^2]
+## Single Beam and Two counter rotating beams scenarios. [^3]
 Single beam case:
 
 $$
@@ -54,7 +54,7 @@ $$
 
 Where, $f_0$ is the revolution frequency the machine, $e$ is the charge of the particle, $N_{beam}$ is the number of particles in the beam, $\Lambda$ is the normalized beam spectrum, $Re[Z_z]$ is the real part of the longitudinal beam-coupling impedance.
 
-Case of two identical counter-rotating beams that are travelling in the same asymmetric vacuum chamber [^3]:
+Case of two identical counter-rotating beams that are travelling in the same asymmetric vacuum chamber [^4]:
 
 $$
 P_{loss}(s) = 
@@ -66,10 +66,12 @@ $$
 
 Where, $s$ is the location from the interaction point at which the power loss is being computed, $Z^0_z$ and $Z^1_z$ are the longitudinal impedances of order 0 and 1, $\Delta y_1(s)$ and $\Delta y_2(s)$ are the offsets from the geometrical center of respectively Beam 1 and Beam 2, $\tau_s = 2s/c$, with $c$ the speed of light, is the relative time delay of arrival at $s$ of the two beams. 
 
-[^1]: Palumbo, L., et al. «Wake Fields and Impedance«. 2003. DOI.org (Datacite), https://doi.org/10.48550/ARXIV.PHYSICS/0309023.
+[^1]: B. Salvant et al., “Beam induced heating”, 2012, [Online]. Available: https://cds.cern.ch/record/1975499 
 
-[^2]: C. Zannini, «Electromagnetic Simulation of CERN accelerator Components and Experimental Applications«, 2013. [Online]. Available: https://cds.cern.ch/record/1561199 
+[^2]: Palumbo, L., et al. "Wake Fields and Impedance". 2003. DOI.org (Datacite), https://doi.org/10.48550/ARXIV.PHYSICS/0309023.
 
-[^3]: Zannini, Carlo, et al. «Power Loss Calculation in Separated and Common Beam Chambers of the LHC«. Proceedings of the 5th Int. Particle Accelerator Conf., vol. IPAC2014, 2014, p. 3 pages, 1.928 MB. DOI.org (Datacite), https://doi.org/10.18429/JACOW-IPAC2014-TUPRI061. 
+[^3]: C. Zannini, "Electromagnetic Simulation of CERN accelerator Components and Experimental Applications", 2013. [Online]. Available: https://cds.cern.ch/record/1561199 
+
+[^4]: C. Zannini, et al. "Power Loss Calculation in Separated and Common Beam Chambers of the LHC". Proceedings of the 5th Int. Particle Accelerator Conf., vol. IPAC2014, 2014, p. 3 pages, 1.928 MB. DOI.org (Datacite), https://doi.org/10.18429/JACOW-IPAC2014-TUPRI061. 
 
 
