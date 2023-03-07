@@ -21,9 +21,9 @@ This code allows the calculation of heating due to Impedance effects in a high-c
 
 The goal of this physics guide is to introduce the definition of all the quantities that are involved in the computation of BIH and to show the mathematical formulations that are implemented in the code. 
 
-## Wakefields and Impedances [^2]
+## Wakefields and Impedances 
 
-The longitudinal wakefunction is defined as:
+The longitudinal wakefunction is defined as [^2]:
 
 $$
 w_z(x_s,y_s,x_t,y_t,s) = - \frac{1}{q_s q_t} \int_0^L F_z(x_s,y_s,s,x_t,y_t,z_t)dz_t
@@ -43,8 +43,8 @@ $$
 
 Where, $j$ is the imaginary unit, $\omega$ is the angular frequency conjugate variable of the time delay $\tau = \frac{s}{v}$ and, $v$ is the particle velocity.
 
-## Single Beam and Two counter rotating beams scenarios. [^3]
-Single beam case:
+## Single Beam and Two counter rotating beams scenarios. 
+Single beam case [^3]:
 
 $$
 P_{loss} = 2 (f_0 eN_{beam})^2 \cdot \sum_{p=0}^{+\infty} |\Lambda(p\omega_0)|^2 Re[Z_z(p \omega_0)]
