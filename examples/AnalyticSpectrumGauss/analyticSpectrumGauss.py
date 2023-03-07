@@ -21,8 +21,8 @@ import bihc
 
 # Beam data with different bunch profile shapes from LPC beam filling scheme 
 file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
-beam_numeric = bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN', verbose=False, spectrum='numeric')
-beam_analytic  = bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN', verbose=False, spectrum='analytic', frev=11.245e3)
+beam_numeric = bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN', spectrum='numeric')
+beam_analytic  = bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN', spectrum='analytic', frev=11.245e3)
 
 # Storing spectra 
 [fn, Sn] = beam_numeric.spectrum
@@ -43,8 +43,8 @@ powera = beam_analytic.getPloss(Z)[0]
 
 # Plotting 
 fig, ax = plt.subplots()
-ax.plot(fa, Sa, 'r+-', label='analytic')
-ax.plot(fn, Sn, 'bo-', label='numeric')
+ax.plot(fn, Sn, 'b-', label='numeric')
+ax.plot(fa, Sa, 'r-', label='analytic')
 
 # plot spectrum envelope
 ax.plot(fa, beam_analytic.lambdas[1], 'r', alpha=0.6)

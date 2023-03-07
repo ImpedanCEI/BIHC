@@ -75,7 +75,7 @@ class Power():
         Zreal=Zreal[mask3]
         Zf=f
 
-        P=f0*e*S*self.filledSlots*self.Nb
+        P=f0*e*S*self.filledSlots*self.Np
         P_density=2*(P**2)*Zreal
         P_loss=np.sum(P_density) 
         if self.verbose:
@@ -134,7 +134,7 @@ class Power():
         Zf=f
 
 
-        P=f0*e*S*self.filledSlots*self.Nb
+        P=f0*e*S*self.filledSlots*self.Np
         P_loss = []
         P_density_list = []
         for shift in phase_shift:

@@ -46,7 +46,7 @@ class Impedance(Plot):
     Zi : numpy.ndarray
         Imaginary part of the impedance in the speciefied frequency points [Ohm].
     """   
-    def __init__(self, f=np.linspace(0.1,2e9,int(1e5)), CST_file=0):
+    def __init__(self, f=np.linspace(0.1,2e9,int(1e5)), CST_file=None):
     
         self.f = f
         self.Zr = np.zeros(len(f))
@@ -55,7 +55,7 @@ class Impedance(Plot):
         self.isResonatorImpedance = False
         self.isRWImpedance = False
 
-        if CST_file != 0:
+        if CST_file is not None:
             self.getImpedanceFromCST(CST_file)          
         
     def getResonatorImpedance(self,Rs,Qr,fr):
@@ -87,6 +87,7 @@ class Impedance(Plot):
         
         self.Zr = np.real(Z)
         self.Zi = np.imag(Z)
+        self.Z = Z
         self.f = f
 
         self.fr = fr
@@ -127,6 +128,7 @@ class Impedance(Plot):
         
         self.Zr = np.real(Z)
         self.Zi = np.imag(Z)
+        self.Z = Z
 
         self.b = b
         self.sigma = sigma
@@ -167,8 +169,9 @@ class Impedance(Plot):
   
         self.Zr = data[:,1]
         self.Zi = data[:,2]
+        self.Z = self.Zr+1j*self.Zi
 
-        return [self.f, self.Zr+1j*self.Zi]
+        return [self.f, self.Z]
     
     def getImpedanceFromPandas(self, path, unit='GHz'):
         import pandas as pd

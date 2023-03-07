@@ -32,7 +32,7 @@ class Beam(Impedance, Power, Plot):
     Parameters
     ----------
     M : int, default 3564
-        Maximum number of buckets
+        Maximum number of bucket
     A : int, default 1
         Normalized amplitude for bunch profiles
     bunchLength : float, default 1.2e-9
@@ -45,7 +45,7 @@ class Beam(Impedance, Power, Plot):
         Offset of the bunch profile distribution in time [s]
     d : float, default 0
         The time length (space) of one bucket
-    Nb : float, default 2.3e11
+    Np : float, default 2.3e11
         Beam intensity in number of protons per bunch
     beamNumber : int, default 1
         Number of beams for the power loss computation (1 or 2)
@@ -63,6 +63,10 @@ class Beam(Impedance, Power, Plot):
         Flag to adapt bucket size to real machine length
     ppbk : int, default 250
         Number of time samples per bucket
+    frev : float, default None
+        Revolution frequency in [Hz] to sample the analytic beam spectrum computation
+    fmax : float, default 2e9
+        Maximum frequency in [Hz] up to which to compute the beam spectrum 
     verbose : bool, default True
         Flag to control console output
 
@@ -80,8 +84,9 @@ class Beam(Impedance, Power, Plot):
 
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
-                 ppbk=250,d=0, Nb=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
-                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', verbose=True):
+                 ppbk=250, d=None, Np=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
+                 fillMode='FB', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', frev=None, 
+                 fmax=2e9, verbose=False):
         
         c = 299792458 # Speed of light in vacuum [m/s]
         
@@ -96,7 +101,7 @@ class Beam(Impedance, Power, Plot):
         self._bunchShape = bunchShape # Bunche shape (analytical function)
         self.q = qvalue #q value for the q-gaussian distribution 1>q>3
         self.J = 1
-        self.Nb = Nb # Number of particles per bunch
+        self.Np = Np # Number of particles per bunch
         self.fillMode = fillMode
         self._fillNumber = fillNumber # Fill number relative to a particular fill of the machine
         
@@ -105,6 +110,9 @@ class Beam(Impedance, Power, Plot):
         self.verbose = verbose 
         self._machine=machine # Select the machine you are working with
         self._spectrumtype=spectrum
+        self.frev = frev
+        self.fmax = fmax
+
         # Some parameters are set in a different way depending on the machine you are working with
         if self._machine == 'LHC':
             self.BUCKET_MAX = 3564
@@ -134,11 +142,12 @@ class Beam(Impedance, Power, Plot):
         
         BETA_R = np.sqrt(1 - (1/GAMMA_R**2))
         self.T_1_TURN = RING_CIRCUMFERENCE/(c*BETA_R)
+        
 
-        # d is the time (space) of one bucket
-        if d==0:
-            self.d = self.T_1_TURN/self.BUCKET_MAX
-        else:
+        # d is the time (space) of one bucket 
+        if d is None:
+            self.d = self.T_1_TURN/self.BUCKET_MAX #forced to be integer
+        else: 
             self.d = d
         
         self.l = self.d/2
@@ -149,6 +158,7 @@ class Beam(Impedance, Power, Plot):
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
         self._beamFile = LPCfile
+
         # Computes the beam longitudinal profile 
         if fillNumber > 0:
             #if user specifies a fill number, data is extracted from timber
@@ -224,6 +234,7 @@ class Beam(Impedance, Power, Plot):
     
             if self._spectrumtype == 'numeric':
                 [t,s]=self.longitudinalProfile
+                s=s/(self.filledSlots*self.J) #why is it normalized?
                 deltaT=t[10]-t[9] 
                 fc=1/deltaT                       #in frequency we have a periodic signal of period fc where fc is 1/deltaT where the sampling step
                                                   #We are interested only in the range between -fc/2 and fc/2 ( In particular (0,fc/2) beacouse x is real)
@@ -238,11 +249,12 @@ class Beam(Impedance, Power, Plot):
                 from  bihc.plot import progressbar
 
                 an = self._fillingScheme
-                t0 = self.d
-                frev = 1/self.T_1_TURN
+                t0 = self.d             #25 ns
+                if self.frev is None:
+                    self.frev = 1/self.T_1_TURN 
                 n = np.arange(1,self.M+1)
                 c = 299792458
-                wrev = 2*np.pi*frev
+                wrev = 2*np.pi*self.frev
                 sigma = self.BUNCH_LENGTH_GLOBAL*c #sigma in m
                 sigmacos= 0.854*sigma
                 sigmapar= 0.744653*sigma
@@ -250,32 +262,31 @@ class Beam(Impedance, Power, Plot):
                 A = (1/np.sum(an))
 
                 #S = np.zeros(self.M*self.ppbk) #same length as numeric
-                S = np.zeros(int(2.0e9/frev))
+                S = np.zeros(int(self.fmax/self.frev))
                 lambdas = np.zeros_like(S)
 
-                if(self._bunchShape=='BINOMIAL'):
+                if(self._bunchShape=='BINOMIAL'): #todo
                     raise Exception("BINOMIAL is not supported for analytic spectrum calculation")
-
+                
                 elif(self._bunchShape=='GAUSSIAN'):
-                    #for p in range(len(S)):
                     for p in progressbar(range(len(S)), "Computing analytic FFT: ", 20):
                         lambdas[p]=np.exp(-(p*p*wrev*wrev*sigma*sigma)/(2*c*c))
-                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*wrev*n*t0)))
+            
 
                 elif(self._bunchShape=='COS2'):
                     for p in progressbar(range(1,len(S)), "Computing analytic FFT: ", 20): #TODO fix
                         Fc=(F**2)*(sigmacos**2)*((p*wrev)**2)/(c**2)
-                        A=p*wrev/c*(-2+Fc)
-                        lambdas[p]=-1.14*np.sqrt(2*np.pi)/np.pi/(sigmacos*A)*(np.sqrt(2/np.pi))*(np.sin((np.pi*sigmacos*p*wrev*F)/(np.sqrt(2)*c)))
-                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+                        lambdas[p]=-1.14*np.sqrt(2*np.pi)/np.pi/(sigmacos*p*wrev/c*(-2+Fc))*(np.sqrt(2/np.pi))*np.sin((np.pi*sigmacos*p*wrev*F)/(np.sqrt(2)*c))
+                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*wrev*n*t0)))
 
                 elif(self._bunchShape=='PARABOLIC'):
-                    for p in progressbar(range(1,len(S)), "Computing analytic FFT: ", 20): #TODO fix
+                    for p in progressbar(range(1,len(S)), "Computing analytic FFT: ", 20): 
                         CosSin=(np.sqrt(5)*sigmapar*p*wrev/c*np.cos(np.sqrt(5)*sigmapar*p*wrev/c)-np.sin(np.sqrt(5)*sigmapar*p*wrev/c))
                         lambdas[p]=-3*c**3/((np.sqrt(5)**3)*(sigmapar**3)*(p*wrev)**3)*CosSin
-                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*2*np.pi*frev*n*t0)))
+                        S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*wrev*n*t0)))
                 
-                f = np.linspace(1,len(S),len(S))*frev
+                f = np.linspace(1,len(S),len(S))*self.frev
                 self.lambdas=[f, lambdas]
 
             if self.verbose:
@@ -302,7 +313,8 @@ class Beam(Impedance, Power, Plot):
         '''
         if((self.realMachineLength) and (self.d*self.M>self.T_1_TURN)):
             self.d=self.T_1_TURN/self.M
-            print("d has been resized to ", self.d ," because it was to big to fill ",self.M," buckets in the real machine length")
+            if self.verbose:
+                print("d has been resized to ", self.d ," because it was to big to fill ",self.M," buckets in the real machine length")
         
         deltaD=self.d/self.ppbk
         tTemp = np.arange(-self.d/2, self.d/2 ,deltaD)
@@ -385,7 +397,7 @@ class Beam(Impedance, Power, Plot):
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
-                    profile_1_bunch = [tTemp, sTemp]
+                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
                     
             else:
                 sTemp=np.zeros(len(tTemp))
@@ -411,8 +423,8 @@ class Beam(Impedance, Power, Plot):
         tn=t
         t=np.linspace(np.min(tn),np.max(tn),len(s))
         
-        self.totalBeamCharge=self.Nb* 1.602176e-19*self.filledSlots
-        s=s/(self.filledSlots*self.J)
+        self.totalBeamCharge=self.Np*1.602176e-19*self.filledSlots
+        #s=s/(self.filledSlots*self.J) #??? why is it normalized
         dt=t[1]-t[0]
     
         s_integr=np.sum(s)*dt
@@ -422,7 +434,7 @@ class Beam(Impedance, Power, Plot):
             print ('Average bunch length = ', np.mean(self._bunchLength[mask])*4, 's')
             print ('Integral of s = ' , s_integr)
             print ("Buckets filled : ", self.filledSlots)
-            print ('Nb: ',self.Nb)
+            print ('Np: ',self.Np)
             print ("Total beam charge: ", self.totalBeamCharge, "C")
         
         self.profile_1_bunch = profile_1_bunch
@@ -523,7 +535,7 @@ class Beam(Impedance, Power, Plot):
 
         self._bunchLength=self._bunchLength[0:self.M]
         self.phi=self.phi[0:self.M]
-        self.setNbFromFillNumber()
+        self.setNpFromFillNumber()
         self._setBunches()
         
     def setCustomBeam(self):
@@ -594,7 +606,7 @@ class Beam(Impedance, Power, Plot):
          
         self._setBunches()
         
-    def setNbFromFillNumber(self):
+    def setNpFromFillNumber(self):
         '''Set Intensity from fill number
 
         Retrieves intensity  information from Timber provided a fill Number
@@ -636,11 +648,11 @@ class Beam(Impedance, Power, Plot):
             i=i-1
         A=A[i]
         mask=A!=0
-        self.Nb=np.mean(A[mask])
-        self._NbIsComputed=True
+        self.Np=np.mean(A[mask])
+        self._NpIsComputed=True
         if self.verbose:
-            print ("Nb updated: " , self.Nb/1e11, "e11")
-            print ("Nb calculated at: ", pytimber.dumpdate(t2))
+            print ("Np updated: " , self.Np/1e11, "e11")
+            print ("Np calculated at: ", pytimber.dumpdate(t2))
  
     def setBeamsFromSumWithShift(self, beam1, beam2, shift):
         ''' Set beam object from the sum of two beam objects

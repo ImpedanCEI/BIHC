@@ -40,7 +40,7 @@ an1 = bt+ st +bt+ st+ bt+ st+ bt+ stt
 an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
 
 # Data retrival from timber
-custom_beam = bihc.Beam(bunchShape='GAUSSIAN', beamNumber=1, fillingScheme=an, Nb=Np, d=t0, verbose=False)
+custom_beam = bihc.Beam(bunchShape='GAUSSIAN', beamNumber=1, fillingScheme=an, Np=Np, d=t0, verbose=False)
 
 # built-in plotting
 custom_beam.plotLongitudinalProfile()
