@@ -49,10 +49,10 @@ Np = 1.5e11   # Number of protons per bunch
 t0 = 25e-9    # Slot space [s]
 bl = 7.505192141958421e-10 * 4 #0.225 m / clight *4 (to fit Francesco's definition: -2sigma, +2sigma)
 
-b1 = bihc.Beam(bunchLength=bl, machine='SPS', fillingScheme=fillingSchemeSPS(1), Np=Np, d=t0, fmax=fmax) #first injection
-b2 = bihc.Beam(bunchLength=bl, machine='SPS', fillingScheme=fillingSchemeSPS(2), Np=Np, d=t0, fmax=fmax) #second injection
-b3 = bihc.Beam(bunchLength=bl, machine='SPS', fillingScheme=fillingSchemeSPS(3), Np=Np, d=t0, fmax=fmax) #third injection
-b4 = bihc.Beam(bunchLength=bl, machine='SPS', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat bottom
+b1 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(1), Np=Np, d=t0, fmax=fmax) #first injection
+b2 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(2), Np=Np, d=t0, fmax=fmax) #second injection
+b3 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB',  fillingScheme=fillingSchemeSPS(3), Np=Np, d=t0, fmax=fmax) #third injection
+b4 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat bottom
 b4ft = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat top
 
 # Computing the dissipated power value

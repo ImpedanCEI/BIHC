@@ -48,7 +48,7 @@ plt.show()
 
 # Importing an impedance curve
 impedance_file = 'PillboxImpedance.txt'
-Z = bihc.Impedance(f_gauss)
+Z = bihc.Impedance()
 Z.getImpedanceFromCST(impedance_file)
 
 # Computing the dissipated power value for the different Bunch Profiles

@@ -17,7 +17,7 @@ setup(
     version="0.0.2",
     description="BIHC: Beam-Induced Heating Computation package",
     author="Francesco Giordano",
-    author_email="francesco.giordano@cern.ch",
+    author_email="benoit.salvant@cern.ch", 
     packages=['bihc'],
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -25,30 +25,30 @@ profiles = ['GAUSSIAN', 'PARABOLIC', 'COS2']
 power={}
 
 # Plotting 
-fig, axs = plt.subplots(len(profiles),1, figsize=(8,10))
+fig, axs = plt.subplots(len(profiles),1, figsize=(5,7))
 
 for i, prof in enumerate(profiles):
 
-    #beam_analytic  = bihc.Beam(LPCfile=file, bunchShape=prof, verbose=False, spectrum='numeric')
+    beam_numeric  = bihc.Beam(LPCfile=file, bunchShape=prof, verbose=False, spectrum='numeric')
     beam_analytic  = bihc.Beam(LPCfile=file, bunchShape=prof, verbose=False, spectrum='analytic')
     
     # Storing spectra 
-    #[fn, Sn] = beam_numeric.spectrum
+    [fn, Sn] = beam_numeric.spectrum
     [fa, Sa] = beam_analytic.spectrum
 
     # Storing profile
-    #[tn, sn] = beam_numeric.profile_1_bunch
+    [tn, sn] = beam_numeric.profile_1_bunch
     [ta, sa] = beam_analytic.profile_1_bunch
 
     # plot spectrum
     if len(profiles) > 1: ax = axs[i]
     else: ax = axs
 
-    ax.plot(fa, Sa, 'r+-', label='analytic')
-    #ax.plot(fn, Sn, 'bo-', label='numeric')
+    ax.plot(fa, Sa, 'r-', label='analytic')
+    ax.plot(fn, Sn, 'bo-', ms=1, label='numeric')
 
     # plot spectrum envelope
-    #ax.plot(fa, beam_analytic.lambdas[1], 'r', alpha=0.6, label='envelope')
+    ax.plot(fa, abs(beam_analytic.lambdas[1]), 'g', alpha=0.6, label='envelope analytic')
 
     # Compute power loss
 
@@ -57,20 +57,20 @@ for i, prof in enumerate(profiles):
     Z = bihc.Impedance(fa) 
     Z.getImpedanceFromCST(impedance_file)
 
-    #powern = beam_numeric.getPloss(Z)[0]
+    powern = beam_numeric.getPloss(Z)[0]
     powera = beam_analytic.getPloss(Z)[0]
 
-    #ax.text(0.3, 0.8, f'Numeric Power loss: {round(powern,2)} W', transform=ax.transAxes, color='tab:blue', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
+    ax.text(0.3, 0.8, f'Numeric Power loss: {round(powern,2)} W', transform=ax.transAxes, color='tab:blue', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
     ax.text(0.3, 0.7, f'Analytic Power loss: {round(powera,2)} W', transform=ax.transAxes, color='tab:red', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
 
-    #power[prof] = {'numeric': powern, 'analytic': powera}
+    power[prof] = {'numeric': powern, 'analytic': powera}
 
     ax.legend()
     ax.set_xlim(0, 2e9)
     #ax.set_ylim(0, 1)
     ax.set_xlabel('frequency [Hz]')
     ax.set_ylabel('Spectrum [a.u.]')
-    ax.set_title(f'Spectrum for profile type {prof}')
+    ax.set_title(f'Spectrum for profile type {prof}', weight='bold')
 
 plt.tight_layout()
 plt.show()

@@ -24,7 +24,7 @@ b_6675 = bihc.Beam(fillNumber=6675, bunchShape='GAUSSIAN')
 # Importing an impedance curve
 impedance_file = 'PillboxImpedance.txt'
 
-Z = bihc.Impedance(f)
+Z = bihc.Impedance()
 Z.getImpedanceFromCST(impedance_file)
 
 # built-in plot spectrum and normalized impedance

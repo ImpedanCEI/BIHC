@@ -38,7 +38,6 @@ class Power():
             Impedance object returned by Impedance class with 
             the frequency information of the impedance map given 
             by the user
-
         '''
 
         e=1.621e-19
@@ -83,7 +82,7 @@ class Power():
 
         return P_loss, P_density;
 
-    def get2BeamPloss(self, Z, phase_shift):
+    def get2BeamPloss(self, Z, tau_s=None, s=None):
         '''
         Computes the power loss for the two beams case
         given impedance object and the pahse_shift between 
@@ -97,15 +96,27 @@ class Power():
             Impedance object returned by Impedance class with 
             the frequency information of the impedance map given 
             by the user
-        phase_shift : float list
+        tau_s : float list
             Phase shift values between the two beams in seconds [s]
+        s : float list
+            Distances from the interaction point in [m]
         '''
+
+        self.s = s
+        if tau_s is not None:
+            self.tau_s = tau_s
+        elif s is not None:
+            self.tau_s = 2*s/c
+        else: 
+            raise Exception('Specify s (distance from IP) or tau_s (phase shift of the two beams)')
+
         e=1.621e-19
         t=self.longitudinalProfile[0]
         f0=1/(t[-1]-t[0])
         [f,S]=self.spectrum
         Zreal=Z.Zr
         Zf=Z.f
+
         
         if np.max(f)>np.max(Z.f):
             mask1=f>=0
@@ -137,7 +148,7 @@ class Power():
         P=f0*e*S*self.filledSlots*self.Np
         P_loss = []
         P_density_list = []
-        for shift in phase_shift:
+        for shift in tau_s:
             P_density=4*(P**2)*Zreal*(1-np.cos(2*np.pi*f*shift))
 #           P_density_list.append(P_density)
             P_loss.append(np.sum(P_density))  
@@ -145,4 +156,5 @@ class Power():
         if self.verbose:
             print(f'Computed Power loss: {P_loss} W') 
 
-        return P_loss;# f, P_density_list;
+        self.P_loss = P_loss
+        return P_loss

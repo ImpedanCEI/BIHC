@@ -58,7 +58,7 @@ class Impedance(Plot):
         if CST_file is not None:
             self.getImpedanceFromCST(CST_file)          
         
-    def getResonatorImpedance(self,Rs,Qr,fr):
+    def getResonatorImpedance(self,Rs,Qr,fr,f=np.linspace(0.1,2e9,int(1e5))):
         """Creating the impedance curve from the broad-band resonator model.
 
         This methods creates an impedance curve using the broad-band resonator 
@@ -97,11 +97,12 @@ class Impedance(Plot):
         
         return [self.f, self.Zr+1j*self.Zi]
         
-    def getRWImpedance(self,L,b,sigma):
+    def getRWImpedance(self, L ,b, sigma, f=np.linspace(0.1,2e9,int(1e5))):
         """Creating the impedance curve from the resistive wall impedance model.
 
         This methods creates an impedance curve using the resistive wall 
-        impedance model for a resistive pipe of circular section with.
+        impedance model for a resistive pipe of circular section with. 
+        It considers the thick wall regime.
 
         Parameters
         ----------

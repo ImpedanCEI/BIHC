@@ -36,7 +36,7 @@ class Beam(Impedance, Power, Plot):
     A : int, default 1
         Normalized amplitude for bunch profiles
     bunchLength : float, default 1.2e-9
-        Beam total longitudinal bunch length in seconds [s]
+        Beam total longitudinal bunch length in seconds (4*sigma) [s]
     bunchShape : str, default 'GAUSSIAN'
         Beam profile shape : 'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN'         
     qvalue : float, default 1.2
@@ -85,14 +85,14 @@ class Beam(Impedance, Power, Plot):
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
                  ppbk=250, d=None, Np=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
-                 fillMode='FB', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', frev=None, 
+                 fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', frev=None, 
                  fmax=2e9, verbose=False):
         
         c = 299792458 # Speed of light in vacuum [m/s]
         
         self.M = M # Default max numebr of buckets
         self.A_GLOBAL = A
-        self.BUNCH_LENGTH_GLOBAL = bunchLength/4 # Bunch lenght [s]
+        self.BUNCH_LENGTH_GLOBAL = bunchLength/4 # Bunch lenght (sigma) [s]
         
         self.PHI_GLOBAL = phi
         self.realMachineLength = realMachineLength
@@ -190,14 +190,14 @@ class Beam(Impedance, Power, Plot):
     
     @bunchShape.setter
     def bunchShape(self,newShape):
-        shapeList=['GAUSSIAN', 'BINOMIAL' , 'COS2', 'q-GAUSSIAN']
+        shapeList=['GAUSSIAN', 'BINOMIAL' ,'PARABOLIC', 'COS2', 'q-GAUSSIAN']
         print('updating bunch shape...')
         if newShape in shapeList:
             self._bunchShape=newShape
             self._setBunches()
             self._isSpectrumReady=False
         else:
-            raise ValueError("bunchShape should be: 'GAUSSIAN', 'BINOMIAL', 'q-GAUSSIAN', or 'COS2'." )
+            raise ValueError("bunchShape should be: 'GAUSSIAN', 'BINOMIAL', 'PARABOLIC', 'q-GAUSSIAN', or 'COS2'." )
 
     @property
     def fillNumber(self):
@@ -256,9 +256,9 @@ class Beam(Impedance, Power, Plot):
                 c = 299792458
                 wrev = 2*np.pi*self.frev
                 sigma = self.BUNCH_LENGTH_GLOBAL*c #sigma in m
-                sigmacos= 0.854*sigma
+                sigmacos= 0.854*sigma #match FWHM to the gaussian sigma
                 sigmapar= 0.744653*sigma
-                F = 1.2413 #?????
+                F = 1.2413 
                 A = (1/np.sum(an))
 
                 #S = np.zeros(self.M*self.ppbk) #same length as numeric
@@ -273,7 +273,6 @@ class Beam(Impedance, Power, Plot):
                         lambdas[p]=np.exp(-(p*p*wrev*wrev*sigma*sigma)/(2*c*c))
                         S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*wrev*n*t0)))
             
-
                 elif(self._bunchShape=='COS2'):
                     for p in progressbar(range(1,len(S)), "Computing analytic FFT: ", 20): #TODO fix
                         Fc=(F**2)*(sigmacos**2)*((p*wrev)**2)/(c**2)
@@ -329,7 +328,7 @@ class Beam(Impedance, Power, Plot):
         for i in range(self.M):
             if self._fillingScheme[i]==True:
                 
-                self.filledSlots+=1
+                self.filledSlots+=1 #TODO: how to match the bunch length
                 if(self._bunchShape=='BINOMIAL'):
                     H=(np.sqrt(2/np.log(2)))*self._bunchLength[i]*4
                     sTemp=( 1- 4*((tTemp - self.phi[i])/(H))**2) #Binomial function
@@ -339,30 +338,30 @@ class Beam(Impedance, Power, Plot):
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
                     sTemp=2*(sTemp**2.5)/H
-                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
+                    profile_1_bunch = [tTemp, sTemp]
 
                 elif(self._bunchShape=='GAUSSIAN'):
                     sTemp=1/(self._bunchLength[i] * np.sqrt(2 * np.pi)) *(np.e)**(-((tTemp - self.phi[i])**2)/(2*self._bunchLength[i]**2))  #Gaussian function
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=np.ones(len(sTemp))
                     sTemp=sTemp*mask2*mask
-                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
+                    profile_1_bunch = [tTemp, sTemp]
                     
                 elif(self._bunchShape=='COS2'):
-                    tc=self._bunchLength[i]*2.77
+                    tc=self._bunchLength[i]*2.77 #4*0.854
                     sTemp=1/tc*(np.cos(np.pi*(tTemp - self.phi[i])/(2*tc)))**2  #cos^2 function
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(abs(tTemp)<tc)
                     sTemp=sTemp*mask2*mask
-                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
+                    profile_1_bunch = [tTemp, sTemp]
 
                 elif(self._bunchShape=='PARABOLIC'):
-                    sTemp=(1-(1/(self._bunchLength[i]**2))*(tTemp- self.phi[i])**2)  #Parabolic function 
+                    sTemp=(1-(1/(4*0.744653*self._bunchLength[i]**2))*(tTemp- self.phi[i])**2)  #Parabolic function 
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(sTemp>0)       
                     sTemp=sTemp*mask*mask2
                     sTemp=sTemp/(sum(sTemp)*deltaD)
-                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
+                    profile_1_bunch = [tTemp, sTemp]
 
                 elif(self._bunchShape=='q-GAUSSIAN'): 
                     
@@ -389,15 +388,15 @@ class Beam(Impedance, Power, Plot):
                         return eq
 
                     #q-Gaussian function
-                    b = self._bunchLength[i]
                     q = self.q #[TODO] pass 1 q-val per bunch
+                    b = 1/((self._bunchLength[i]**2)*(5-3*q))
                     mu = self.phi[i]
                     sTemp=np.sqrt(b)/_Cq(q)*_eq(-b*(tTemp-mu)**2,q)  
 
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
-                    profile_1_bunch = [tTemp, sTemp/np.max(sTemp)]
+                    profile_1_bunch = [tTemp, sTemp]
                     
             else:
                 sTemp=np.zeros(len(tTemp))
