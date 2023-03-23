@@ -84,7 +84,7 @@ axs[3].text(0.3, 0.8, f'Cosine Squared Power loss: {round(power_cos,2)} W', tran
 axs[4].text(0.3, 0.8, f'Parabolic Power loss: {round(power_par,2)} W', transform=axs[4].transAxes,color='k', weight='bold', bbox = dict(facecolor = 'white', alpha = 0.6))
 
 print(f'Gaussian power loss: {power_gauss} W')
-print(f'Gaussian power loss: {power_qgauss} W')
+print(f'q-Gaussian power loss: {power_qgauss} W')
 print(f'Binomial power loss: {power_bin} W')
 print(f'Cosine Squared power loss: {power_cos} W')
 print(f'Parabolic power loss: {power_par} W')
