@@ -20,7 +20,7 @@ file1='25ns_2748b_2736_2258_2374_288bpi_12inj.csv'
 file2='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
 file3='8b4e_1972b_1967_1178_1886_224bpi_12inj.csv'
 
-# Data retrival from timber, with different bunch profile shapes
+# Data retrival with different LPC files
 beamBcms1 = bihc.Beam(LPCfile=file1, bunchShape='GAUSSIAN')
 beamBcms2 = bihc.Beam(LPCfile=file2, bunchShape='GAUSSIAN')
 beam8b4e = bihc.Beam(LPCfile=file3, bunchShape='GAUSSIAN')

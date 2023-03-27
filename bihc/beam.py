@@ -129,7 +129,7 @@ class Beam(Impedance, Power, Plot):
 
         elif self._machine == 'PS':
             self.BUCKET_MAX = 21
-            RING_CIRCUMFERENCE = 628
+            RING_CIRCUMFERENCE = 628 #2*pi*10**2
             GAMMA_R = 27.7366 #28.7185  # p=26GeV
 
         elif self._machine== 'PSB': #TODO
