@@ -89,7 +89,7 @@ def fillingSchemeSPS_8b4e(ninj):
     return an
 
 #select filling scheme
-fillingSchemeSPS=fillingSchemeSPS_8b4e
+fillingSchemeSPS=fillingSchemeSPS_BCMS
 
 # Reading Impedance file
 Z = bihc.Impedance()
