@@ -58,8 +58,9 @@ rcParams={
     'mathtext.fontset' : 'dejavuserif',
     }
 
-def progressbar(it, prefix="", size=60, out=sys.stdout): # Python3.6+
-    count = len(it)
+def progressbar(it, prefix="", size=60, out=sys.stdout, count=None): # Python3.6+
+    if count is None:
+        count = len(it)
     def show(j):
         x = int(size*j/count)
         percent = int(j/count*100)
