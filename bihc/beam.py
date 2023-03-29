@@ -86,7 +86,7 @@ class Beam(Impedance, Power, Plot):
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
                  ppbk=250, d=None, Np=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
                  fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', frev=None, 
-                 fmax=2e9, verbose=False):
+                 fmax=2e9, exp=2.5, verbose=False):
         
         c = 299792458 # Speed of light in vacuum [m/s]
         
@@ -100,6 +100,7 @@ class Beam(Impedance, Power, Plot):
 
         self._bunchShape = bunchShape # Bunche shape (analytical function)
         self.q = qvalue #q value for the q-gaussian distribution 1>q>3
+        self.exp = exp
         self.J = 1
         self.Np = Np # Number of particles per bunch
         self.fillMode = fillMode
@@ -123,13 +124,13 @@ class Beam(Impedance, Power, Plot):
             self.BUCKET_MAX = 920 #924 is the correct number
             RING_CIRCUMFERENCE = 6895          #[m]
             if self.fillMode == 'FLATTOP':
-                GAMMA_R = 251    # flat top 236 GeV
+                GAMMA_R = 251    # flat top 450 GeV
             else:
                 GAMMA_R = 27.7   # flat bottom value 26 GeV
 
         elif self._machine == 'PS':
             self.BUCKET_MAX = 21
-            RING_CIRCUMFERENCE = 628 #2*pi*10**2
+            RING_CIRCUMFERENCE = 628 #2*pi*100
             GAMMA_R = 27.7366 #28.7185  # p=26GeV
 
         elif self._machine== 'PSB': #TODO
@@ -330,14 +331,15 @@ class Beam(Impedance, Power, Plot):
                 
                 self.filledSlots+=1 #TODO: how to match the bunch length
                 if(self._bunchShape=='BINOMIAL'):
-                    H=(np.sqrt(2/np.log(2)))*self._bunchLength[i]*4
-                    sTemp=( 1- 4*((tTemp - self.phi[i])/(H))**2) #Binomial function
+                    H=(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*4) #Binomial function (Francesco)
+                    #H=(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*2*np.sqrt(2*np.log(2)))
+                    sTemp=(1 - 4*((tTemp - self.phi[i])/(H))**2) #Binomial function (Francesco)
 
                     #set to zero the part of each bunch that is outside the l range arount his mean
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
-                    sTemp=2*(sTemp**2.5)/H
+                    sTemp=2*(sTemp**self.exp)/H
                     profile_1_bunch = [tTemp, sTemp]
 
                 elif(self._bunchShape=='GAUSSIAN'):

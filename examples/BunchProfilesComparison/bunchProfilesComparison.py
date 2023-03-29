@@ -21,11 +21,12 @@ import bihc
 file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
 
 # Data retrival from timber, with different bunch profile shapes
-b_gauss= bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN', ppbk=1000, verbose=False)
-b_qgauss= bihc.Beam(LPCfile=file, bunchShape='q-GAUSSIAN', ppbk=1000, verbose=False)
-b_bin = bihc.Beam(LPCfile=file, bunchShape='BINOMIAL', ppbk=1000,  verbose=False)
-b_cos = bihc.Beam(LPCfile=file, bunchShape='COS2', ppbk=1000, verbose=False)
-b_par = bihc.Beam(LPCfile=file, bunchShape='PARABOLIC', ppbk=1000, verbose=False)
+ppbk = 200 #number of samples per slot
+b_gauss= bihc.Beam(LPCfile=file, bunchShape='GAUSSIAN', ppbk=ppbk, verbose=False)
+b_qgauss= bihc.Beam(LPCfile=file, bunchShape='q-GAUSSIAN', ppbk=ppbk, verbose=False)
+b_bin = bihc.Beam(LPCfile=file, bunchShape='BINOMIAL', ppbk=ppbk,  verbose=False)
+b_cos = bihc.Beam(LPCfile=file, bunchShape='COS2', ppbk=ppbk, verbose=False)
+b_par = bihc.Beam(LPCfile=file, bunchShape='PARABOLIC', ppbk=ppbk, verbose=False)
 
 # Storing spectra 
 [f_gauss, S_gauss] = b_gauss.spectrum
@@ -41,6 +42,12 @@ b_par = bihc.Beam(LPCfile=file, bunchShape='PARABOLIC', ppbk=1000, verbose=False
 [t_cos, s_cos] = b_cos.profile_1_bunch
 [t_par, s_par] = b_par.profile_1_bunch
 
+# Importing an impedance curve
+impedance_file = 'PillboxImpedance.txt'
+Z = bihc.Impedance()
+Z.getImpedanceFromCST(impedance_file)
+#Z.getRWImpedance(L=1.0, b=15e-3, sigma=5.7e7, f=f_gauss) #Resistive wall impedance
+Z.getResonatorImpedance(Rs=7e3, Qr=1e2, fr=1.75e9, f=f_gauss)
 # Plotting 
 fig, ax = plt.subplots(1, figsize=(12,7))
 
@@ -53,6 +60,9 @@ ax.legend()
 
 fig, axs = plt.subplots(5,1, figsize=(8,12), dpi=200)
 
+for ax in axs:
+	ax.plot(Z.f, Z.Zr/np.max(Z.Zr), 'k')
+
 axs[0].plot(f_gauss, S_gauss,'b')
 axs[1].plot(f_qgauss, S_qgauss,'g')
 axs[2].plot(f_bin, S_bin, c='orange' )
@@ -64,11 +74,6 @@ for ax in axs:
 	ax.set_ylim(0, 1)
 	ax.set_xlabel('frequency [Hz]')
 	ax.set_ylabel('Spectrum [a.u.]')
-
-# Importing an impedance curve
-impedance_file = 'PillboxImpedance.txt'
-Z = bihc.Impedance(f_gauss)
-Z.getImpedanceFromCST(impedance_file)
 
 # Computing the dissipated power value for the different Bunch Profiles
 power_gauss = b_gauss.getPloss(Z)[0]
@@ -91,3 +96,10 @@ print(f'Parabolic power loss: {power_par} W')
 
 plt.tight_layout()
 plt.show()
+
+dt = t_gauss[2]-t_gauss[1]
+print(f'Gaussian integral: {np.sum(s_gauss)*dt} ')
+print(f'q-Gaussian integral: {np.sum(s_qgauss)*dt} ')
+print(f'Binomial integral: {np.sum(s_bin)*dt} ')
+print(f'Cosine Squared integral: {np.sum(s_cos)*dt} ')
+print(f'Parabolic integral: {np.sum(s_par)*dt} ')
