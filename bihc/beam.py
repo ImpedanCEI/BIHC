@@ -300,8 +300,8 @@ class Beam(Impedance, Power, Plot):
         
     @spectrum.setter
     def spectrum(self, newSpectrum): # TODO we want to assign the spectrum
-#        self._spectrum=newSpectrum
-        raise Exception("Spectrum can not be assigned")
+        self._spectrum = newSpectrum
+        #raise Exception("Spectrum can not be assigned")
                        
     def _setBunches(self):
         '''_setBunches method
