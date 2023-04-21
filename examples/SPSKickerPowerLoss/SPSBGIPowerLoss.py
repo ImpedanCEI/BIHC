@@ -13,17 +13,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def fillingSchemeSPS_standard(ninj):
+def fillingSchemeSPS_standard(ntrains):
     '''
     Returns the filling scheme for the SPS
 
     Parameters
     ----------
-    ninj: number of injections (batches)
+    ntrains: number of trains (batches)
     nbunches: default, 48. number of bunches per train
     '''
     # Define filling scheme: parameters
-    ntrain = 1 # SPS has 1 train per cycle
     nslots = 920 # Defining total number of slots for SPS
     nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72.. 
     batchspacing = 9 # Batch spacing in 25 ns slots 45/5
@@ -31,8 +30,8 @@ def fillingSchemeSPS_standard(ninj):
     # Defining the trains as lists of True/Falses
     bt = [True]*nbunches
     st = [False]*batchspacing
-    sc = [False]*(nslots - (nbunches+batchspacing)*ninj)
-    an = (bt + st)*ninj + sc
+    sc = [False]*(nslots - (nbunches+batchspacing)*ntrains)
+    an = (bt + st)*ntrains + sc
 
     return an
 
@@ -49,12 +48,11 @@ fmax = np.max(Z.f)
 
 # Create 4 beam objects for each injection
 Np = 1.2e11   # Number of protons per bunch
-t0 = 25e-9    # Slot space [s]
 bl = 1.65e-9  # total bunch length flat top
 
-b_bin = bihc.Beam(bunchLength=bl, bunchShape='BINOMIAL', exp=1.5, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat top
-b_gauss = bihc.Beam(bunchLength=bl, bunchShape='GAUSSIAN', machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat top
-b_qgauss = bihc.Beam(bunchLength=bl, bunchShape='q-GAUSSIAN', qvalue=1.25, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat top
+b_bin = bihc.Beam(bunchLength=bl, bunchShape='BINOMIAL', exp=1.5, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, fmax=fmax) #4th injection flat top
+b_gauss = bihc.Beam(bunchLength=bl, bunchShape='GAUSSIAN', machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, fmax=fmax) #4th injection flat top
+b_qgauss = bihc.Beam(bunchLength=bl, bunchShape='q-GAUSSIAN', qvalue=1.25, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, fmax=fmax) #4th injection flat top
 
 # get power
 pwr_bin = b_bin.getPloss(Z)[0]
