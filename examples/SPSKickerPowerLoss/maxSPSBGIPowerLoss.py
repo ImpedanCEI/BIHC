@@ -42,6 +42,31 @@ def fillingSchemeSPS_standard(ninj):
 
     return an
 
+def fillingSchemeSPS_8b4e(ninj):
+    '''
+    Returns the filling scheme for the SPS 
+    using the 8b4e pattern
+
+    Parameters
+    ----------
+    ninj: number of injections (batches)
+    nbunches: default, 48. number of bunches per train
+    '''
+    # Define filling scheme: parameters
+    ntrain = 1 # SPS has 1 train per cycle
+    nslots = 920 # Defining total number of slots for SPS
+    nbunches = 8*7 # Defining number of bunches e.g. 18, 36, 72.. 
+    nempty = 4*6  #Defining number of empty slots between bunches
+    batchspacing = 8 # Batch spacing in 25 ns slots (200 ns)
+
+    # Defining the trains as lists of True/Falses
+    bt = ([True]*8+[False]*4)*6+[True]*8
+    st = [False]*batchspacing
+    sc = [False]*(nslots - (nbunches+nempty+batchspacing)*ninj)
+    an = (bt + st)*ninj + sc
+
+    return an
+
 #select filling scheme
 fillingSchemeSPS=fillingSchemeSPS_standard
 
@@ -53,10 +78,9 @@ Z.getImpedanceFromCST(impedance_file)
 
 # Create 4 beam objects for each injection
 Np = 1.2e11   # Number of protons per bunch
-t0 = 25e-9    # Slot space [s]
 bl = 1.65e-9  # total bunch length flat top
 
-beam = bihc.Beam(bunchLength=bl, bunchShape='q-GAUSSIAN', qvalue=1.25, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0) #4th injection flat top
+beam = bihc.Beam(bunchLength=bl, bunchShape='q-GAUSSIAN', qvalue=1.25, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np) #4th injection flat top
 [f,S] = beam.spectrum
 ploss0 = beam.getPloss(Z)[0]
 

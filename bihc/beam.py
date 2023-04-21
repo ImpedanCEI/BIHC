@@ -43,7 +43,7 @@ class Beam(Impedance, Power, Plot):
         q-Gaussian q-value for the 'q-GAUSSIAN' beam profile opt
     phi : float, default 0
         Offset of the bunch profile distribution in time [s]
-    d : float, default 0
+    t0 : float, default 0
         The time length (space) of one bucket
     Np : float, default 2.3e11
         Beam intensity in number of protons per bunch
@@ -84,7 +84,7 @@ class Beam(Impedance, Power, Plot):
 
     def __init__(self, M=3564, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
-                 ppbk=250, d=None, Np=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
+                 ppbk=250, t0=None, Np=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
                  fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', frev=None, 
                  fmax=2e9, exp=2.5, verbose=False):
         
@@ -121,8 +121,8 @@ class Beam(Impedance, Power, Plot):
             GAMMA_R = 7461                   # flat top
                         
         elif self._machine =='SPS':
-            self.BUCKET_MAX = 920 #924 is the correct number
-            RING_CIRCUMFERENCE = 6895          #[m]
+            self.BUCKET_MAX = 924 
+            RING_CIRCUMFERENCE = 6911          #[m]
             if self.fillMode == 'FLATTOP':
                 GAMMA_R = 251    # flat top 450 GeV
             else:
@@ -143,15 +143,16 @@ class Beam(Impedance, Power, Plot):
         
         BETA_R = np.sqrt(1 - (1/GAMMA_R**2))
         self.T_1_TURN = RING_CIRCUMFERENCE/(c*BETA_R)
-        
+        if self.frev is None:
+            self.frev = 1/self.T_1_TURN 
 
-        # d is the time (space) of one bucket 
-        if d is None:
-            self.d = self.T_1_TURN/self.BUCKET_MAX #forced to be integer
+        # t0 is the time (space) of one bucket 
+        if t0 is None:
+            self.t0 = self.T_1_TURN/self.BUCKET_MAX #forced to be integer
         else: 
-            self.d = d
+            self.t0 = t0
         
-        self.l = self.d/2
+        self.l = self.t0/2
         self._bunchLength = np.zeros(self.M)
         self.phi = np.zeros(self.M)
         self._spectrum = [np.zeros(self.M), np.zeros(self.M)]    #[f,S]
@@ -250,9 +251,7 @@ class Beam(Impedance, Power, Plot):
                 from  bihc.plot import progressbar
 
                 an = self._fillingScheme
-                t0 = self.d             #25 ns
-                if self.frev is None:
-                    self.frev = 1/self.T_1_TURN 
+                t0 = self.t0             #25 ns
                 n = np.arange(1,self.M+1)
                 c = 299792458
                 wrev = 2*np.pi*self.frev
@@ -311,13 +310,13 @@ class Beam(Impedance, Power, Plot):
 
          'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN' 
         '''
-        if((self.realMachineLength) and (self.d*self.M>self.T_1_TURN)):
-            self.d=self.T_1_TURN/self.M
+        if((self.realMachineLength) and (self.t0*self.M>self.T_1_TURN)):
+            self.t0=self.T_1_TURN/self.M
             if self.verbose:
-                print("d has been resized to ", self.d ," because it was to big to fill ",self.M," buckets in the real machine length")
+                print("t0 has been resized to ", self.t0 ," because it was to big to fill ",self.M," buckets in the real machine length")
         
-        deltaD=self.d/self.ppbk
-        tTemp = np.arange(-self.d/2, self.d/2 ,deltaD)
+        deltaD=self.t0/self.ppbk
+        tTemp = np.arange(-self.t0/2, self.t0/2 ,deltaD)
         
         print ("Elaborating Data...")
         
@@ -408,12 +407,12 @@ class Beam(Impedance, Power, Plot):
                 s=np.concatenate((s,sTemp),axis=0)
         
         
-        t_max=self.d*self.M-self.d/2
+        t_max=self.t0*self.M-self.t0/2
         
         if(self.realMachineLength):
-            t=np.arange(-self.d/2,self.T_1_TURN -self.d/2,deltaD)     
+            t=np.arange(-self.t0/2,self.T_1_TURN -self.t0/2,deltaD)     
         else:
-            t=np.arange(-self.d/2,t_max,deltaD)
+            t=np.arange(-self.t0/2,t_max,deltaD)
          
         s_end=np.zeros(len(t) - len(s))
         s=np.concatenate((s,s_end),axis=0)
