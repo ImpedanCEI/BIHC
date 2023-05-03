@@ -58,7 +58,7 @@ class Beam(Impedance, Power, Plot):
     machine : str, default 'LHC'
         Name of the machine to operate with : 'PS', 'SPS', 'LHC'
     spectrum : str, default 'numeric'
-        Whether to calculate the spectrum with a numerical FFT 'numeric', or the analytical formula 'analytic'
+        Whether to calculate the spectrum with a numerical FFT 'numeric', from the analytical formula 'analytic', or from input 'user'
     realMachineLength : bool, default True
         Flag to adapt bucket size to real machine length
     ppbk : int, default 250
@@ -109,8 +109,8 @@ class Beam(Impedance, Power, Plot):
         self._isSpectrumReady = False
         self.isATimberFill    = False
         self.verbose = verbose 
-        self._machine=machine # Select the machine you are working with
-        self._spectrumtype=spectrum
+        self._machine = machine # Select the machine you are working with
+        self._spectrumtype = spectrum
         self.frev = frev
         self.fmax = fmax
 
@@ -232,6 +232,10 @@ class Beam(Impedance, Power, Plot):
             [f,s] = self._spectrum
             self.powerSpectrum=[f, np.abs(s)**2]
             return self._spectrum
+
+        elif self._spectrumtype == 'user':
+            return self._spectrum #spectrum must be provided through the setter
+            
         else:
     
             if self._spectrumtype == 'numeric':
@@ -293,13 +297,14 @@ class Beam(Impedance, Power, Plot):
 
             self._spectrum=[f, np.abs(S)]
             self.powerSpectrum=[f, np.abs(S)**2]
-            self._isSpectrumReady=True
+            self._isSpectrumReady = True
             
             return self._spectrum
         
     @spectrum.setter
-    def spectrum(self, newSpectrum): # TODO we want to assign the spectrum
+    def setSpectrum(self, newSpectrum): 
         self._spectrum = newSpectrum
+        self._isSpectrumReady = True
         #raise Exception("Spectrum can not be assigned")
                        
     def _setBunches(self):
