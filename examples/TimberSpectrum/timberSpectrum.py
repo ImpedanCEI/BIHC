@@ -74,4 +74,4 @@ beam.plotSpectrumAndImpedance(Z)
 
 # Computing the dissipated power value
 print(f'Beam 6675 power loss: {beam.getPloss(Z)[0]} W')
-''cd'
+'''
