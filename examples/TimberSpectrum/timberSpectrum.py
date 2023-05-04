@@ -53,13 +53,13 @@ print('Accessing timber...')
 db=pytimber.LoggingDB() 
 time = pytimber.parsedate('2015-08-07 19:55:00')
 data = db.get('ALB.SR4.B1:SPEC_POW', time)['ALB.SR4.B1:SPEC_POW'][1][0] #in dB
-spectrum = 10.0**(data/20)
-f = np.arange(0,len(spectrum))*beam.frev
+S = 10.0**(data/20)
+f = np.arange(0,len(S))*beam.frev
+spectrum = [f, S]
+beam.setSpectrum(spectrum) #???
 
-#beam.setSpectrum([f, spectrum]) #???
 
-
-plt.plot(spectrum)
+plt.plot(spectrum[0], spectrum[1])
 plt.show()
 
 '''

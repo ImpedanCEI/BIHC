@@ -301,7 +301,7 @@ class Beam(Impedance, Power, Plot):
             
             return self._spectrum
         
-    @spectrum.setter
+    #@spectrum.setter
     def setSpectrum(self, newSpectrum): 
         self._spectrum = newSpectrum
         self._isSpectrumReady = True
