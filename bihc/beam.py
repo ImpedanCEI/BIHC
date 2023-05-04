@@ -235,7 +235,7 @@ class Beam(Impedance, Power, Plot):
 
         elif self._spectrumtype == 'user':
             return self._spectrum #spectrum must be provided through the setter
-            
+
         else:
     
             if self._spectrumtype == 'numeric':
@@ -289,7 +289,7 @@ class Beam(Impedance, Power, Plot):
                         lambdas[p]=-3*c**3/((np.sqrt(5)**3)*(sigmapar**3)*(p*wrev)**3)*CosSin
                         S[p]=np.abs(A*lambdas[p]*np.sum(an*np.exp(1j*p*wrev*n*t0)))
                 
-                f = np.linspace(1,len(S),len(S))*self.frev
+                f = np.linspace(1,len(S),len(S))*self.frev #[TODO] should it start in 0?
                 self.lambdas=[f, lambdas]
 
             if self.verbose:
