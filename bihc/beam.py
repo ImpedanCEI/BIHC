@@ -344,6 +344,7 @@ class Beam(Impedance, Power, Plot):
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
                     sTemp=2*(sTemp**self.exp)/H
+                    sTemp=np.sum(sTemp)*deltaD
                     profile_1_bunch = [tTemp, sTemp]
 
                 elif(self._bunchShape=='GAUSSIAN'):
