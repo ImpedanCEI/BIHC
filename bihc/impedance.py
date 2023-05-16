@@ -169,7 +169,11 @@ class Impedance(Plot):
             self.f= data[:,0]*1e6
   
         self.Zr = data[:,1]
-        self.Zi = data[:,2]
+        try:
+            self.Zi = data[:,2]
+        except:
+            self.Zi = np.zeros_like(self.Zr)
+
         self.Z = self.Zr+1j*self.Zi
 
         return [self.f, self.Z]
