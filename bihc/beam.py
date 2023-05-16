@@ -306,7 +306,18 @@ class Beam(Impedance, Power, Plot):
         self._spectrum = newSpectrum
         self._isSpectrumReady = True
         #raise Exception("Spectrum can not be assigned")
-                       
+                     
+    def setBunches(self, newLongitudinalProfile, interp=True):
+        [t,s] = newlongitudinalProfile
+    
+        if interp:
+            [to,so] = self.longitudinalProfile
+            s = np.interp(to, t, s)
+            t = to
+
+        self.profile_1_bunch = [t[0:self.ppbk], s[0:self.ppbk]]
+        self.longitudinalProfile = [t,s]
+
     def _setBunches(self):
         '''_setBunches method
 
