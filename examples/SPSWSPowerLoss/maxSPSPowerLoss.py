@@ -70,6 +70,7 @@ fillingSchemeSPS=fillingSchemeSPS_standard
 # Reading Impedance file
 Z = bihc.Impedance()
 impedance_file = 'impedance_with_ferrite.txt'
+impedance_file = 'SPSWiresWFerritesSide.txt'
 Z.getImpedanceFromCST(impedance_file)
 
 # Create 4 beam objects for each injection

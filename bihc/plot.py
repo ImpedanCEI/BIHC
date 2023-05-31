@@ -216,7 +216,7 @@ class Plot():
 
         plt.figure()
         #spectrum
-        plt.plot(f/1e9,S,label='Spectrum')
+        plt.plot(f/1e9,S, color='r', label='Spectrum')
         ax = plt.gca()
         plt.xlim(0,self.fmax/1e9)
         plt.ylim(0,)
@@ -225,9 +225,10 @@ class Plot():
         plt.ylabel("Normalized Spectrum [a.u.]")
         plt.grid(True, color='gray', linestyle=':')
         plt.legend()
+
         #impedance
         axx = ax.twinx()
-        axx.plot(f/1e9,Zreal, color='r', label='Impedance')
+        axx.plot(f/1e9,Zreal, color='k', label='Impedance')
         axx.set_ylabel('Impedance [$\Omega$]')
         plt.show()
 

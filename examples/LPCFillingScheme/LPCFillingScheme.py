@@ -17,7 +17,7 @@ import bihc
 
 #LPC csv file names
 file1='25ns_2748b_2736_2258_2374_288bpi_12inj.csv'
-file2='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
+file2='25ns_2374b_2361_1730_1773_236bpi_13inj_hybrid_2INDIV.csv' #downloaded from LPC
 file3='8b4e_1972b_1967_1178_1886_224bpi_12inj.csv'
 
 # Data retrival with different LPC files

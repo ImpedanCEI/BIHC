@@ -26,7 +26,6 @@ nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72..
 
 batchS = 7 # Batch spacing in 25 ns slots
 injspacing = 37 # Injection spacing in 25 ns slots
-BS = 200 # Batch spacing in ns
 
 Np = 1.2e11 # Number of protons per bunch
 t0 = 25e-9 # Slot space [s]

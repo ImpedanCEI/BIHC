@@ -584,12 +584,36 @@ class Beam(Impedance, Power, Plot):
 
         self.isATimberFill = False
         self._fillingScheme = np.zeros(self.M, dtype=bool)
+        francesco_style = False 
 
         with open(self._beamFile) as f:
             data = csv.reader(f)
-            for row in data:
-                if row[0]: #avoid empty rows
-                    self._fillingScheme[int((int(row[0])-1)/10)] = True
+
+            for i, row in enumerate(data):
+                if i == 0:
+                    if row[0].isdigit():  #reading francesco modified files
+                        francesco_style = True
+                        break
+                else:
+                     break
+
+            if francesco_style:
+                for row in data:
+                    if row[0]: #avoid empty rows
+                        self._fillingScheme[int((int(row[0])-1)/10)] = True #Takes only beam 1
+
+            else: #reading files from LPC web format
+                start_line = False
+                for i, row in enumerate(data):
+                    if 'B1 bucket number' in row:
+                        start_line = True
+                        continue
+
+                    if start_line:
+                        try:
+                            self._fillingScheme[int((int(row[0])-1)/10)] = True #we take beam one
+                        except: #this breaks when an empty cell is reached
+                            break
 
         self._bunchLength[self._fillingScheme]=self.BUNCH_LENGTH_GLOBAL  #std vector of a single turn in the machine
         self.phi=np.ones(self.M)*self.PHI_GLOBAL
