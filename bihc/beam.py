@@ -304,6 +304,8 @@ class Beam(Impedance, Power, Plot):
     #@spectrum.setter
     def setSpectrum(self, newSpectrum): 
         self._spectrum = newSpectrum
+        [f,s] = self._spectrum
+        self.powerSpectrum=[f, np.abs(s)**2]
         self._isSpectrumReady = True
         #raise Exception("Spectrum can not be assigned")
                      
