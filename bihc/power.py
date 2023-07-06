@@ -233,7 +233,7 @@ class Power():
             P = (2*f0*e*self.filledSlots*self.Np*S)**2
             P_loss = []
             P_density_list = []
-            for i, shift in enumerate(tau_s):
+            for i, shift in tqdm(enumerate(tau_s), "Computing 2-beam power with offset: "):
                 P_density = P*(Zreal_0+(offset1[i]+offset2[i])*Zreal_1)*(1-np.cos(2*np.pi*f*shift))
                 P_loss.append(np.sum(P_density))  
         else:
@@ -241,13 +241,14 @@ class Power():
             P = (2*f0*e*self.filledSlots*self.Np*S)**2
             P_loss = []
             P_density_list = []
-            for shift in tau_s:
+            for shift in tqdm(tau_s, "Computing 2-beam power: "):
                 P_density = P*Zreal_0*(1-np.cos(2*np.pi*f*shift))
     #           P_density_list.append(P_density)
                 P_loss.append(np.sum(P_density))  
 
         if self.verbose:
-            print(f'Computed Power loss: {P_loss} W') 
+            pass
+            #print(f'Computed Power loss: {P_loss} W') 
 
         self.P_loss = P_loss
         return P_loss

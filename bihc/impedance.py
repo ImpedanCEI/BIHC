@@ -56,7 +56,19 @@ class Impedance(Plot):
         self.isRWImpedance = False
 
         if CST_file is not None:
-            self.getImpedanceFromCST(CST_file)          
+            self.getImpedanceFromCST(CST_file)     
+
+    def __add__(self, Zn):
+        Z = Impedance(self.f)
+
+        if not np.array_equal(Z.f, Zn.f):
+            Z.Zr = np.interp(Z.f, Zn.f, Zn.Zr)
+            Z.Zi = np.interp(Z.f, Zn.f, Zn.Zi)
+
+        Z.Zr = self.Zr + Zn.Zr 
+        Z.Zi = self.Zi + Zn.Zi    
+
+        return Z
         
     def getResonatorImpedance(self,Rs,Qr,fr,f=np.linspace(0.1,2e9,int(1e5))):
         """Creating the impedance curve from the broad-band resonator model.
