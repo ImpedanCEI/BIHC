@@ -233,7 +233,7 @@ class Beam(Impedance, Power, Plot):
         '''
         
         if self._isSpectrumReady:
-            if self.PowerSpectrum is None:
+            if self.powerSpectrum is None:
                 [f,s] = self._spectrum
                 self.powerSpectrum=[f, np.abs(s)**2]
 
