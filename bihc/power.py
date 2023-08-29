@@ -105,26 +105,27 @@ class Power():
         deltaF = f[1]-f[0]
         fmax = Z.f[-1]
 
-        Zint = np.interp(f, Z.f, Z.Zr)
-        Z.f, Z.Zr = f, Zint
-
         #if impedance file is too short, we zero padd it
         #Otherwise the interpolation will assume for the 
         #missing frequencies a constant value 
 
-        if Z.f[-1] > fmax: 
-            mask = Z.f > fmax
-            Z.Zr[mask] = 0.0
+        Zint = np.interp(f, Z.f, Z.Zr)
+        Zmod = Z 
+        Zmod.f, Zmod.Zr = f, Zint
+
+        if Zmod.f[-1] > fmax: 
+            mask = Zmod.f > fmax
+            Zmod.Zr[mask] = 0.0
 
         size = int(shift/deltaF)
         shifts = np.arange(-size, size, 1, dtype=int) #shifting every frev
 
         power = np.array([])
         for step in tqdm(shifts, "Computing scan: ", total=2*size):
-            Z.Zr = np.roll(Zint, step) 
-            if step > 0: Z.Zr[:step] = 0.0
-            if step < 0: Z.Zr[:2*size-step] = 0.0
-            power = np.append(power, self.getPloss(Z)[0])
+            Zmod.Zr = np.roll(Zint, step) 
+            if step > 0: Zmod.Zr[:step] = 0.0
+            if step < 0: Zmod.Zr[:2*size-step] = 0.0
+            power = np.append(power, self.getPloss(Zmod)[0])
 
         return shifts, power
 

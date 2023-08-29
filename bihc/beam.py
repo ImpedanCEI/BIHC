@@ -156,6 +156,7 @@ class Beam(Impedance, Power, Plot):
         self._bunchLength = np.zeros(self.M)
         self.phi = np.zeros(self.M)
         self._spectrum = [np.zeros(self.M), np.zeros(self.M)]    #[f,S]
+        self.powerSpectrum = None
         self._fillingScheme=fillingScheme[0:self.M]
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
@@ -174,7 +175,10 @@ class Beam(Impedance, Power, Plot):
         else:
             #if the array is all False values
             self.setCustomBeam()
-   
+
+        # Computes spectrum and power spectrum 
+        [f, S] = self.spectrum
+
     @property
     def bunchLength(self):
         return self._bunchLength
@@ -227,12 +231,14 @@ class Beam(Impedance, Power, Plot):
         spectrum : numpy.ndarray list 
             Beam spectrum in frequency. Returns the list of numpy arrays [frequency, spectrum]
         '''
-        self.powerSpectrum = []
+        
         if self._isSpectrumReady:
-            [f,s] = self._spectrum
-            self.powerSpectrum=[f, np.abs(s)**2]
-            return self._spectrum
+            if self.PowerSpectrum is None:
+                [f,s] = self._spectrum
+                self.powerSpectrum=[f, np.abs(s)**2]
 
+            return self._spectrum
+        
         elif self._spectrumtype == 'user':
             return self._spectrum #spectrum must be provided through the setter
 
