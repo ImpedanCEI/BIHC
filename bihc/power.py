@@ -110,7 +110,7 @@ class Power():
         #missing frequencies a constant value 
 
         Zint = np.interp(f, Z.f, Z.Zr)
-        Zmod = Z 
+        Zmod = Z.copy()
         Zmod.f, Zmod.Zr = f, Zint
 
         if Zmod.f[-1] > fmax: 
@@ -126,6 +126,11 @@ class Power():
             if step > 0: Zmod.Zr[:step] = 0.0
             if step < 0: Zmod.Zr[:2*size-step] = 0.0
             power = np.append(power, self.getPloss(Zmod)[0])
+
+        Zmod.f, Zmod.Zr = f, Zint
+        self.Z = Zmod.copy()
+        Zmod.Zr = np.roll(Zint, shifts[np.argmax(power)])
+        self.Zmax = Zmod.copy()
 
         return shifts, power
 
