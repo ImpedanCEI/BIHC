@@ -12,6 +12,7 @@ the frequency vector, the second is the impedance.
 
 import numpy as np
 import csv
+import copy
 
 from bihc.plot import Plot
 
@@ -207,3 +208,7 @@ class Impedance(Plot):
         
         return data
     
+    def copy(self):
+        obj = type(self).__new__(self.__class__)
+        obj.__dict__.update(self.__dict__)
+        return obj
