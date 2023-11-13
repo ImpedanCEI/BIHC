@@ -25,11 +25,11 @@ def fillingSchemeSPS_standard(ntrains):
 
     Parameters
     ----------
-    ntrains: number of injections (batches)
+    ntrains: number of trains (batches)
+    nbunches: default, 48. number of bunches per train
     '''
     # Define filling scheme: parameters
-    ntrain = 1 # SPS has 1 train per cycle
-    nslots = 924 # Defining total number of slots for SPS
+    nslots = 920 # Defining total number of slots for SPS
     nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72.. 
     batchspacing = 9 # Batch spacing in 25 ns slots 45/5
 
