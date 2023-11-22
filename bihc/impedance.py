@@ -62,12 +62,15 @@ class Impedance(Plot):
     def __add__(self, Zn):
         Z = Impedance(self.f)
 
-        if not np.array_equal(Z.f, Zn.f):
-            Z.Zr = np.interp(Z.f, Zn.f, Zn.Zr)
-            Z.Zi = np.interp(Z.f, Zn.f, Zn.Zi)
+        if not np.array_equal(self.f, Zn.f):
+            Z.Zr = np.interp(self.f, Zn.f, Zn.Zr)
+            Z.Zi = np.interp(self.f, Zn.f, Zn.Zi)
+        else:
+            Z.Zr = Zn.Zr
+            Z.Zi = Zn.Zi
 
-        Z.Zr = self.Zr + Zn.Zr 
-        Z.Zi = self.Zi + Zn.Zi    
+        Z.Zr += self.Zr
+        Z.Zi += self.Zi   
 
         return Z
         
@@ -204,7 +207,7 @@ class Impedance(Plot):
   
         self.f = data['f']
         self.Zr = data['Zr']
-        self.isResonatorImpedance=False
+        self.isResonatorImpedance = False
         
         return data
     
@@ -212,3 +215,38 @@ class Impedance(Plot):
         obj = type(self).__new__(self.__class__)
         obj.__dict__.update(self.__dict__)
         return obj
+
+    def getFrequencyRegions(self, vlines=None, figsize=[12,6], dpi=200):
+        '''Interactively select points 
+        of the impedance curve. The list of
+        points will be returned and saved in 
+        `self.freqregions`. How to use:
+        - place cursor + Spacebar --> pick
+        - Delete --> unpick
+        - Enter --> End picking
+
+        Returns
+        -------
+        freqregions: list
+            np.array of frequencies of picked points [Hz]
+        '''
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+        ax.plot(self.f*1e-9, self.Zr, color='k')
+
+        if vlines is not None:
+            ax.vlines(vlines*1e-9, ymin=np.min(self.Zr), ymax=np.max(self.Zr), color='k', linestyle='dashed', alpha=0.4)
+
+        ax.set_ylabel('Impedance [$\Omega$]')
+        ax.set_xlabel('Frequency [GHz]')
+        ax.set_title('Spacebar --> pick | Delete --> unpick | Enter --> Finish', color='red')
+        fig.tight_layout()
+
+        #get frequencies 
+        points = plt.ginput(n=0, timeout=0, mouse_add=None, mouse_pop=None, mouse_stop=None)
+        self.freqregions = np.array(points)[:,0]*1e9
+        plt.close()   
+
+        return self.freqregions
+
