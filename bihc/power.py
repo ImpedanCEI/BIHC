@@ -127,7 +127,7 @@ class Power():
             if step < 0: Zmod.Zr[:2*size-step] = 0.0
             power = np.append(power, self.getPloss(Zmod)[0])
 
-        Zmod.f, Zmod.Zr = f, Zint
+        Zmod.f, Zmod.Zr, Zmod.Zi = f, Zint, Zint*0.
         self.Z = Zmod.copy()
         Zmod.Zr = np.roll(Zint, shifts[np.argmax(power)])
         self.Zmax = Zmod.copy()
