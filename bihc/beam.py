@@ -498,16 +498,9 @@ class Beam(Impedance, Power, Plot):
         self.fillMode=fillMode
         self._beamNumber=beamNumber
         self.isATimberFill=True
-
+        print("\x1b[33;20m"+'! Warning: This method only works on SWAN for the moment'+"\x1b[0m")
         print ('Downloading data from Timber...')
-        db = pytimber.LoggingDB(spark_session = spark, sparkconf="large",
-            sparkprops={
-                "spark.driver.cores", "4",
-                "spark.executor.memory", "10g",
-                "spark.sql.parquet.columnarReaderBatchSize", "32",
-                "spark.driver.maxResultSize", "1t",
-                "spark.task.maxDirectResultSize", "1t"
-        })      
+        db = pytimber.LoggingDB()      
         bunchLengths='LHC.BQM.B'+str(beamNumber)+':BUNCH_LENGTHS'
         filledBuckets='LHC.BQM.B'+str(beamNumber)+':FILLED_BUCKETS'
 
