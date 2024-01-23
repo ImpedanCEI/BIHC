@@ -500,12 +500,19 @@ class Beam(Impedance, Power, Plot):
         self.isATimberFill=True
 
         print ('Downloading data from Timber...')
-        db=pytimber.LoggingDB()        
+        db = pytimber.LoggingDB(spark_session = spark, sparkconf="large",
+            sparkprops={
+                "spark.driver.cores", "4",
+                "spark.executor.memory", "10g",
+                "spark.sql.parquet.columnarReaderBatchSize", "32",
+                "spark.driver.maxResultSize", "1t",
+                "spark.task.maxDirectResultSize", "1t"
+        })      
         bunchLengths='LHC.BQM.B'+str(beamNumber)+':BUNCH_LENGTHS'
         filledBuckets='LHC.BQM.B'+str(beamNumber)+':FILLED_BUCKETS'
 
     
-        fill=db.getLHCFillData(fillNumber)
+        fill = db.getLHCFillData(fillNumber)
         ts = fill['startTime']
         for j in range(len(fill['beamModes'])):
             if(fill['beamModes'][j]['mode']==fillMode):
@@ -559,6 +566,11 @@ class Beam(Impedance, Power, Plot):
          
 
         self._bunchLength=self._bunchLength[0:self.M]
+        if self.verbose:
+            print (f'Avg. bunch length off all bunches: {np.mean(self._bunchLength)}')
+            print (f'Max. bunch length off all bunches: {np.max(self._bunchLength)}')
+            print (f'Min. bunch length off all bunches: {np.min(self._bunchLength)}')
+
         self.phi=self.phi[0:self.M]
         self.setNpFromFillNumber()
         self._setBunches()
