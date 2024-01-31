@@ -482,7 +482,7 @@ class Beam(Impedance, Power, Plot):
         fillNumber : int, default 0
             Fill number relative to a particular beam fill of the machine
         fillMode : str, default 'FLATTOP'
-            Timber label to extract data at a certain energy 'INJ', 'FLATTOP', 'STABLE'
+            Timber label to extract data at a certain energy 'INJ', 'RAMP', 'FLATTOP', 'STABLE'
 
         Raises
         ------
@@ -498,8 +498,8 @@ class Beam(Impedance, Power, Plot):
         self.fillMode=fillMode
         self._beamNumber=beamNumber
         self.isATimberFill=True
-        print("\x1b[33;20m"+'! Warning: This method only works on SWAN for the moment'+"\x1b[0m")
         print ('Downloading data from Timber...')
+        print("\x1b[33;20m"+'! Warning: This method only works on SWAN for the moment'+"\x1b[0m")
         db = pytimber.LoggingDB()      
         bunchLengths='LHC.BQM.B'+str(beamNumber)+':BUNCH_LENGTHS'
         filledBuckets='LHC.BQM.B'+str(beamNumber)+':FILLED_BUCKETS'
