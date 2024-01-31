@@ -10,7 +10,7 @@ Based on the studies by C. Zannini.
 * author: F. Giordano, E. de la Fuente, L. Sito
 '''
 import sys
-sys.path.append('../../')
+sys.path.append('/')
 
 import bihc
 import numpy as np
@@ -102,11 +102,11 @@ t0 = 25e-9    # Slot space [s]
 blft = 7.505192141958421e-10 * 4 #0.225 m / clight *4 (to fit Francesco's definition: -2sigma, +2sigma)
 bl = blft * 2
 
-b1 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(1), Np=Np, d=t0, fmax=fmax) #first injection
-b2 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(2), Np=Np, d=t0, fmax=fmax) #second injection
-b3 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB',  fillingScheme=fillingSchemeSPS(3), Np=Np, d=t0, fmax=fmax) #third injection
-b4 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat bottom
-b4ft = bihc.Beam(bunchLength=blft, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, d=t0, fmax=fmax) #4th injection flat top
+b1 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(1), Np=Np, t0=t0, fmax=fmax) #first injection
+b2 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(2), Np=Np, t0=t0, fmax=fmax) #second injection
+b3 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB',  fillingScheme=fillingSchemeSPS(3), Np=Np, t0=t0, fmax=fmax) #third injection
+b4 = bihc.Beam(bunchLength=bl, machine='SPS', fillMode='FB', fillingScheme=fillingSchemeSPS(4), Np=Np, t0=t0, fmax=fmax) #4th injection flat bottom
+b4ft = bihc.Beam(bunchLength=blft, machine='SPS', fillMode='FLATTOP', fillingScheme=fillingSchemeSPS(4), Np=Np, t0=t0, fmax=fmax) #4th injection flat top
 
 # Computing the dissipated power value
 avg_powerloss = (b1.getPloss(Z)[0] + b2.getPloss(Z)[0] + b3.getPloss(Z)[0] + b4.getPloss(Z)[0] + b4ft.getPloss(Z)[0])/5
