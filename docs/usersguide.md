@@ -132,47 +132,155 @@ The LPC file is generated with the online `LPC tool` available in this [link](ht
 import matplotlib.pyplot as plt
 import bihc
 
-#LPC csv file names
-file1='25ns_2748b_2736_2258_2374_288bpi_12inj.csv'
-file2='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
-file3='8b4e_1972b_1967_1178_1886_224bpi_12inj.csv'
+# LPC csv file names
+# downloaded from LPC: https://lpc.web.cern.ch/cgi-bin/fillingSchemeTab.py
+file1 = '25ns_2748b_2736_2258_2374_288bpi_12inj.csv'
+file2 = '25ns_2374b_2361_1730_1773_236bpi_13inj_hybrid_2INDIV.csv' 
+file3 = '8b4e_1972b_1967_1178_1886_224bpi_12inj.csv'
 
-# Data retrival from timber, with different bunch profile shapes
-beamBcms1 = bihc.Beam(LPCfile=file1, bunchShape='GAUSSIAN')
-beamBcms2 = bihc.Beam(LPCfile=file2, bunchShape='GAUSSIAN')
-beam8b4e = bihc.Beam(LPCfile=file3, bunchShape='GAUSSIAN')
+#------- Ploss calculation ----------
 
-# Storing spectra 
-[f_bcms1, S_bcms1] = beamBcms1.spectrum
-[f_bcms2, S_bcms2] = beamBcms2.spectrum
-[f_8b4e, S_8b4e] = beam8b4e.spectrum
+# Create beam object
+bl = 1.2e-9         # bunch length [s]
+Np = 2.3e11         # bunch intensity [protons/bunch]
+bunchShape = 'GAUSSIAN'     # bunch profile shape in time 
+fillMode = 'FLATTOP'        # Energy
+fmax = 2e-9                 # Maximum frequency of the beam spectrum [Hz]
 
-# Plotting 
-fig, axs = plt.subplots(3,1)
-
-axs[0].plot(f_bcms1, S_bcms1, label=beamBcms1.LPCfile)
-axs[1].plot(f_bcms2, S_bcms2, label=beamBcms2.LPCfile)
-axs[2].plot(f_8b4e, S_8b4e,label=beam8b4e.LPCfile)
-
-for ax in axs:
-	ax.set_xlim(0, 2e9)
-	ax.set_xlabel('frequency [Hz]')
-	ax.set_ylabel('Spectrum [a.u.]')
-	ax.legend()
-
-plt.tight_layout()
-plt.show()
+beamBcms1 = bihc.Beam(LPCfile=file1, Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode, fmax=fmax)
+beamBcms2 = bihc.Beam(LPCfile=file2,  Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode,fmax=fmax)
+beam8b4e = bihc.Beam(LPCfile=file3,  Np=Np, bunchLength=bl,  bunchShape=bunchShape, fillMode=fillMode, fmax=fmax)
 
 # Importing an impedance curve
 impedance_file = 'PillboxImpedance.txt'
-Z = bihc.Impedance(f_gauss)
+Z = bihc.Impedance()
 Z.getImpedanceFromCST(impedance_file)
 
-# Computing the dissipated power value for the different Bunch Profiles
+# Computing the dissipated power value for the different filling schemes
 print(f'25ns_2748b_2736_2258_2374_288bpi_12inj power loss: {beamBcms1.getPloss(Z)[0]} W')
 print(f'25ns_2760b_2748_2494_2572_288bpi_13inj power loss: {beamBcms2.getPloss(Z)[0]} W')
 print(f'8b4e_1972b_1967_1178_1886_224bpi_12inj power loss: {beam8b4e.getPloss(Z)[0]} W')
 
+```
+
+## Statistical min. max power loss
+This section showcases the method `beam.getShiftedPloss()`. With this method, the impedance curve is shifted rigidly in frequency steps defined by the `shifts` parameter. This allows to consider uncertainties in the simulated impedance curve or in the beam spectral lines.
+The maximum power will be obtained when the impedance peaks overlaps with one or more spectral lines. There is one example available for the SPS, using a user defined filling scheme (SPS standard 25ns, 4 batches). The other example is for the LHC, for which an LPC file is used as input.
+
+### SPS example
+
+Available in `examples/minMaxDissipatedPowerSPS.py`
+
+```python
+import bihc
+import numpy as np
+import matplotlib.pyplot as plt
+
+from tqdm import tqdm
+
+# SPS user defined filling scheme
+def fillingSchemeSPS_standard(ntrains):
+    '''
+    Returns the filling scheme for the SPS
+
+    Parameters
+    ----------
+    ntrains: number of injections (batches)
+    '''
+    # Define filling scheme: parameters
+    ntrain = 1 # SPS has 1 train per cycle
+    nslots = 924 # Defining total number of slots for SPS
+    nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72.. 
+    batchspacing = 9 # Batch spacing in 25 ns slots 45/5
+
+    # Defining the trains as lists of True/Falses
+    bt = [True]*nbunches
+    st = [False]*batchspacing
+    sc = [False]*(nslots - (nbunches+batchspacing)*ntrains)
+    an = (bt + st)*ntrains + sc
+
+    return an
+
+
+#------- Ploss calculation ----------
+
+# Create beam object
+fillingScheme = fillingSchemeSPS_standard(ntrains=4)
+bl = 1.2e-9                 # bunch length [s]
+Np = 2.3e11                 # bunch intensity [protons/bunch]
+bunchShape = 'q-GAUSSIAN'     # bunch profile shape in time 
+qvalue = 1.2                # value of q parameter in the q-gaussian distribution
+fillMode = 'FLATTOP'        # Energy
+fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
+
+beam = bihc.Beam(Np=Np, bunchLength=bl, fillingScheme=fillingScheme,
+                bunchShape=bunchShape, qvalue=qvalue, 
+                machine='SPS', fillMode=fillMode, spectrum='numeric', fmax=fmax)
+[f,S] = beam.spectrum
+
+# Create Impedance object
+impedance_file = 'PillboxImpedance.txt'
+Z = bihc.Impedance(f)
+Z.getImpedanceFromCST(impedance_file)
+
+# Get unshifted ploss 
+ploss, ploss_density = beam.getPloss(Z) 
+
+#---------------- Rigid Shift power loss ------------------------------
+shift = 40e6  # distance between shift steps [Hz]
+shifts, power = beam.getShiftedPloss(Z, shift=shift)
+
+print(f'Minimum dissipated power: P_min = {np.min(power)}, at step {shifts[np.argmin(power)]}')
+print(f'Maximum dissipated power: P_max = {np.max(power)}, at step {shifts[np.argmax(power)]}')
+print(f'Average dissipated power: P_mean = {np.mean(power)}')
+````
+
+### LHC example
+
+Available in `examples/minMaxDissipatedPower.py`
+
+```python
+import sys
+sys.path.append('../../')
+
+import bihc
+import numpy as np
+import matplotlib.pyplot as plt
+
+from tqdm import tqdm
+
+#LPC csv file name
+# downloaded from LPC: https://lpc.web.cern.ch/cgi-bin/fillingSchemeTab.py
+file = '25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
+
+#------- Ploss calculation ----------
+
+# Create beam object
+bl = 1.2e-9                 # bunch length [s]
+Np = 2.3e11                 # bunch intensity [protons/bunch]
+bunchShape = 'GAUSSIAN'     # bunch profile shape in time 
+fillMode = 'FLATTOP'        # Energy
+fmax = 2e9                 # Maximum frequency of the beam spectrum [Hz]
+
+beam = bihc.Beam(LPCfile=file, Np=Np, bunchLength=bl, bunchShape=bunchShape, 
+                machine='LHC', fillMode=fillMode, spectrum='numeric', fmax=fmax)
+[f,S] = beam.spectrum
+
+# Create Impedance object
+impedance_file = 'PillboxImpedance.txt'
+Z = bihc.Impedance(f)
+Z.getImpedanceFromCST(impedance_file)
+
+# Get unshifted ploss 
+ploss, ploss_density = beam.getPloss(Z) 
+
+#---------------- Rigid Shift power loss ------------------------------
+shift = 20e6  # distance between shift steps [Hz]
+shifts, power = beam.getShiftedPloss(Z, shift=shift)
+
+print(f'Minimum dissipated power: P_min = {np.min(power)}, at step {shifts[np.argmin(power)]}')
+print(f'Maximum dissipated power: P_max = {np.max(power)}, at step {shifts[np.argmax(power)]}')
+print(f'Average dissipated power: P_mean = {np.mean(power)}')
 ```
 
 ## Bunch profiles comparison
@@ -310,4 +418,6 @@ for i, prof in enumerate(profiles):
 plt.tight_layout()
 plt.show()
 ```
+
+
 [^1]: CST Studio, [https://www.cst.com](https://www.cst.com)
