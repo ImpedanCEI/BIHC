@@ -28,7 +28,7 @@ bl = 1.2e-9  		# bunch length [s]
 Np = 2.3e11			# bunch intensity [protons/bunch]
 bunchShape = 'GAUSSIAN' 	# bunch profile shape in time 
 fillMode = 'FLATTOP' 		# Energy
-fmax = 2e-9					# Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9					# Maximum frequency of the beam spectrum [Hz]
 
 beamBcms1 = bihc.Beam(LPCfile=file1, Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode, fmax=fmax)
 beamBcms2 = bihc.Beam(LPCfile=file2,  Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode,fmax=fmax)
