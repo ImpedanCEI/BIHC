@@ -3,10 +3,13 @@ Beam Induced Heating Computation (BIHC) tool is a package that allows the estima
 
 The dissipated power value depends on the characteristics of the particle beam (beam spectrum and intensity) and on the characteristics of the consdiered accelerator component (beam-coupling impedance).
 
-Check :file_folder: examples/ to learn how to use it!
+Check :file_folder: `examples/` on how to use it!
 
-Documentation is avaiable in [bihc.readthedocs.io](https://bihc.readthedocs.io/en/latest/)
-More practical information and code snippets in the `Users guide` section.
+Documentation is avaiable in [bihc.readthedocs.io](https://bihc.readthedocs.io/en/latest/). More practical information and code snippets in the `Users guide` section.
+
+For specific needs, please contac the maintainers :woman_technologist: :man_technologist: :wave:
+* elena.de.la.fuente.garcia@cern.ch
+* leonardo.sito@cern.ch
 
 ## Installation
 This section explains how to set up the environment to start using BIHC package for power loss computations.
