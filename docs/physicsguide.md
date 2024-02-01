@@ -2,14 +2,6 @@
 
 This section aims to provide the user with the basic physics behind the beam induced heating computation. For a more detailed explanation, we encourage the reader to check the references provided below.
 
-<div class="warning">
-<div class="admonition-title">
-Warning
-</div>
-This documentation is currently under development
-</div>
-
-
 ## Introduction 
 When a particle beam passes into the vacuum chamber of an accelerator component, it will electromagnetically interact with its surroundings. One of the most critical effects that occur is heating due to the passage of the beam, known as Beam-Induced Heating (BIH) [^1]. 
 
@@ -66,6 +58,9 @@ $$
 
 Where, $s$ is the location from the interaction point at which the power loss is being computed, $Z^0_z$ and $Z^1_z$ are the longitudinal impedances of order 0 and 1, $\Delta y_1(s)$ and $\Delta y_2(s)$ are the offsets from the geometrical center of respectively Beam 1 and Beam 2, $\tau_s = 2s/c$, with $c$ the speed of light, is the relative time delay of arrival at $s$ of the two beams. 
 
+## About `bihc` python package 
+This beam induced heating computation tool, the `bihc` python package, was fundamentaly built on the work performed by F. Giordano during his PhD at CERN. For detailed information about beam spectrum and bunch shapes we encourage the reader to refer to his PhD thesis [^5].
+
 [^1]: B. Salvant et al., “Beam induced heating”, 2012, [Online]. Available: https://cds.cern.ch/record/1975499 
 
 [^2]: Palumbo, L., et al. "Wake Fields and Impedance". 2003. DOI.org (Datacite), https://doi.org/10.48550/ARXIV.PHYSICS/0309023.
@@ -74,4 +69,4 @@ Where, $s$ is the location from the interaction point at which the power loss is
 
 [^4]: C. Zannini, et al. "Power Loss Calculation in Separated and Common Beam Chambers of the LHC". Proceedings of the 5th Int. Particle Accelerator Conf., vol. IPAC2014, 2014, p. 3 pages, 1.928 MB. DOI.org (Datacite), https://doi.org/10.18429/JACOW-IPAC2014-TUPRI061. 
 
-
+[^5]: F. Giordano, ‘Simulation Analysis and Machine Learning Based Detection of Beam-Induced Heating in Particle Accelerator at CERN’, University of Naples Federico II, 2020.

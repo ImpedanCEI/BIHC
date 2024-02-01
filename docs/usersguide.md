@@ -2,13 +2,6 @@
 
 This section offers a description of the example suite available in BIHC package. This section asumes that the user has followed the Installation guide and has installed BIHC succesfully. 
 
-<div class="warning">
-<div class="admonition-title">
-Warning
-</div>
-This documentation is currently under development
-</div>
-
 ## User defined beam filling scheme
 
 This example shows the definition of a filling  scheme as a list of True or Falses values. It is then used along some parameters of the bunches 
