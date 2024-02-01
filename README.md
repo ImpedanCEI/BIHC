@@ -7,7 +7,7 @@ Check :file_folder: `examples/` on how to use it!
 
 Documentation is avaiable in [bihc.readthedocs.io](https://bihc.readthedocs.io/en/latest/). More practical information and code snippets in the `Users guide` section.
 
-For specific needs, please contac the maintainers :woman_technologist: :man_technologist: :wave:
+For specific needs, please contact the maintainers :woman_technologist: :man_technologist: :wave:
 * elena.de.la.fuente.garcia@cern.ch
 * leonardo.sito@cern.ch
 
