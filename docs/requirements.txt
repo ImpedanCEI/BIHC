@@ -6,3 +6,4 @@ myst-parser==0.18.1
 numpy
 matplotlib
 scipy
+tqdm
