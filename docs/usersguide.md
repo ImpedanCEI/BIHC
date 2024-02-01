@@ -41,7 +41,7 @@ custom_beam.plotLongitudinalProfile()
 custom_beam.plotPowerSpectrum()
 ```
 
-The manual plotting can be done as well by retrieven the attributes of the beam class:
+The manual plotting can be done as well by retrieving the attributes of the beam class:
 
 ```python
 # Retrieve attributes
@@ -156,7 +156,9 @@ print(f'8b4e_1972b_1967_1178_1886_224bpi_12inj power loss: {beam8b4e.getPloss(Z)
 ```
 
 ## Statistical min. max power loss
+
 This section showcases the method `beam.getShiftedPloss()`. With this method, the impedance curve is shifted rigidly in frequency steps defined by the `shifts` parameter. This allows to consider uncertainties in the simulated impedance curve or in the beam spectral lines.
+
 The maximum power will be obtained when the impedance peaks overlaps with one or more spectral lines. There is one example available for the SPS, using a user defined filling scheme (SPS standard 25ns, 4 batches). The other example is for the LHC, for which an LPC file is used as input.
 
 ### SPS example
@@ -277,19 +279,15 @@ print(f'Average dissipated power: P_mean = {np.mean(power)}')
 
 ## Bunch profiles comparison
 
-This example compares different bunch profile shapes using a same filling scheme given by an `LPC Tool`generated `.csv` file and the same impedance curve from a genereic Pillbox cavity computed with `CST Studio`.
+This example compares different bunch profile shapes using a same filling scheme given by an `LPC Tool`generated `.csv` file and two differnt analytic impedances: a narrowband resonator, and a broadband resistive wall.
 
-It plots the impact of the different bunch shapes in the beam spectrum, and shows the difference in power loss computation, for all the different bunch profiles available in `bihc`. 
+The example shows the impact of the different bunch shapes in the beam spectrum, and shows the difference in power loss computation, for all the different bunch profiles available in `bihc`. 
 
-:::{tip}
-The LPC file is generated with the online `LPC tool` available in this [link](https://lpc.web.cern.ch/schemeEditor.html).
-:::
-
-How to initialize the beam for each bunch shape. Notice how for the `bunchShape='q-GAUSSIAN'` the user needs to provide the q value  `qvalue=1.2` that shapes the tails of the distribution. In a similar way, for the `bunchShape='BINOMIAL'`, the user must provide the binomial exponent `exp=2.5`. 
-
-:::{admonition}info
+:::{tip} 
 All bunch shapes are defined to have an area along the time slot of 1 bunch equal to 1.0.
 :::
+
+The first part of the example shows how to initialize the beam for each bunch shape. Notice how for the `bunchShape='q-GAUSSIAN'` the user needs to provide the q value  `qvalue=1.2` that shapes the tails of the distribution. In a similar way, for the `bunchShape='BINOMIAL'`, the user must provide the binomial exponent `exp=2.5`. 
 
 ```python
 import matplotlib.pyplot as plt
