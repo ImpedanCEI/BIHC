@@ -26,15 +26,15 @@ Impedance module
 Power loss computation module
 -----------------------------
 
-.. automodule:: bihc.power.Power
+.. autoclass:: bihc.power.Power
    :members:
    :undoc-members:
 
 
 Built-in plotting module
 ------------------------
-
 .. automodule:: bihc.plot
+.. autoclass:: bihc.plot.Plot
    :members:
    :undoc-members:
 

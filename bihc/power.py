@@ -18,15 +18,6 @@ class Power():
 
     Class to encapsulate power computation methods
     It is inherited by Beam class
-
-    Methods
-    -------
-    getPloss(Z)
-        Computes the power loss for a given impedance object
-    get2BeamPloss(Z, phase_shift)
-        Computes the power loss for the 2 beams case for a 
-        given impedance object and a phase shift between the
-        beams
     '''
     def getPloss(self,Z):
         '''
