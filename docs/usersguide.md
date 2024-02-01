@@ -6,7 +6,7 @@ This section offers a description of the example suite available in BIHC package
 
 This example shows the definition of a filling  scheme as a list of True or Falses values. It is then used along some parameters of the bunches 
 (Number of protons and slot space) to define a Beam object. Using some built in methods, the time distribution and beam spectrum are plotted. The manual plotting is also included below.
-Finally, the power loss is calculated for a simple Pillbox impedance computed with `CST Stdio`[^1].
+Finally, the power loss is calculated for a simple Pillbox impedance computed with `CST Studio`[^1].
 
 ```python
 import bihc
