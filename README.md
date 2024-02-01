@@ -3,20 +3,34 @@ Beam Induced Heating Computation (BIHC) tool is a package that allows the estima
 
 The dissipated power value depends on the characteristics of the particle beam (beam spectrum and intensity) and on the characteristics of the consdiered accelerator component (beam-coupling impedance).
 
-Check :file_folder: examples/ on how to use!
+Check :file_folder: examples/ to learn how to use it!
 
 Documentation is avaiable in [bihc.readthedocs.io](https://bihc.readthedocs.io/en/latest/)
-
-**Fist release coming soon** (January 2023)
+More practical information and code snippets in the `Users guide` section.
 
 ## Installation
 This section explains how to set up the environment to start using BIHC package for power loss computations.
 
-### Installation in CERN lxplus
+#### Developers: Download BIHC repository from Github
+```
+# SSH:
+git clone git@github.com:ImpedanCEI/BIHC.git
+
+# or HTTPS:
+git clone https://github.com/ImpedanCEI/BIHC.git
+```
+
+#### Users: pip install 
+```
+pip install bihc
+```
+If already installed but want to have the newest version: `pip install bihc --upgrade`
+
+### Installation with pytimber in CERN lxplus
 
 Connect to CERN lxplus via ssh. Avoid connecting to lxplus8, the code will induce in Kerberos issues. Kerberos logging will expire 4h after each connection and needs to be renewed.
 ```
-ssh -XY user@lxplus.cern.ch
+ssh -X user@lxplus.cern.ch
 ```
 In your /user or /work directory, do:
 ```
@@ -47,29 +61,5 @@ ldb = pytimber.LoggingDB(source="nxcals")
 ldb.search('LHC%BEAM_ENERGY%')
 ldb.get(ldb.search('LHC%BEAM_ENERGY%')[0], t1='2022-06-15 15:10:30.0000')
 ```
-#### Setup Git in lxplus
-```
-git config --list
-```
-Look for user.name and user.email. If it is not yet set, run the following commands (which set the information for all your git repositories on lxplus)
-```
-git config --global user.name "Your Name"
-git config --global user.email "your.name@cern.ch"
-```
-There are other settings recommended as well:
-```
-git config --global push.default simple
-git config --global http.postBuffer 1048576000
-git config --global http.emptyAuth true # Required on CC7
-```
-The push setting makes some operations more straightforward. The second addresses an issue with large pushes via plain http or krb5. The third addresses an issue with libcurl and krb5.
 
-#### Developers: Download BIHC repository
-```
-git clone https://github.com/LeonardoSito/BIHC.git
-```
-#### Users: pip install 
-(Available soon)
-```
-pip install bihc
-```
+
