@@ -10,8 +10,6 @@ The dissipated power value depends on the characteristics of the particle beam (
 
 The source code is available in the `BIHC GitHub repository <https://github.com/lsito/BIHC>`_.
 
-.. attention::
-   This documentation is currently under development
 
 Table of contents
 -----------------
