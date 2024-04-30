@@ -71,3 +71,38 @@ def fillingSchemeSPS_8b4e(ninj):
     an = (bt + st)*ninj + sc
 
     return an
+
+def fillingSchemeLHC_standard(ninj, nbunches=72, ntrains=4):
+    '''
+    Returns the filling scheme for the LHC 
+    using the standard pattern: 
+
+    "nbunches x ntrains for ninj"
+
+    Parameters
+    ----------
+    ninj: int
+        number of injections of the "ntrains x nbunches" scheme
+    nbunches: optional, default 72
+        number of bunches per train
+    ntrains: optional, default 4
+        number of trains of bunches per single injection
+    '''
+
+    # Define filling scheme: parameters
+    ninj = ninj # Defining number of injections
+    nslots = 3564 # Defining total number of slots for LHC
+    ntrain = ntrains # Defining the number of trains
+    nbunches = nbunches # Defining a number of bunchs e.g. 18, 36, 72.. 
+    batchS = 7 # Batch spacing in 25 ns slots
+    injspacing = 37 # Injection spacing in 25 ns slots
+
+    # Defining the trains as lists of True/Falses
+    bt = [True]*nbunches
+    st = [False]*batchS
+    stt = [False]*injspacing
+    sc = [False]*(nslots-(ntrain*nbunches*ninj+((ntrain-1)*(batchS)*ninj)+((1)*injspacing*(ninj))))
+    an1 = (bt+st)*ntrains + stt
+    an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
+
+    return an
