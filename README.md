@@ -1,4 +1,7 @@
 # BIHC
+
+[![Documentation Status](https://readthedocs.org/projects/bihc/badge/?version=latest)](https://bihc.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/bihc.svg)](https://badge.fury.io/py/bihc)
+
 Beam Induced Heating Computation (BIHC) tool is a package that allows the estimation of the dissipated power due to the passage of a particle beam inside an accelerator component.
 
 The dissipated power value depends on the characteristics of the particle beam (beam spectrum and intensity) and on the characteristics of the consdiered accelerator component (beam-coupling impedance).
