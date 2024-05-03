@@ -59,7 +59,7 @@ $$
 Where, $s$ is the location from the interaction point at which the power loss is being computed, $Z^0_z$ and $Z^1_z$ are the longitudinal impedances of order 0 and 1, $\Delta y_1(s)$ and $\Delta y_2(s)$ are the offsets from the geometrical center of respectively Beam 1 and Beam 2, $\tau_s = 2s/c$, with $c$ the speed of light, is the relative time delay of arrival at $s$ of the two beams. 
 
 ## About `bihc` python package 
-`bihc` is a computational package that integrates over a decade of experience in beam-induced heating calculations from the Impedance and Coherent Effects Section (see [^1], [^3], [^4], [^5], [^6]) into a comprehensive and flexible Python-based tool. 
+`bihc` is a computational package that integrates over a decade of experience in beam-induced heating calculations from the Impedance and Coherent Effects Section (see [^1], [^3], [^4], [^5], [^6], [^7]) into a comprehensive and flexible Python-based tool. 
 
 The package has been presented at the 68th ICFA Advanced Beam Dynamics Workshop on High-Intensity and High-Brightness Hadron Beam (0ct. 2023)[^7], and is under continuous development to face the beam-induce heating challenges that become more relevant as the beam total intensity and bunch length is pushed.
 
@@ -75,6 +75,8 @@ The package has been presented at the 68th ICFA Advanced Beam Dynamics Workshop 
 
 [^5]: C. Zannini, “Multiphysics Simulations of Impedance Effects in Accelerators,” CERN Yellow Rep. Conf. Proc., vol. 1, pp. 141–144, 2018, doi: 10.23732/CYRCP-2018-001.141. 
 
-[^6]: F. Giordano, ‘Simulation Analysis and Machine Learning Based Detection of Beam-Induced Heating in Particle Accelerator at CERN’, University of Naples Federico II, 2020.
+[^6]: G. Rumolo, “Beam Instabilities”, 21 pages contribution to the CAS - CERN Accelerator School: Advanced Accelerator Physics Course, Trondheim, Norway, 2014, doi: 10.5170/CERN-2014-009.199. Available; https://cds.cern.ch/record/1982422
 
-[^7]: L. Sito, E. de la Fuente, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” in Proc. 68th Adv. Beam Dyn. Workshop High-Intensity High-Brightness Hadron Beams (HB’23), Geneva, Switzerland, Apr. 2024, no. 68, pp. 611–614. doi: 10.18429/JACoW-HB2023-THBP52. 
+[^7]: F. Giordano, ‘Simulation Analysis and Machine Learning Based Detection of Beam-Induced Heating in Particle Accelerator at CERN’, University of Naples Federico II, 2020.
+
+[^8]: L. Sito, E. de la Fuente, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” in Proc. 68th Adv. Beam Dyn. Workshop High-Intensity High-Brightness Hadron Beams (HB’23), Geneva, Switzerland, Apr. 2024, no. 68, pp. 611–614. doi: 10.18429/JACoW-HB2023-THBP52. 
