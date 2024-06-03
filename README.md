@@ -14,9 +14,9 @@ For specific needs, please contact the maintainers :woman_technologist: :man_tec
 * elena.de.la.fuente.garcia@cern.ch
 * leonardo.sito@cern.ch
 
-Citing `bihc`
+:bookmark: Citing `bihc`
 ---
-There is a [paper about `bihc`](10.18429/JACoW-HB2023-THBP52), presented at IPAC 2023 conference.
+There is a [paper about `bihc`](10.18429/JACoW-HB2023-THBP52), presented at 8th ICFA Advanced Beam Dynamics Workshop on High-Intensity and High-Brightness Hadron Beam (0ct. 2023).
 If you are using PyVista in your scientific research, please help our scientific
 visibility by citing our work:
 > [1] E. de la Fuente, L. Sito, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” JACoW, vol. HB2023, pp. 611–614, 2024, doi: [https://doi.10.18429/JACoW-HB2023-THBP52](https://jacow.org/hb2023/papers/thbp52.pdf). 
@@ -33,8 +33,30 @@ Bibtex:
     year = "2024"
 }
 ```
+:mag_right: About `bihc` python package 
+---
 
-## Installation
+`bihc` is a computational package that integrates over a decade of experience in beam-induced heating calculations from the Impedance and Coherent Effects Section (see [^1], [^3], [^4], [^5], [^6], [^7]) into a comprehensive and flexible Python-based tool. 
+
+The package has been presented at the 68th ICFA Advanced Beam Dynamics Workshop on High-Intensity and High-Brightness Hadron Beam (0ct. 2023)[^8], and is under continuous development to face the beam-induce heating challenges that become more relevant as the beam total intensity and bunch length is pushed.
+
+`bihc` has been succesfully employed to assess the mitigation strategy for the CERN-SPS Beam Wire Scanners after the wire failure in 2023, and was extensively used to study the CERN-LHC Warm Vacuum modules limitations in intensity and bunch length for the 2024 run.
+
+[^1]: B. Salvant et al., “Beam induced heating”, 2012, [Online]. Available: https://cds.cern.ch/record/1975499 
+
+[^3]: C. Zannini, et al. "Power Loss Calculation in Separated and Common Beam Chambers of the LHC". Proceedings of the 5th Int. Particle Accelerator Conf., vol. IPAC2014, 2014, p. 3 pages, 1.928 MB. DOI.org (Datacite), https://doi.org/10.18429/JACOW-IPAC2014-TUPRI061. 
+
+[^4]: C. Zannini, "Electromagnetic Simulation of CERN accelerator Components and Experimental Applications", 2013. [Online]. Available: https://cds.cern.ch/record/1561199 
+
+[^5]: C. Zannini, “Multiphysics Simulations of Impedance Effects in Accelerators,” CERN Yellow Rep. Conf. Proc., vol. 1, pp. 141–144, 2018, doi: 10.23732/CYRCP-2018-001.141. 
+
+[^6]: G. Rumolo, “Beam Instabilities”, 21 pages contribution to the CAS - CERN Accelerator School: Advanced Accelerator Physics Course, Trondheim, Norway, 2014, doi: 10.5170/CERN-2014-009.199. Available; https://cds.cern.ch/record/1982422
+
+[^7]: F. Giordano, ‘Simulation Analysis and Machine Learning Based Detection of Beam-Induced Heating in Particle Accelerator at CERN’, University of Naples Federico II, 2020.
+
+[^8]: L. Sito, E. de la Fuente, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” in Proc. 68th Adv. Beam Dyn. Workshop High-Intensity High-Brightness Hadron Beams (HB’23), Geneva, Switzerland, Apr. 2024, no. 68, pp. 611–614. doi: 10.18429/JACoW-HB2023-THBP52. 
+
+## :zap: Installation
 This section explains how to set up the environment to start using BIHC package for power loss computations.
 If you are using PyVista in your scientific research, please help our scientific
 visibility by citing our work:
