@@ -14,8 +14,31 @@ For specific needs, please contact the maintainers :woman_technologist: :man_tec
 * elena.de.la.fuente.garcia@cern.ch
 * leonardo.sito@cern.ch
 
+Citing `bihc`
+---
+There is a [paper about `bihc`](10.18429/JACoW-HB2023-THBP52), presented at IPAC 2023 conference.
+If you are using PyVista in your scientific research, please help our scientific
+visibility by citing our work:
+> [1] E. de la Fuente, L. Sito, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” JACoW, vol. HB2023, pp. 611–614, 2024, doi: 10.18429/JACoW-HB2023-THBP52. 
+
+Bibtex:
+```
+@article{Sito:2024ywv,
+    author = "Sito, Leonardo and de la Fuente, Elena and Giordano, Francesco and Rumolo, Giovanni and Salvant, Benoit and Zannini, Carlo ",
+    title = "{A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications}",
+    doi = "10.18429/JACoW-HB2023-THBP52",
+    journal = "JACoW",
+    volume = "HB2023",
+    pages = "611--614",
+    year = "2024"
+}
+```
+
 ## Installation
 This section explains how to set up the environment to start using BIHC package for power loss computations.
+If you are using PyVista in your scientific research, please help our scientific
+visibility by citing our work:
+
 
 #### Developers: Download BIHC repository from Github
 ```
