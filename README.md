@@ -17,7 +17,7 @@ For specific needs, please contact the maintainers :woman_technologist: :man_tec
 :bookmark: Citing `bihc`
 ---
 There is a [paper about `bihc`](10.18429/JACoW-HB2023-THBP52), presented at 8th ICFA Advanced Beam Dynamics Workshop on High-Intensity and High-Brightness Hadron Beam (0ct. 2023).
-If you are using PyVista in your scientific research, please help our scientific
+If you are using `bihc` in your scientific research, please help our scientific
 visibility by citing our work:
 > [1] E. de la Fuente, L. Sito, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” JACoW, vol. HB2023, pp. 611–614, 2024, doi: [https://doi.10.18429/JACoW-HB2023-THBP52](https://jacow.org/hb2023/papers/thbp52.pdf). 
 
