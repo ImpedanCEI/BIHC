@@ -125,7 +125,7 @@ class Power():
 
         return shifts, power
 
-    def getShiftedPpowerSpectrum(self, Z, shift=20e6):
+    def getShiftedPowerSpectrum(self, Z, shift=20e6):
         '''
         Computes the power loss spectrum, shifting the impedance 
         curve rigidly in steps given by `shift`, to overlap
