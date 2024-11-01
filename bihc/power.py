@@ -125,6 +125,56 @@ class Power():
 
         return shifts, power
 
+    def getShiftedPpowerSpectrum(self, Z, shift=20e6):
+        '''
+        Computes the power loss spectrum, shifting the impedance 
+        curve rigidly in steps given by `shift`, to overlap
+        with the spectral lines, giving a best (away from the
+        line) and worst (on top of the line) case scenario.
+
+        Parameters
+        ----------
+        Z : object
+            Impedance object returned by Impedance class with 
+            the frequency information of the impedance map given 
+            by the user
+        shift : float
+            Frequency shift to be applied in steps to the 
+            impedance curve
+        '''
+
+        [f,S] = self.spectrum
+        deltaF = f[1]-f[0]
+        fmax = Z.f[-1]
+
+        #if impedance file is too short, we zero padd it
+        #Otherwise the interpolation will assume for the 
+        #missing frequencies a constant value 
+
+        Zint = np.interp(f, Z.f, Z.Zr)
+        Zmod = Z.copy()
+        Zmod.f, Zmod.Zr = f, Zint
+
+        if Zmod.f[-1] > fmax: 
+            mask = Zmod.f > fmax
+            Zmod.Zr[mask] = 0.0
+
+        size = int(shift/deltaF)
+        shifts = np.arange(-size, size, 1, dtype=int) #shifting every frev
+
+        power_spectrum = []
+        for step in tqdm(shifts, "Computing scan: ", total=2*size):
+            Zmod.Zr = np.roll(Zint, step) 
+            if step > 0: Zmod.Zr[:step] = 0.0
+            if step < 0: Zmod.Zr[:2*size-step] = 0.0
+            power_spectrum.append(self.getPloss(Zmod)[1]) #1: spectrum!
+
+        power_spectrum = np.array(power_spectrum)
+        Zmod.f, Zmod.Zr, Zmod.Zi = f, Zint, Zint*0.
+        self.Z = Zmod.copy()
+
+        return shifts, power_spectrum
+    
     def get2BeamPloss(self, Z_0, tau_s=None, s=None, offset1=None, offset2=None, Z_1=None):
         '''
         Computes the power loss for the two beams case
