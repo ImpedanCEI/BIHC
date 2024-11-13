@@ -41,6 +41,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.githubpages',
               'sphinx_copybutton',
               'myst_parser', #for markdown
+              'sphinx_design',
 ] 
 
 autodoc_preserve_defaults = True #preserves default args as in source code
