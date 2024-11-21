@@ -194,6 +194,32 @@ class Impedance(Plot):
 
         return [self.f, self.Z]
     
+    def getImpedanceFromFunc(self, func, f=None):
+        '''Gets impedance from a python function
+        in the form of Z = func(f)
+
+        Ensures compatibility to Xwakes wake objects
+        https://github.com/xsuite/xwakes/
+
+        Example:
+        -------
+        >>> import xwakes as xw
+        >>> wake = xw.WakeResonator(r=1e8, q=10, f_r=1e9,
+                                    kind='longitudinal')
+        >>> import bihc
+        >>> Z = bihc.Impedance(f=np.linspace(0,1e9,10000))
+        >>> Z.getImpedanceFromFunc(wake.components[0].impedance)
+        '''
+
+        if f is not None:
+            self.f = f
+        
+        self.Z = func(f)
+        self.Zr = np.real(self.Z)
+        self.Zi = np.imag(self.Z)
+
+        return [self.f, self.Z]
+
     def getImpedanceFromPandas(self, path, unit='GHz'):
         import pandas as pd
 
@@ -207,7 +233,6 @@ class Impedance(Plot):
   
         self.f = data['f']
         self.Zr = data['Zr']
-        self.isResonatorImpedance = False
         
         return data
     
