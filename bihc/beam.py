@@ -82,7 +82,7 @@ class Beam(Impedance, Power, Plot):
         Beam charge computed from intensity and number of filled slots, in Coulombs [C]
     '''
 
-    def __init__(self, M=3564, A=1, fillNumber=0,
+    def __init__(self, M=1e6, A=1, fillNumber=0,
                  bunchLength=1.2e-9, phi=0, realMachineLength=True,
                  ppbk=250, t0=None, Np=2.3e11, bunchShape='GAUSSIAN', LPCfile=None, qvalue=1.2, beamNumber=1, 
                  fillMode='FLATTOP', fillingScheme=[False]*3564, machine='LHC', spectrum='numeric', frev=None, 
@@ -127,6 +127,14 @@ class Beam(Impedance, Power, Plot):
                 GAMMA_R = 251    # flat top 450 GeV
             else:
                 GAMMA_R = 27.7   # flat bottom value 26 GeV
+
+        elif self._machine =='SPS-SFTPRO':
+            self.BUCKET_MAX = 924*5 
+            RING_CIRCUMFERENCE = 6911          #[m]
+            if self.fillMode == 'FLATTOP':
+                GAMMA_R = 426.5    # flat top 400 GeV
+            else:
+                GAMMA_R = 14.95   # flat bottom value 14 GeV
 
         elif self._machine == 'PS':
             self.BUCKET_MAX = 21
@@ -316,7 +324,7 @@ class Beam(Impedance, Power, Plot):
         #raise Exception("Spectrum can not be assigned")
                      
     def setBunches(self, newLongitudinalProfile, interp=True):
-        [t,s] = newlongitudinalProfile
+        [t,s] = newLongitudinalProfile
     
         if interp:
             [to,so] = self.longitudinalProfile
