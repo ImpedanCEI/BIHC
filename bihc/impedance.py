@@ -74,7 +74,7 @@ class Impedance(Plot):
 
         return Z
         
-    def getResonatorImpedance(self,Rs,Qr,fr,f=np.linspace(0.1,2e9,int(1e5))):
+    def getResonatorImpedance(self,Rs,Qr,fr):
         """Creating the impedance curve from the broad-band resonator model.
 
         This methods creates an impedance curve using the broad-band resonator 
@@ -96,6 +96,12 @@ class Impedance(Plot):
             Impedance curve. Returns the list of numpy arrays [frequency, 
             complex impedance].
         """
+
+        self.fr = fr
+        self.Rs = Rs
+        self.Qr = Qr
+        self.isResonatorImpedance = True
+
         f = self.f
         mask1 = f == 0
         f[mask1] = 1e-5
@@ -104,12 +110,6 @@ class Impedance(Plot):
         self.Zr = np.real(Z)
         self.Zi = np.imag(Z)
         self.Z = Z
-        self.f = f
-
-        self.fr = fr
-        self.Rs = Rs
-        self.Qr = Qr
-        self.isResonatorImpedance = True
         
         return [self.f, self.Zr+1j*self.Zi]
         
