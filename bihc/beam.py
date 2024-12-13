@@ -185,7 +185,7 @@ class Beam(Impedance, Power, Plot):
             self.setCustomBeam()
 
         # Computes spectrum and power spectrum 
-        [f, S] = self.spectrum
+        [self.f, self.S] = self.spectrum
 
     @property
     def bunchLength(self):
@@ -248,6 +248,8 @@ class Beam(Impedance, Power, Plot):
             return self._spectrum
         
         elif self._spectrumtype == 'user':
+            print("! When using spectrum == 'user', set the spectrum data via:\n \
+                   >>> beam.setSpectrum(newSpectrum)\n")
             return self._spectrum #spectrum must be provided through the setter
 
         else:
@@ -317,17 +319,24 @@ class Beam(Impedance, Power, Plot):
         
     #@spectrum.setter
     def setSpectrum(self, newSpectrum): 
+        '''Setter for new spectrum data
+        Needs to be used when using: 
+        >>> Beam(specturm='user' )
+        
+        '''
         self._spectrum = newSpectrum
-        [f,s] = self._spectrum
-        self.powerSpectrum=[f, np.abs(s)**2]
+        [f,S] = self._spectrum
+        self.powerSpectrum=[f, np.abs(S)**2]
         self._isSpectrumReady = True
+        self.f = f
+        self.S = S
         #raise Exception("Spectrum can not be assigned")
                      
     def setBunches(self, newLongitudinalProfile, interp=True):
         [t,s] = newLongitudinalProfile
     
         if interp:
-            [to,so] = self.longitudinalProfile
+            to = self.longitudinalProfile[0]
             s = np.interp(to, t, s)
             t = to
 
