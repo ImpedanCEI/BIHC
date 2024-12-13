@@ -45,8 +45,9 @@ class Beam(Impedance, Power, Plot):
         Offset of the bunch profile distribution in time [s]
     t0 : float, default 0
         The time length (space) of one bucket
-    Np : float, default 2.3e11
-        Beam intensity in number of protons per bunch
+    Np : float or list, default 2.3e11
+        Beam intensity in number of protons per bunch. 
+        It can also be passed as a list of length == fillingScheme
     beamNumber : int, default 1
         Number of beams for the power loss computation (1 or 2)
     fillNumber : int, default 0
@@ -56,7 +57,7 @@ class Beam(Impedance, Power, Plot):
     fillingScheme : list of bool, default [False]*3564
         Bool values to define the bunch filling scheme with length the number of buckets
     machine : str, default 'LHC'
-        Name of the machine to operate with : 'PS', 'SPS', 'LHC'
+        Name of the machine to operate with : 'PS', 'SPS', 'SPS-SFTPRO', 'LHC'
     spectrum : str, default 'numeric'
         Whether to calculate the spectrum with a numerical FFT 'numeric', from the analytical formula 'analytic', or from input 'user'
     realMachineLength : bool, default True
@@ -102,7 +103,6 @@ class Beam(Impedance, Power, Plot):
         self.q = qvalue #q value for the q-gaussian distribution 1>q>3
         self.exp = exp
         self.J = 1
-        self.Np = Np # Number of particles per bunch
         self.fillMode = fillMode
         self._fillNumber = fillNumber # Fill number relative to a particular fill of the machine
         
@@ -169,6 +169,13 @@ class Beam(Impedance, Power, Plot):
              
         self._beamNumber = beamNumber # Beam number, either 1 or 2
         self._beamFile = LPCfile
+
+        self.Np_arr = None
+        if type(Np) is float:
+            self.Np = Np # Number of particles per bunch
+        else:
+            self.Np = np.mean(Np*fillingScheme)
+            self.Np_arr = Np*fillingScheme
 
         # Computes the beam longitudinal profile 
         if fillNumber > 0:
@@ -466,6 +473,10 @@ class Beam(Impedance, Power, Plot):
         t=np.linspace(np.min(tn),np.max(tn),len(s))
         
         self.totalBeamCharge=self.Np*1.602176e-19*self.filledSlots
+        if self.Np_arr is not None: #weigth the longitudinal profile amplitudes
+            for i, Npi in enumerate(self.Np_arr):
+                s[i*self.ppbk:(i+1)*self.ppbk] = s[i*self.ppbk:(i+1)*self.ppbk]*Npi/self.Np
+
         #s=s/(self.filledSlots*self.J) #??? why is it normalized
         dt=t[1]-t[0]
     
