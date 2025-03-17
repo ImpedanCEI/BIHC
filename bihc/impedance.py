@@ -47,11 +47,17 @@ class Impedance(Plot):
     Zi : numpy.ndarray
         Imaginary part of the impedance in the speciefied frequency points [Ohm].
     """   
-    def __init__(self, f=np.linspace(0.1,2e9,int(1e5)), CST_file=None):
+    def __init__(self, f=np.linspace(0.1,2e9,int(1e5)), Z=None, CST_file=None):
     
         self.f = f
         self.Zr = np.zeros(len(f))
         self.Zi = np.zeros(len(f))
+
+        if Z is not None:
+            self.Zr = np.real(Z)
+            self.Zi = np.imag(Z)
+            if len(self.f) != len(self.Zr):
+                print('[!] frequency array and impedance data have different lengths')
 
         self.isResonatorImpedance = False
         self.isRWImpedance = False
