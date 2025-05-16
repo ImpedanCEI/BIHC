@@ -46,7 +46,7 @@ pip install numpy scipy matplotlib ipython pandas
 pip install git+https://gitlab.cern.ch/acc-co/devops/python/acc-py-pip-config.git
 
 # Install pytimber
-pip install pytimber
+pip install pytimber datascout
 
 # Change python package index back to default
 pip uninstall acc-py-pip-config
