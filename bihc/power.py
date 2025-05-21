@@ -1,3 +1,8 @@
+# copyright ################################# #
+# This file is part of the BIHC Package.      #
+# Copyright (c) CERN, 2024.                   #
+# ########################################### #
+
 '''
 Power module to manage power loss computations
 for one beam and two beams case.

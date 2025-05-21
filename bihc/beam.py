@@ -1,3 +1,8 @@
+# copyright ################################# #
+# This file is part of the BIHC Package.      #
+# Copyright (c) CERN, 2024.                   #
+# ########################################### #
+
 '''
 Beam module to manage beam object creation
 from Timber database or specified by custom 

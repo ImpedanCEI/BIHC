@@ -1,3 +1,8 @@
+# copyright ################################# #
+# This file is part of the BIHC Package.      #
+# Copyright (c) CERN, 2024.                   #
+# ########################################### #
+
 '''
 User defined filling schemes defined as
 a sequence of true/falses. A True indicates

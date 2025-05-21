@@ -1,3 +1,8 @@
+# copyright ################################# #
+# This file is part of the BIHC Package.      #
+# Copyright (c) CERN, 2024.                   #
+# ########################################### #
+
 '''
 Plot module to manage built-in plotting functions
 

@@ -1,3 +1,8 @@
+# copyright ################################# #
+# This file is part of the BIHC Package.      #
+# Copyright (c) CERN, 2024.                   #
+# ########################################### #
+
 '''
 Impedance module to manage impedance object creation from a txt file exported 
 from CST database or thanks to (i) the resisitive wall impedance model (for a 
