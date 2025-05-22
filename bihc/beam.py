@@ -145,6 +145,11 @@ class Beam(Impedance, Power, Plot):
             self.BUCKET_MAX = 21
             RING_CIRCUMFERENCE = 628 #2*pi*100
             GAMMA_R = 27.7366 #28.7185  # p=26GeV
+            
+        elif self._machine == 'FCC-ee':
+            self.BUCKET_MAX = 12120
+            RING_CIRCUMFERENCE = 90658.816 # [m]
+            GAMMA_R = 89236.79 # Energy: 45.6 GeV
 
         elif self._machine== 'PSB': #TODO
             pass
