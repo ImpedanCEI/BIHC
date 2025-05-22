@@ -124,7 +124,7 @@ class Impedance(Plot):
         
         return [self.f, self.Zr+1j*self.Zi]
         
-    def getRWImpedance(self, L ,b, sigma, f=np.linspace(0.1,2e9,int(1e5))):
+    def getRWImpedance(self, L ,b, sigma):
         """Creating the impedance curve from the resistive wall impedance model.
 
         This methods creates an impedance curve using the resistive wall 
