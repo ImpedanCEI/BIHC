@@ -92,7 +92,7 @@ an = an1 * ninj + sc # This is the final true false sequence that is the beam di
 
 
 '''Computing power of every mode'''
-def CalModePower(frequency, par, index:int):
+def calModePower(frequency, par, index:int):
     
     print(f'Mode {index} power is calculating...')
     
@@ -101,12 +101,12 @@ def CalModePower(frequency, par, index:int):
     Z.getResonatorImpedance(Rs=Resonator_par[0], Qr=Resonator_par[1], fr=Resonator_par[2]) # input the resonator parameters from IDDEFIX
     fmax = np.max(Z.f)
     
-    Z_qgauss = bihc.Beam(M=nslots, fillNumber=0, bunchLength=bunch_length, t0=t0, Np=N_density, 
+    beam_qgauss = bihc.Beam(M=nslots, fillNumber=0, bunchLength=bunch_length, t0=t0, Np=N_density, 
                             bunchShape='q-GAUSSIAN', LPCfile=None, qvalue=q_value,
                             fillingScheme=an, machine='LHC', spectrum='numeric', fmax=fmax, verbose=False)
 
     # get power
-    Z_p_scan = Z_qgauss.getShiftedPloss(Z, shift=shift)[1]
+    Z_p_scan = beam_qgauss.getShiftedPloss(Z, shift=shift)[1]
     # Z_p_mini = np.min(Z_p_scan)
     Z_p_maxi = np.max(Z_p_scan)
     # Z_p_aver = np.average(Z_p_scan)
@@ -119,7 +119,7 @@ mode_number = 6
 ModePLoss_Max = np.zeros(mode_number)
 for i in np.arange(mode_number):
     mode_index = i+1
-    ModePLoss_Max[i] = CalModePower(frequency=Z_origin.f, par=pars, index=mode_index)
+    ModePLoss_Max[i] = calModePower(frequency=Z_origin.f, par=pars, index=mode_index)
 
 
 
