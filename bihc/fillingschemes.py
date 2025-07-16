@@ -116,7 +116,7 @@ def fillingSchemeSPS_BCMS(ninj):
 
     return an
 
-def fillingSchemeSPS_8b4e(ninj):
+def fillingSchemeSPS_8b4e(ntrains):
     '''
     Returns the filling scheme for the SPS 
     using the 8b4e pattern
@@ -134,8 +134,8 @@ def fillingSchemeSPS_8b4e(ninj):
     # Defining the trains as lists of True/Falses
     bt = ([True]*8+[False]*4)*6+[True]*8
     st = [False]*batchspacing
-    sc = [False]*(nslots - (nbunches+nempty+batchspacing)*ninj)
-    an = (bt + st)*ninj + sc
+    sc = [False]*(nslots - (nbunches+nempty+batchspacing)*ntrains)
+    an = (bt + st)*ntrains + sc
 
     return an
 
@@ -172,6 +172,31 @@ def fillingSchemeLHC_standard(ninj, nbunches=72, ntrains=4):
     an1 = (bt+st)*ntrains + stt
     an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
 
+    return an
+
+def fillingSchemeLHC_8b4e(ninj, ntrains=5):
+    '''
+    Returns the filling scheme for the SPS 
+    using the 8b4e pattern
+
+    Parameters
+    ----------
+    ninj: number of injections (batches)
+    '''
+    # Define filling scheme: parameters
+    nslots = 3564 # Defining total number of slots for SPS
+    nbunches = 8*7 # Defining number of bunches e.g. 18, 36, 72.. 
+    nempty = 4*6  #Defining number of empty slots between bunches
+    batchS = 8 # Batch spacing in 25 ns slots (200 ns)
+    injspacing = 37 # Injection spacing in 25 ns slots
+
+    # Defining the trains as lists of True/Falses
+    bt = ([True]*8+[False]*4)*6+[True]*8
+    st = [False]*batchS
+    stt = [False]*injspacing
+    sc = [False]*(nslots-(ntrains*nbunches*ninj+((ntrains-1)*(batchS)*ninj)+((1)*injspacing*(ninj))))
+    an1 = (bt+st)*ntrains + stt
+    an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
     return an
 
 # SPS user defined filling scheme: AWAKE single bunch
