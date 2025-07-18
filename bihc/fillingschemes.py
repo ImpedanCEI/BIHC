@@ -72,7 +72,7 @@ def fillingSchemeLHC(ninj, nbunches, ntrains, batchspacing=7, injspacing=37):
 # -------------------------------------
 # Case-specific filling schemes:
 
-def fillingSchemeSPS_standard(ntrains):
+def fillingSchemeSPS_standard(ntrains, nbunches=72, batchspacing=9):
     '''
     Returns standard the filling scheme for the SPS
 
@@ -83,7 +83,7 @@ def fillingSchemeSPS_standard(ntrains):
     # Define filling scheme: parameters
     nslots = 920 # Defining total number of slots for SPS
     nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72.. 
-    batchspacing = 9 # Batch spacing in 25 ns slots 45/5
+    #batchspacing = 9 # Batch spacing in 25 ns slots 45/5
 
     # Defining the trains as lists of True/Falses
     bt = [True]*nbunches
@@ -93,7 +93,7 @@ def fillingSchemeSPS_standard(ntrains):
 
     return an
 
-def fillingSchemeSPS_BCMS(ninj):
+def fillingSchemeSPS_BCMS(ntrains, nbunches=48, batchspacing=8):
     '''
     Returns the filling scheme for the SPS
 
@@ -103,20 +103,19 @@ def fillingSchemeSPS_BCMS(ninj):
     nbunches: default, 48. number of bunches per train
     '''
     # Define filling scheme: parameters
-    ntrain = 1 # SPS has 1 train per cycle
     nslots = 920 # Defining total number of slots for SPS
     nbunches = 48 # Defining a number of bunchs e.g. 18, 36, 72.. 
-    batchspacing = 8 # Batch spacing in 25 ns slots (200 ns)
+    # batchspacing = 8 # Batch spacing in 25 ns slots (200 ns)
 
     # Defining the trains as lists of True/Falses
     bt = [True]*nbunches
     st = [False]*batchspacing
-    sc = [False]*(nslots - (nbunches+batchspacing)*ninj)
-    an = (bt + st)*ninj + sc
+    sc = [False]*(nslots - (nbunches+batchspacing)*ntrains)
+    an = (bt + st)*ntrains + sc
 
     return an
 
-def fillingSchemeSPS_8b4e(ntrains):
+def fillingSchemeSPS_8b4e(ntrains, batchspacing=8):
     '''
     Returns the filling scheme for the SPS 
     using the 8b4e pattern
@@ -129,7 +128,7 @@ def fillingSchemeSPS_8b4e(ntrains):
     nslots = 920 # Defining total number of slots for SPS
     nbunches = 8*7 # Defining number of bunches e.g. 18, 36, 72.. 
     nempty = 4*6  #Defining number of empty slots between bunches
-    batchspacing = 8 # Batch spacing in 25 ns slots (200 ns)
+    #batchspacing = 8 # Batch spacing in 25 ns slots (200 ns)
 
     # Defining the trains as lists of True/Falses
     bt = ([True]*8+[False]*4)*6+[True]*8
@@ -139,7 +138,7 @@ def fillingSchemeSPS_8b4e(ntrains):
 
     return an
 
-def fillingSchemeLHC_standard(ninj, nbunches=72, ntrains=4):
+def fillingSchemeLHC_standard(ninj, nbunches=72, ntrains=4, batchspacing=7, injspacing=37):
     '''
     Returns the filling scheme for the LHC 
     using the standard pattern: 
@@ -161,20 +160,20 @@ def fillingSchemeLHC_standard(ninj, nbunches=72, ntrains=4):
     nslots = 3564 # Defining total number of slots for LHC
     ntrain = ntrains # Defining the number of trains
     nbunches = nbunches # Defining a number of bunchs e.g. 18, 36, 72.. 
-    batchS = 7 # Batch spacing in 25 ns slots
-    injspacing = 37 # Injection spacing in 25 ns slots
+    #batchspacing = 7 # Batch spacing in 25 ns slots
+    #injspacing = 37 # Injection spacing in 25 ns slots
 
     # Defining the trains as lists of True/Falses
     bt = [True]*nbunches
-    st = [False]*batchS
+    st = [False]*batchspacing
     stt = [False]*injspacing
-    sc = [False]*(nslots-(ntrain*nbunches*ninj+((ntrain-1)*(batchS)*ninj)+((1)*injspacing*(ninj))))
+    sc = [False]*(nslots-(ntrain*nbunches*ninj+((ntrain-1)*(batchspacing)*ninj)+((1)*injspacing*(ninj))))
     an1 = (bt+st)*ntrains + stt
     an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
 
     return an
 
-def fillingSchemeLHC_8b4e(ninj, ntrains=5):
+def fillingSchemeLHC_8b4e(ninj, ntrains=1, batchspacing=7, injspacing=37):
     '''
     Returns the filling scheme for the SPS 
     using the 8b4e pattern
@@ -187,14 +186,15 @@ def fillingSchemeLHC_8b4e(ninj, ntrains=5):
     nslots = 3564 # Defining total number of slots for SPS
     nbunches = 8*7 # Defining number of bunches e.g. 18, 36, 72.. 
     nempty = 4*6  #Defining number of empty slots between bunches
-    batchS = 8 # Batch spacing in 25 ns slots (200 ns)
-    injspacing = 37 # Injection spacing in 25 ns slots
+    #batchS = 8 # Batch spacing in 25 ns slots (200 ns)
+    #injspacing = 37 # Injection spacing in 25 ns slots
+    #injspacing = (nslots - ((nbunches+nempty)*ntrains+batchS*(ntrains-1))*ninj)//ninj # Uniformly distributed injection spacing
 
     # Defining the trains as lists of True/Falses
     bt = ([True]*8+[False]*4)*6+[True]*8
-    st = [False]*batchS
+    st = [False]*batchspacing
     stt = [False]*injspacing
-    sc = [False]*(nslots-(ntrains*nbunches*ninj+((ntrains-1)*(batchS)*ninj)+((1)*injspacing*(ninj))))
+    sc = [False]*(nslots-(ntrains*(nbunches+nempty)*ninj+((ntrains-1)*(batchspacing)*ninj)+((1)*injspacing*(ninj))))
     an1 = (bt+st)*ntrains + stt
     an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
     return an
