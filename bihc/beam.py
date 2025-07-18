@@ -668,6 +668,7 @@ class Beam(Impedance, Power, Plot):
 
         self._bunchLength[self._fillingScheme]=self.BUNCH_LENGTH_GLOBAL  #std vector of a single turn in the machine
         self.phi=np.ones(self.M)*self.PHI_GLOBAL
+        self.profile_1_bunch
 
         self._setBunches()
 
@@ -693,7 +694,11 @@ class Beam(Impedance, Power, Plot):
         for j in range(self.M):
             if(self._fillingScheme[j]):
                 self.A[j]=self.A_GLOBAL
-                self._bunchLength[j]=self.BUNCH_LENGTH_GLOBAL
+                if type(self.BUNCH_LENGTH_GLOBAL) == float:
+                    self._bunchLength[j]=self.BUNCH_LENGTH_GLOBAL
+                else:
+                    self._bunchLength[j]=self.BUNCH_LENGTH_GLOBAL[j]
+
                 self.phi[j]=self.PHI_GLOBAL
          
         self._setBunches()
