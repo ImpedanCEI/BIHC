@@ -73,23 +73,8 @@ N_density = 2.3e11
 q_value = 0.6
 shift = 20E6
 
-# Define filling scheme: parameters
-ninj = 10 # Defining number of injections
-nslots = 3564 # Defining total number of slots for LHC
-ntrain = 4 # Defining the number of trains
-nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72.. 
-batchS = 7 # Batch spacing in 25 ns slots
-injspacing = 37 # Injection spacing in 25 ns slots
-t0 = 25e-9 # Slot space [s]
-
-# Defining the trains as lists of True/Falses
-bt = [True]*nbunches
-st = [False]*batchS
-stt = [False]*injspacing
-sc = [False]*(nslots-(ntrain*nbunches*ninj+((ntrain-1)*(batchS)*ninj)+((1)*injspacing*(ninj))))
-an1 = bt+ st +bt+ st+ bt+ st+ bt+ stt
-an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
-
+from bihc.fillingschemes import fillingSchemeLHC_standard
+fillingScheme = fillingSchemeLHC_standard(ninj=10)
 
 '''Computing power of every mode'''
 def calModePower(frequency, par, index:int):
@@ -101,9 +86,10 @@ def calModePower(frequency, par, index:int):
     Z.getResonatorImpedance(Rs=Resonator_par[0], Qr=Resonator_par[1], fr=Resonator_par[2]) # input the resonator parameters from IDDEFIX
     fmax = np.max(Z.f)
     
-    beam_qgauss = bihc.Beam(M=nslots, fillNumber=0, bunchLength=bunch_length, t0=t0, Np=N_density, 
-                            bunchShape='q-GAUSSIAN', LPCfile=None, qvalue=q_value,
-                            fillingScheme=an, machine='LHC', spectrum='numeric', fmax=fmax, verbose=False)
+    beam_qgauss = bihc.Beam(bunchLength=bunch_length, Np=N_density, 
+                            bunchShape='q-GAUSSIAN', qvalue=q_value,
+                            fillingScheme=fillingScheme, machine='LHC', spectrum='numeric', fmax=fmax, 
+                            verbose=False)
 
     # get power
     Z_p_scan = beam_qgauss.getShiftedPloss(Z, shift=shift)[1]
