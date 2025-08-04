@@ -65,8 +65,8 @@ print(f'Parabolic integral: {np.sum(s_par)*dt} ')
 
 #   Importing an impedance curve (Resonator)
 # ----------------------------------------------
-Z = bihc.Impedance()
-Z.getResonatorImpedance(Rs=7e3, Qr=1e2, fr=1.75e9, f=b_gauss.spectrum[0])
+Z = bihc.Impedance(f=b_gauss.spectrum[0])
+Z.getResonatorImpedance(Rs=7e3, Qr=1e2, fr=1.75e9)
 
 # ---------  Plotting in frequency -------------
 # Storing spectra 
@@ -118,8 +118,8 @@ plt.show()
 
 # Importing an impedance curve (Resistive wall)
 # ----------------------------------------------
-Z = bihc.Impedance()
-Z.getRWImpedance(L=1.0, b=15e-3, sigma=5.7e7, f=f_gauss) 
+Z = bihc.Impedance(f=f_gauss)
+Z.getRWImpedance(L=1.0, b=15e-3, sigma=5.7e7) 
 
 # ---------  Plotting in frequency -------------
 fig, axs = plt.subplots(5,1, figsize=(8,10), dpi=100)
