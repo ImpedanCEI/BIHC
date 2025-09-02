@@ -388,7 +388,7 @@ class Beam(Impedance, Power, Plot):
                 
                 self.filledSlots+=1 #TODO: how to match the bunch length
                 if(self._bunchShape=='BINOMIAL'):
-                    H=(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*4) #Binomial function (Francesco)
+                    H=0.5*(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*4) #Binomial function (Francesco) * 0.5 (matching BlonD)
                     #H=(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*2*np.sqrt(2*np.log(2)))
                     sTemp=(1 - 4*((tTemp - self.phi[i])/(H))**2) #Binomial function (Francesco)
 
@@ -668,8 +668,6 @@ class Beam(Impedance, Power, Plot):
 
         self._bunchLength[self._fillingScheme]=self.BUNCH_LENGTH_GLOBAL  #std vector of a single turn in the machine
         self.phi=np.ones(self.M)*self.PHI_GLOBAL
-        self.profile_1_bunch
-
         self._setBunches()
 
     def setCustomBeamWithFillingScheme(self):

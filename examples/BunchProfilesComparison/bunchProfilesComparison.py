@@ -30,7 +30,7 @@ verbose = False 				# Enable terminal verbosy output
 
 b_gauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='GAUSSIAN', ppbk=ppbk, verbose=verbose)
 b_qgauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='q-GAUSSIAN', qvalue=1.2, ppbk=ppbk, verbose=verbose)
-b_bin = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='BINOMIAL', exp=2.5, ppbk=ppbk, verbose=verbose)
+b_bin = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='BINOMIAL', exp=1, ppbk=ppbk, verbose=verbose)
 b_cos = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='COS2', ppbk=ppbk, verbose=verbose)
 b_par = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='PARABOLIC', ppbk=ppbk, verbose=verbose)
 
