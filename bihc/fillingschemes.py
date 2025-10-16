@@ -64,9 +64,12 @@ def fillingSchemeLHC(ninj, nbunches, ntrains, batchspacing=7, injspacing=37):
     st = [False]*batchS
     stt = [False]*injspacing
     sc = [False]*(nslots-(ntrains*nbunches*ninj+((ntrains-1)*(batchS)*ninj)+((1)*injspacing*(ninj))))
-    an1 = (bt+st)*ntrains + stt
+    an1 = (bt+st)*(ntrains-1) + bt + stt
     an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
 
+    if len(an) > nslots:
+        raise Exception(f'Filling scheme length: {len(an)} > available machine slots: {nslots}')
+    
     return an
 
 # -------------------------------------
@@ -168,9 +171,12 @@ def fillingSchemeLHC_standard(ninj, nbunches=72, ntrains=4, batchspacing=7, injs
     st = [False]*batchspacing
     stt = [False]*injspacing
     sc = [False]*(nslots-(ntrain*nbunches*ninj+((ntrain-1)*(batchspacing)*ninj)+((1)*injspacing*(ninj))))
-    an1 = (bt+st)*ntrains + stt
+    an1 = (bt+st)*(ntrains-1) + bt + stt
     an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
 
+    if len(an) > nslots:
+        raise Exception(f'Filling scheme length: {len(an)} > available machine slots: {nslots}')
+    
     return an
 
 def fillingSchemeLHC_8b4e(ninj, ntrains=1, batchspacing=7, injspacing=37):
@@ -195,8 +201,12 @@ def fillingSchemeLHC_8b4e(ninj, ntrains=1, batchspacing=7, injspacing=37):
     st = [False]*batchspacing
     stt = [False]*injspacing
     sc = [False]*(nslots-(ntrains*(nbunches+nempty)*ninj+((ntrains-1)*(batchspacing)*ninj)+((1)*injspacing*(ninj))))
-    an1 = (bt+st)*ntrains + stt
+    an1 = (bt+st)*(ntrains-1) + bt + stt
     an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
+
+    if len(an) > nslots:
+        raise Exception(f'Filling scheme length: {len(an)} > available machine slots: {nslots}')
+
     return an
 
 # SPS user defined filling scheme: AWAKE single bunch
