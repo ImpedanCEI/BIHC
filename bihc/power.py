@@ -17,7 +17,7 @@ frequency.
 
 import numpy as np
 from tqdm import tqdm
-
+from scipy.constants import e
 class Power():
     '''Power Mixin class
 
@@ -37,7 +37,6 @@ class Power():
             by the user
         '''
 
-        e=1.621e-19
         t=self.longitudinalProfile[0]
         f0=1/(t[-1]-t[0])
         [f,S]=self.spectrum
@@ -208,7 +207,6 @@ class Power():
         else: 
             raise Exception('Specify s (distance from IP) or tau_s (phase shift of the two beams)')
 
-        e = 1.621e-19
         t = self.longitudinalProfile[0]
         f0 = 1/(t[-1]-t[0])
         [f,S] = self.spectrum
