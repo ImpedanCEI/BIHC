@@ -25,6 +25,8 @@ import math
 from bihc.impedance import Impedance
 from bihc.power import Power
 from bihc.plot import Plot
+from scipy.constants import e
+from scipy.special import gamma
 
 class Beam(Impedance, Power, Plot):
     '''Defining the beam characteristics.
@@ -388,15 +390,21 @@ class Beam(Impedance, Power, Plot):
                 
                 self.filledSlots+=1 #TODO: how to match the bunch length
                 if(self._bunchShape=='BINOMIAL'):
-                    H=0.5*(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*4) #Binomial function (Francesco) * 0.5 (matching BlonD)
-                    #H=(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*2*np.sqrt(2*np.log(2)))
-                    sTemp=(1 - 4*((tTemp - self.phi[i])/(H))**2) #Binomial function (Francesco)
+                    lambda_0=(2*gamma(1.5+self.exp))/((self._bunchLength[i] \
+                            *(2*np.sqrt(3+2*self.exp)))*np.sqrt(np.pi)*gamma(1+self.exp)) #normalization factor
+                    sTemp=lambda_0*(1 - 4*((tTemp - self.phi[i])/(self._bunchLength[i] \
+                            *(2*np.sqrt(3+2*self.exp))))**2)**(self.exp) #Binomial definition from RF-BR
+                    
+                    # For legacy:
+                    # H=0.5*(np.sqrt(2*np.log(2)))*(self._bunchLength[i]*4) #Binomial function (Francesco) * 0.5 (matching BlonD)
+                    # H=(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*2*np.sqrt(2*np.log(2)))
+                    # sTemp=(1 - 4*((tTemp - self.phi[i])/(H))**2) #Binomial function (Francesco)
+                    # sTemp=2*(sTemp**self.exp)/H
 
                     #set to zero the part of each bunch that is outside the l range arount his mean
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(sTemp>0)
                     sTemp=sTemp*mask2*mask
-                    sTemp=2*(sTemp**self.exp)/H
                     sTemp=sTemp/(sum(sTemp)*deltaD)
                     profile_1_bunch = [tTemp, sTemp]
 
@@ -416,7 +424,13 @@ class Beam(Impedance, Power, Plot):
                     profile_1_bunch = [tTemp, sTemp]
 
                 elif(self._bunchShape=='PARABOLIC'):
-                    sTemp=(1-(1/(4*0.744653*self._bunchLength[i]**2))*(tTemp- self.phi[i])**2)  #Parabolic function 
+                    # For legacy:
+                    #sTemp=(1-(1/(4*0.744653*self._bunchLength[i]**2))*(tTemp- self.phi[i])**2)  #Parabolic function 
+                    self.exp=1
+                    lambda_0=(2*gamma(1.5+self.exp))/((self._bunchLength[i] \
+                                                       *(2*np.sqrt(3+2*self.exp)))*np.sqrt(np.pi)*gamma(1+self.exp)) #normalization factor
+                    sTemp=lambda_0*(1 - 4*((tTemp - self.phi[i])/(self._bunchLength[i] \
+                                                                  *(2*np.sqrt(3+2*self.exp))))**2)**(self.exp) # Parabolic definition, same as Binomial with exp=1
                     mask=(np.abs(tTemp - self.phi[i]))<self.l
                     mask2=(sTemp>0)       
                     sTemp=sTemp*mask*mask2
@@ -482,7 +496,7 @@ class Beam(Impedance, Power, Plot):
         tn=t
         t=np.linspace(np.min(tn),np.max(tn),len(s))
         
-        self.totalBeamCharge=self.Np*1.602176e-19*self.filledSlots
+        self.totalBeamCharge=self.Np*e*self.filledSlots
         if self.Np_arr is not None: #weigth the longitudinal profile amplitudes
             for i, Npi in enumerate(self.Np_arr):
                 s[i*self.ppbk:(i+1)*self.ppbk] = s[i*self.ppbk:(i+1)*self.ppbk]*Npi/self.Np
