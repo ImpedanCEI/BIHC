@@ -29,7 +29,7 @@ ppbk = 250 					# number of samples per slot
 verbose = False 				# Enable terminal verbosy output 
 
 b_gauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='GAUSSIAN', ppbk=ppbk, verbose=verbose)
-b_qgauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='q-GAUSSIAN', qvalue=1.2, ppbk=ppbk, verbose=verbose)
+b_qgauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='q-GAUSSIAN', qvalue=0, ppbk=ppbk, verbose=verbose)
 b_bin = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='BINOMIAL', exp=1, ppbk=ppbk, verbose=verbose)
 b_cos = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='COS2', ppbk=ppbk, verbose=verbose)
 b_par = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='PARABOLIC', ppbk=ppbk, verbose=verbose)
@@ -45,12 +45,12 @@ b_par = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='PARABOLIC', p
 
 fig, ax = plt.subplots(1, figsize=(8,6), dpi=150)
 ax.plot(t_gauss, s_gauss, 'b', lw=3, label='gaussian')
-ax.plot(t_qgauss, s_qgauss, 'g', lw=3, label='q-gaussian')
+ax.plot(t_qgauss, s_qgauss, 'g', lw=3, label=f'q-gaussian, q={b_qgauss.q}')
 ax.plot(t_cos, s_cos, c='m', lw=3, label='cosine')
-ax.plot(t_bin, s_bin,c='orange', lw=3, label='binomial')
+ax.plot(t_bin, s_bin,c='orange', lw=3, label=f'binomial exp={b_bin.exp}')
 ax.plot(t_par, s_par, c='red', lw=3, label='parabolic')
 ax.legend()
-fig.suptitle('Bunch shape comparison in time for 1 bunch slot')
+fig.suptitle('Bunch shape comparison in time for 1 bunch slot \n for same bunch length and filling scheme', fontweight='bold')
 fig.tight_layout()
 plt.show()
 
