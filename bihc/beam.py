@@ -393,8 +393,11 @@ class Beam(Impedance, Power, Plot):
                     lambda_0=(2*gamma(1.5+self.exp))/((self._bunchLength[i] \
                             *(2*np.sqrt(3+2*self.exp)))*np.sqrt(np.pi)*gamma(1+self.exp)) #normalization factor
                     sTemp=lambda_0*(1 - 4*((tTemp - self.phi[i])/(self._bunchLength[i] \
-                            *(2*np.sqrt(3+2*self.exp))))**2)**(self.exp) #Binomial definition from RF-BR
-                    
+                            *(2*np.sqrt(3+2*self.exp))))**2) #Binomial definition from RF-BR
+                    # enforce lambda(|tau| > tau_L/2) = 0
+                    sTemp = np.maximum(sTemp, 0.0)
+                    sTemp = sTemp**self.exp
+
                     # For legacy:
                     # H=0.5*(np.sqrt(2*np.log(2)))*(self._bunchLength[i]*4) #Binomial function (Francesco) * 0.5 (matching BlonD)
                     # H=(np.sqrt(2/np.log(2)))*(self._bunchLength[i]*2*np.sqrt(2*np.log(2)))
