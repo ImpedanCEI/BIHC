@@ -25,14 +25,16 @@ bl = 1.2e-9                 # bunch length [s]
 Np = 2.3e11                 # bunch intensity [protons/bunch]
 fillMode = 'FLATTOP'        # Energy
 fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
-ppbk = 250 					# number of samples per slot
+ppbk = 250*4 					# number of samples per slot
 verbose = False 				# Enable terminal verbosy output 
 
 b_gauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='GAUSSIAN', ppbk=ppbk, verbose=verbose)
-b_qgauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='q-GAUSSIAN', qvalue=0, ppbk=ppbk, verbose=verbose)
-b_bin = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='BINOMIAL', exp=1, ppbk=ppbk, verbose=verbose)
+b_qgauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='q-GAUSSIAN', qvalue=0.7, ppbk=ppbk, verbose=verbose)
+b_bin = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='BINOMIAL', exp=1.2, ppbk=ppbk, verbose=verbose)
 b_cos = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='COS2', ppbk=ppbk, verbose=verbose)
 b_par = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='PARABOLIC', ppbk=ppbk, verbose=verbose)
+#b_cos = bihc.Beam(Np=Np, bunchLength=bl*0.854, LPCfile=file, bunchShape='COS2', ppbk=ppbk, verbose=verbose)
+#b_par = bihc.Beam(Np=Np, bunchLength=bl*0.744653, LPCfile=file, bunchShape='PARABOLIC', ppbk=ppbk, verbose=verbose)
 
 #  ------- Plotting in time ------------
 
