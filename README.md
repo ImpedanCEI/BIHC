@@ -1,6 +1,7 @@
 # BIHC
 
-[![Documentation Status](https://readthedocs.org/projects/bihc/badge/?version=latest)](https://bihc.readthedocs.io/en/latest/?badge=latest) [![PyPI version](https://badge.fury.io/py/bihc.svg)](https://badge.fury.io/py/bihc)
+[![Documentation Status](https://readthedocs.org/projects/bihc/badge/?version=latest)](https://bihc.readthedocs.io/en/latest/?badge=latest) ![PyPI - Version](https://img.shields.io/pypi/v/bihc?color=green)
+[![nightly_tests_CPU_py3.14](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml)
 
 Beam Induced Heating Computation (BIHC) tool is a package that allows the estimation of the dissipated power due to the passage of a particle beam inside an accelerator component.
 
@@ -113,4 +114,10 @@ ldb.search('LHC%BEAM_ENERGY%')
 ldb.get(ldb.search('LHC%BEAM_ENERGY%')[0], t1='2022-06-15 15:10:30.0000')
 ```
 
+---
+### Nightly test badges
+[![nightly_tests_CPU_py3.11](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.11.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.11.yml)
+[![nightly_tests_CPU_py3.12](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.12.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.12.yml)
+[![nightly_tests_CPU_py3.13](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.13.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.13.yml)
+[![nightly_tests_CPU_py3.14](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml)
 
