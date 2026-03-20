@@ -32,9 +32,7 @@ def test_beam_custom_scheme_sets_profiles_and_charge():
     )
 
     assert beam.filledSlots == 3
-    assert beam.totalBeamCharge == pytest.approx(
-        beam.filledSlots * beam.Np * qe
-    )
+    assert beam.totalBeamCharge == pytest.approx(beam.filledSlots * beam.Np * qe)
 
     t, profile = beam.longitudinalProfile
     assert t.shape == profile.shape

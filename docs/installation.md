@@ -18,7 +18,7 @@ git clone git@github.com:ImpedanCEI/BIHC.git
 git clone https://github.com/ImpedanCEI/BIHC.git
 ```
 
-#### Users: pip install 
+#### Users: pip install
 ```
 pip install bihc
 ```
@@ -35,10 +35,10 @@ In your /user or /work directory, do:
 # If miniconda is not installed
 # Get, install and activate miniconda
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh 
+bash Miniconda3-latest-Linux-x86_64.sh
 source miniconda3/bin/activate
 
-# Get standard packages 
+# Get standard packages
 # (to have all spark functionalities pandas needs to be installed before pytimber)
 pip install numpy scipy matplotlib ipython pandas
 
@@ -51,11 +51,11 @@ pip install pytimber datascout
 # Change python package index back to default
 pip uninstall acc-py-pip-config
 ```
-Test the installation with 
+Test the installation with
 ```
 $ ipython
 import pytimber
-ldb = pytimber.LoggingDB(source="nxcals") 
+ldb = pytimber.LoggingDB(source="nxcals")
 ldb.search('LHC%BEAM_ENERGY%')
 ldb.get(ldb.search('LHC%BEAM_ENERGY%')[0], t1='2022-06-15 15:10:30.0000')
 ```
@@ -82,7 +82,7 @@ Select the project folder to open:
 * If you keep your project on your personal CERNBox (not shares), you can access it on the `CERNBox` and modify it without needing to clone it.
 
 ### Install `BIHC` and other needed packages
-Packages can be installed directly from a notebook cell by using `!` as first character. The notebook will interprete it as a terminal (bash) command. 
+Packages can be installed directly from a notebook cell by using `!` as first character. The notebook will interprete it as a terminal (bash) command.
 ```python
 !pip install bihc
 ```
@@ -93,5 +93,3 @@ Another option is to open a terminal:
 ![swan open terminal button](img/SWAN_terminal.png)
 
 This will give you access to the linux terminal of your kernel environment. There one can simple write `pip install bihc` to install the package and also access the files and python from the terminal.
-
-

@@ -14,9 +14,7 @@ from bihc.beam import Beam
 from bihc.impedance import Impedance
 
 
-def _beam_with_custom_spectrum(
-    freqs, amps, time_span, filled_slots=1, np_bunch=1e11
-):
+def _beam_with_custom_spectrum(freqs, amps, time_span, filled_slots=1, np_bunch=1e11):
     beam = Beam(
         M=1,
         fillingScheme=[True],
@@ -31,9 +29,7 @@ def _beam_with_custom_spectrum(
         np.array([0.0, time_span], dtype=float),
         np.zeros(2, dtype=float),
     ]
-    beam.setSpectrum(
-        [np.array(freqs, dtype=float), np.array(amps, dtype=float)]
-    )
+    beam.setSpectrum([np.array(freqs, dtype=float), np.array(amps, dtype=float)])
     beam.filledSlots = filled_slots
     beam.Np = np_bunch
     return beam
@@ -50,9 +46,7 @@ def _impedance_from(freqs, real=None):
 
 @pytest.fixture
 def noop_tqdm(monkeypatch):
-    monkeypatch.setattr(
-        power_module, "tqdm", lambda iterable, *_, **__: iterable
-    )
+    monkeypatch.setattr(power_module, "tqdm", lambda iterable, *_, **__: iterable)
 
 
 def test_resonator_impedance_real_part_at_resonance():
@@ -127,9 +121,7 @@ def test_shifted_power_spectrum_returns_density_grid(noop_tqdm):
     )
 
     Z = _impedance_from(freqs, real=np.linspace(0.5, 2.5, len(freqs)))
-    shifts, power_spectrum = beam.getShiftedPowerSpectrum(
-        Z, shift=freqs[1] - freqs[0]
-    )
+    shifts, power_spectrum = beam.getShiftedPowerSpectrum(Z, shift=freqs[1] - freqs[0])
 
     assert power_spectrum.shape == (len(shifts), len(freqs))
     assert np.all(power_spectrum >= 0)

@@ -1,10 +1,10 @@
 # User's Manual
 
-This section offers a description of the example suite available in BIHC package. This section asumes that the user has followed the Installation guide and has installed BIHC succesfully. 
+This section offers a description of the example suite available in BIHC package. This section asumes that the user has followed the Installation guide and has installed BIHC succesfully.
 
 ## User defined beam filling scheme
 
-This example shows the definition of a filling  scheme as a list of True or Falses values. It is then used along some parameters of the bunches 
+This example shows the definition of a filling  scheme as a list of True or Falses values. It is then used along some parameters of the bunches
 (Number of protons and slot space) to define a Beam object. Using some built in methods, the time distribution and beam spectrum are plotted. The manual plotting is also included below.
 Finally, the power loss is calculated for a simple Pillbox impedance computed with `CST Studio`[^1].
 
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 ninj = 10 # Defining number of injections
 nslots = 3564 # Defining total number of slots for LHC
 ntrain = 4 # Defining the number of trains
-nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72.. 
+nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72..
 
 batchS = 7 # Batch spacing in 25 ns slots
 injspacing = 37 # Injection spacing in 25 ns slots
@@ -79,13 +79,13 @@ print(f'Custom beam power loss: {custom_beam.getPloss(Z)[0]} W')
 
 ## Timber filling scheme
 This example shows how to compute the dissipated power
-for a specific LHC fill Number. 
+for a specific LHC fill Number.
 
 The filling scheme and the bunch parameters are obtained from a fill number through Timber database python interface `pytimber`.
 The impedance curve used is from a generic Pillbox cavity simulated with CST studio and then exported in `.txt` format.
 
 :::{admonition} Note
-This example uses data from the CERN Timber database and requires access to NxCALS. 
+This example uses data from the CERN Timber database and requires access to NxCALS.
 See the [Installation guide](installation.md) for how to setup `pytimber` to acces the Timber database from CERN Lxplus. Pytimber is also available from CERN SWAN python notebooks using the `102b NXCALS PRO` configuration.
 :::
 
@@ -114,7 +114,7 @@ print(f'Beam 6675 power loss: {b_6675.getPloss(Z)[0]} W')
 
 This example shows how to read filling schemes generated
 by the LPC tool, in `.csv` format. It plots the comparison of three different
-filling shcemes and computes the power loss for each of them, displaying it in the plot. 
+filling shcemes and computes the power loss for each of them, displaying it in the plot.
 
 :::{tip}
 The LPC file is generated with the online `LPC tool` available in this [link](https://lpc.web.cern.ch/schemeEditor.html).
@@ -127,7 +127,7 @@ import bihc
 # LPC csv file names
 # downloaded from LPC: https://lpc.web.cern.ch/cgi-bin/fillingSchemeTab.py
 file1 = '25ns_2748b_2736_2258_2374_288bpi_12inj.csv'
-file2 = '25ns_2374b_2361_1730_1773_236bpi_13inj_hybrid_2INDIV.csv' 
+file2 = '25ns_2374b_2361_1730_1773_236bpi_13inj_hybrid_2INDIV.csv'
 file3 = '8b4e_1972b_1967_1178_1886_224bpi_12inj.csv'
 
 #------- Ploss calculation ----------
@@ -135,7 +135,7 @@ file3 = '8b4e_1972b_1967_1178_1886_224bpi_12inj.csv'
 # Create beam object
 bl = 1.2e-9         # bunch length [s]
 Np = 2.3e11         # bunch intensity [protons/bunch]
-bunchShape = 'GAUSSIAN'     # bunch profile shape in time 
+bunchShape = 'GAUSSIAN'     # bunch profile shape in time
 fillMode = 'FLATTOP'        # Energy
 fmax = 2e-9                 # Maximum frequency of the beam spectrum [Hz]
 
@@ -184,7 +184,7 @@ def fillingSchemeSPS_standard(ntrains):
     # Define filling scheme: parameters
     ntrain = 1 # SPS has 1 train per cycle
     nslots = 924 # Defining total number of slots for SPS
-    nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72.. 
+    nbunches = 72 # Defining a number of bunchs e.g. 18, 36, 72..
     batchspacing = 9 # Batch spacing in 25 ns slots 45/5
 
     # Defining the trains as lists of True/Falses
@@ -202,13 +202,13 @@ def fillingSchemeSPS_standard(ntrains):
 fillingScheme = fillingSchemeSPS_standard(ntrains=4)
 bl = 1.2e-9                 # bunch length [s]
 Np = 2.3e11                 # bunch intensity [protons/bunch]
-bunchShape = 'q-GAUSSIAN'     # bunch profile shape in time 
+bunchShape = 'q-GAUSSIAN'     # bunch profile shape in time
 qvalue = 1.2                # value of q parameter in the q-gaussian distribution
 fillMode = 'FLATTOP'        # Energy
 fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
 
 beam = bihc.Beam(Np=Np, bunchLength=bl, fillingScheme=fillingScheme,
-                bunchShape=bunchShape, qvalue=qvalue, 
+                bunchShape=bunchShape, qvalue=qvalue,
                 machine='SPS', fillMode=fillMode, spectrum='numeric', fmax=fmax)
 [f,S] = beam.spectrum
 
@@ -217,8 +217,8 @@ impedance_file = 'PillboxImpedance.txt'
 Z = bihc.Impedance(f)
 Z.getImpedanceFromCST(impedance_file)
 
-# Get unshifted ploss 
-ploss, ploss_density = beam.getPloss(Z) 
+# Get unshifted ploss
+ploss, ploss_density = beam.getPloss(Z)
 
 #---------------- Rigid Shift power loss ------------------------------
 shift = 40e6  # distance between shift steps [Hz]
@@ -252,11 +252,11 @@ file = '25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
 # Create beam object
 bl = 1.2e-9                 # bunch length [s]
 Np = 2.3e11                 # bunch intensity [protons/bunch]
-bunchShape = 'GAUSSIAN'     # bunch profile shape in time 
+bunchShape = 'GAUSSIAN'     # bunch profile shape in time
 fillMode = 'FLATTOP'        # Energy
 fmax = 2e9                 # Maximum frequency of the beam spectrum [Hz]
 
-beam = bihc.Beam(LPCfile=file, Np=Np, bunchLength=bl, bunchShape=bunchShape, 
+beam = bihc.Beam(LPCfile=file, Np=Np, bunchLength=bl, bunchShape=bunchShape,
                 machine='LHC', fillMode=fillMode, spectrum='numeric', fmax=fmax)
 [f,S] = beam.spectrum
 
@@ -265,8 +265,8 @@ impedance_file = 'PillboxImpedance.txt'
 Z = bihc.Impedance(f)
 Z.getImpedanceFromCST(impedance_file)
 
-# Get unshifted ploss 
-ploss, ploss_density = beam.getPloss(Z) 
+# Get unshifted ploss
+ploss, ploss_density = beam.getPloss(Z)
 
 #---------------- Rigid Shift power loss ------------------------------
 shift = 20e6  # distance between shift steps [Hz]
@@ -281,20 +281,20 @@ print(f'Average dissipated power: P_mean = {np.mean(power)}')
 
 This example compares different bunch profile shapes using a same filling scheme given by an `LPC Tool`generated `.csv` file and two differnt analytic impedances: a narrowband resonator, and a broadband resistive wall.
 
-The example shows the impact of the different bunch shapes in the beam spectrum, and shows the difference in power loss computation, for all the different bunch profiles available in `bihc`. 
+The example shows the impact of the different bunch shapes in the beam spectrum, and shows the difference in power loss computation, for all the different bunch profiles available in `bihc`.
 
-:::{tip} 
+:::{tip}
 All bunch shapes are defined to have an area along the time slot of 1 bunch equal to 1.0.
 :::
 
-The first part of the example shows how to initialize the beam for each bunch shape. Notice how for the `bunchShape='q-GAUSSIAN'` the user needs to provide the q value  `qvalue=1.2` that shapes the tails of the distribution. In a similar way, for the `bunchShape='BINOMIAL'`, the user must provide the binomial exponent `exp=2.5`. 
+The first part of the example shows how to initialize the beam for each bunch shape. Notice how for the `bunchShape='q-GAUSSIAN'` the user needs to provide the q value  `qvalue=1.2` that shapes the tails of the distribution. In a similar way, for the `bunchShape='BINOMIAL'`, the user must provide the binomial exponent `exp=2.5`.
 
 ```python
 import matplotlib.pyplot as plt
 import numpy as np
 import bihc
 
-#LPC beam filling scheme 
+#LPC beam filling scheme
 file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
 
 # Create beam object
@@ -303,7 +303,7 @@ Np = 2.3e11                 # bunch intensity [protons/bunch]
 fillMode = 'FLATTOP'        # Energy
 fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
 ppbk = 250 					# number of samples per slot
-verbose = False 				# Enable terminal verbosy output 
+verbose = False 				# Enable terminal verbosy output
 
 b_gauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='GAUSSIAN', ppbk=ppbk, verbose=verbose)
 b_qgauss = bihc.Beam(Np=Np, bunchLength=bl, LPCfile=file, bunchShape='q-GAUSSIAN', qvalue=1.2, ppbk=ppbk, verbose=verbose)
@@ -351,7 +351,7 @@ Z = bihc.Impedance()
 Z.getResonatorImpedance(Rs=7e3, Qr=1e2, fr=1.75e9, f=b_gauss.spectrum[0])
 
 # ---------  Plotting in frequency -------------
-# Storing spectra 
+# Storing spectra
 [f_gauss, S_gauss] = b_gauss.spectrum
 [f_qgauss, S_qgauss] = b_qgauss.spectrum
 [f_bin, S_bin] = b_bin.spectrum
@@ -399,13 +399,13 @@ fig.tight_layout()
 plt.show()
 ```
 
-A second comparison is done using a resistive wall impedance (broadband). The impact of the bunch shape is less notorious in this case. 
+A second comparison is done using a resistive wall impedance (broadband). The impact of the bunch shape is less notorious in this case.
 
 ```python
 # Importing an impedance curve (Resistive wall)
 # ----------------------------------------------
 Z = bihc.Impedance()
-Z.getRWImpedance(L=1.0, b=15e-3, sigma=5.7e7, f=f_gauss) 
+Z.getRWImpedance(L=1.0, b=15e-3, sigma=5.7e7, f=f_gauss)
 
 # ---------  Plotting in frequency -------------
 fig, axs = plt.subplots(5,1, figsize=(8,10), dpi=100)
@@ -453,12 +453,12 @@ plt.show()
 
 ## Analytical vs Numeric spectrum computation
 
-This example compares the dissipated power difference obtained between 
+This example compares the dissipated power difference obtained between
 using a numeric spactrum calculation or the analytic formula by C.Zannini
-using a same filling scheme given by an `LPC Tool` generated `.csv` file and 
+using a same filling scheme given by an `LPC Tool` generated `.csv` file and
 the same impedance curve from a simple Pillbox resonator computed with `CST Studio`.
 
-It plots the impact of the spectrum type chosen: `numeric` or `analytic` in the 
+It plots the impact of the spectrum type chosen: `numeric` or `analytic` in the
 beam spectrum and computes the difference in power loss.
 
 ```python
@@ -467,12 +467,12 @@ import numpy as np
 import bihc
 
 
-# Beam data with different bunch profile shapes from LPC beam filling scheme 
+# Beam data with different bunch profile shapes from LPC beam filling scheme
 file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
-profiles = ['GAUSSIAN'] 
+profiles = ['GAUSSIAN']
 power={}
 
-# Plotting 
+# Plotting
 fig, axs = plt.subplots(len(profiles),1)
 
 for i, prof in enumerate(profiles):
@@ -480,7 +480,7 @@ for i, prof in enumerate(profiles):
     beam_numeric = bihc.Beam(LPCfile=file, bunchShape=prof, verbose=False, spectrum='numeric')
     beam_analytic  = bihc.Beam(LPCfile=file, bunchShape=prof, verbose=False, spectrum='analytic')
 
-    # Storing spectra 
+    # Storing spectra
     [fn, Sn] = beam_numeric.spectrum
     [fa, Sa] = beam_analytic.spectrum
 

@@ -82,9 +82,7 @@ def test_plot_impedance_draws_curves(show_spy):
     assert len(show_spy) == 1
 
 
-def test_plot_spectrum_and_impedance_handles_interpolation(
-    plot_harness, show_spy
-):
+def test_plot_spectrum_and_impedance_handles_interpolation(plot_harness, show_spy):
     freqs = np.linspace(0.0, 5e9, 6)
     Z = Impedance(f=freqs)
     Z.Zr = np.linspace(0.2, 1.2, 6)
@@ -95,9 +93,7 @@ def test_plot_spectrum_and_impedance_handles_interpolation(
 
 def test_save_longitudinal_distribution_writes_file(plot_harness, tmp_path):
     target = tmp_path / "profile.txt"
-    plot_harness.saveLongitudinalDistribution(
-        target, phase_shift=5, normalise=True
-    )
+    plot_harness.saveLongitudinalDistribution(target, phase_shift=5, normalise=True)
     data = np.loadtxt(target, skiprows=1)
     assert data.shape[1] == 2
     # Normalisation ensures the maximum is 1
@@ -106,7 +102,5 @@ def test_save_longitudinal_distribution_writes_file(plot_harness, tmp_path):
 
 def test_plot2beam_handles_shift(plot_harness, show_spy):
     partner = PlotHarness()
-    Plot.plot2Beam(
-        plot_harness, partner, shift=plot_harness.longitudinalProfile[0][1]
-    )
+    Plot.plot2Beam(plot_harness, partner, shift=plot_harness.longitudinalProfile[0][1])
     assert len(show_spy) == 1
