@@ -37,4 +37,3 @@ jobs:
     - name: Run pytest
       run:  |
         python -m pytest --cov=bihc --cov-report=term-missing -vv
-

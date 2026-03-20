@@ -8,14 +8,14 @@ Beam Induced Heating Computation package is structured in the following modules:
 
    bihc
 
-Beam module 
+Beam module
 ------------
 
 .. autoclass:: bihc.beam.Beam
    :members:
    :undoc-members:
    :show-inheritance:
-	
+
 Impedance module
 -----------------
 
@@ -37,5 +37,3 @@ Built-in plotting module
 .. autoclass:: bihc.plot.Plot
    :members:
    :undoc-members:
-
-

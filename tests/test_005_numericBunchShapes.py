@@ -14,15 +14,12 @@ import bihc
 
 _EXAMPLES = Path(__file__).resolve().parents[1] / "examples"
 CSV_FILE = (
-    _EXAMPLES
-    / "BunchProfilesComparison"
-    / "25ns_2760b_2748_2494_2572_288bpi_13inj.csv"
+    _EXAMPLES / "BunchProfilesComparison" / "25ns_2760b_2748_2494_2572_288bpi_13inj.csv"
 )
 IMPEDANCE_FILE = _EXAMPLES / "MinMaxDissipatedPower" / "PillboxImpedance.txt"
 
 
 def test_numeric_gaussian():
-
     prof = "GAUSSIAN"
     beam = bihc.Beam(
         LPCfile=str(CSV_FILE),
