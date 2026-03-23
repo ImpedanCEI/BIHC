@@ -1,5 +1,6 @@
 # BIHC
 
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Documentation Status](https://readthedocs.org/projects/bihc/badge/?version=latest)](https://bihc.readthedocs.io/en/latest/?badge=latest) ![PyPI - Version](https://img.shields.io/pypi/v/bihc?color=green)
 [![nightly_tests_CPU_py3.14](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml)
 
@@ -20,7 +21,7 @@ For specific needs, please contact the maintainers :woman_technologist: :man_tec
 There is a [paper about `bihc`](10.18429/JACoW-HB2023-THBP52), presented at 8th ICFA Advanced Beam Dynamics Workshop on High-Intensity and High-Brightness Hadron Beam (0ct. 2023).
 If you are using `bihc` in your scientific research, please help our scientific
 visibility by citing our work:
-> [1] E. de la Fuente, L. Sito, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” JACoW, vol. HB2023, pp. 611–614, 2024, doi: [https://doi.10.18429/JACoW-HB2023-THBP52](https://jacow.org/hb2023/papers/thbp52.pdf). 
+> [1] E. de la Fuente, L. Sito, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” JACoW, vol. HB2023, pp. 611–614, 2024, doi: [https://doi.10.18429/JACoW-HB2023-THBP52](https://jacow.org/hb2023/papers/thbp52.pdf).
 
 Bibtex:
 ```
@@ -34,28 +35,28 @@ Bibtex:
     year = "2024"
 }
 ```
-:mag_right: About `bihc` python package 
+:mag_right: About `bihc` python package
 ---
 
-`bihc` is a computational package that integrates over a decade of experience in beam-induced heating calculations from the Impedance and Coherent Effects Section (see [^1], [^3], [^4], [^5], [^6], [^7]) into a comprehensive and flexible Python-based tool. 
+`bihc` is a computational package that integrates over a decade of experience in beam-induced heating calculations from the Impedance and Coherent Effects Section (see [^1], [^3], [^4], [^5], [^6], [^7]) into a comprehensive and flexible Python-based tool.
 
 The package has been presented at the 68th ICFA Advanced Beam Dynamics Workshop on High-Intensity and High-Brightness Hadron Beam (0ct. 2023)[^8], and is under continuous development to face the beam-induce heating challenges that become more relevant as the beam total intensity and bunch length is pushed.
 
 `bihc` has been succesfully employed to assess the mitigation strategy for the CERN-SPS Beam Wire Scanners after the wire failure in 2023, and was extensively used to study the CERN-LHC Warm Vacuum modules limitations in intensity and bunch length for the 2024 run.
 
-[^1]: B. Salvant et al., “Beam induced heating”, 2012, [Online]. Available: https://cds.cern.ch/record/1975499 
+[^1]: B. Salvant et al., “Beam induced heating”, 2012, [Online]. Available: https://cds.cern.ch/record/1975499
 
-[^3]: C. Zannini, et al. "Power Loss Calculation in Separated and Common Beam Chambers of the LHC". Proceedings of the 5th Int. Particle Accelerator Conf., vol. IPAC2014, 2014, p. 3 pages, 1.928 MB. DOI.org (Datacite), https://doi.org/10.18429/JACOW-IPAC2014-TUPRI061. 
+[^3]: C. Zannini, et al. "Power Loss Calculation in Separated and Common Beam Chambers of the LHC". Proceedings of the 5th Int. Particle Accelerator Conf., vol. IPAC2014, 2014, p. 3 pages, 1.928 MB. DOI.org (Datacite), https://doi.org/10.18429/JACOW-IPAC2014-TUPRI061.
 
-[^4]: C. Zannini, "Electromagnetic Simulation of CERN accelerator Components and Experimental Applications", 2013. [Online]. Available: https://cds.cern.ch/record/1561199 
+[^4]: C. Zannini, "Electromagnetic Simulation of CERN accelerator Components and Experimental Applications", 2013. [Online]. Available: https://cds.cern.ch/record/1561199
 
-[^5]: C. Zannini, “Multiphysics Simulations of Impedance Effects in Accelerators,” CERN Yellow Rep. Conf. Proc., vol. 1, pp. 141–144, 2018, doi: 10.23732/CYRCP-2018-001.141. 
+[^5]: C. Zannini, “Multiphysics Simulations of Impedance Effects in Accelerators,” CERN Yellow Rep. Conf. Proc., vol. 1, pp. 141–144, 2018, doi: 10.23732/CYRCP-2018-001.141.
 
 [^6]: G. Rumolo, “Beam Instabilities”, 21 pages contribution to the CAS - CERN Accelerator School: Advanced Accelerator Physics Course, Trondheim, Norway, 2014, doi: 10.5170/CERN-2014-009.199. Available; https://cds.cern.ch/record/1982422
 
 [^7]: F. Giordano, ‘Simulation Analysis and Machine Learning Based Detection of Beam-Induced Heating in Particle Accelerator at CERN’, University of Naples Federico II, 2020.
 
-[^8]: L. Sito, E. de la Fuente, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” in Proc. 68th Adv. Beam Dyn. Workshop High-Intensity High-Brightness Hadron Beams (HB’23), Geneva, Switzerland, Apr. 2024, no. 68, pp. 611–614. doi: 10.18429/JACoW-HB2023-THBP52. 
+[^8]: L. Sito, E. de la Fuente, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” in Proc. 68th Adv. Beam Dyn. Workshop High-Intensity High-Brightness Hadron Beams (HB’23), Geneva, Switzerland, Apr. 2024, no. 68, pp. 611–614. doi: 10.18429/JACoW-HB2023-THBP52.
 
 ## :zap: Installation
 This section explains how to set up the environment to start using BIHC package for power loss computations.
@@ -72,7 +73,7 @@ git clone git@github.com:ImpedanCEI/BIHC.git
 git clone https://github.com/ImpedanCEI/BIHC.git
 ```
 
-#### Users: pip install 
+#### Users: pip install
 ```
 pip install bihc
 ```
@@ -89,10 +90,10 @@ In your /user or /work directory, do:
 # If miniconda is not installed
 # Get, install and activate miniconda
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh 
+bash Miniconda3-latest-Linux-x86_64.sh
 source miniconda3/bin/activate
 
-# Get standard packages 
+# Get standard packages
 # (to have all spark functionalities pandas needs to be installed before pytimber)
 pip install numpy scipy matplotlib ipython pandas
 
@@ -105,11 +106,11 @@ pip install pytimber
 # Change python package index back to default
 pip uninstall acc-py-pip-config
 ```
-Test the installation with 
+Test the installation with
 ```
 $ ipython
 import pytimber
-ldb = pytimber.LoggingDB(source="nxcals") 
+ldb = pytimber.LoggingDB(source="nxcals")
 ldb.search('LHC%BEAM_ENERGY%')
 ldb.get(ldb.search('LHC%BEAM_ENERGY%')[0], t1='2022-06-15 15:10:30.0000')
 ```
@@ -120,4 +121,3 @@ ldb.get(ldb.search('LHC%BEAM_ENERGY%')[0], t1='2022-06-15 15:10:30.0000')
 [![nightly_tests_CPU_py3.12](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.12.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.12.yml)
 [![nightly_tests_CPU_py3.13](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.13.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.13.yml)
 [![nightly_tests_CPU_py3.14](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml)
-

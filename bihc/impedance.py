@@ -52,10 +52,7 @@ class Impedance(Plot):
         Imaginary part of the impedance in the speciefied frequency points [Ohm].
     """
 
-    def __init__(
-        self, f=np.linspace(0.1, 2e9, int(1e5)), Z=None, CST_file=None
-    ):
-
+    def __init__(self, f=np.linspace(0.1, 2e9, int(1e5)), Z=None, CST_file=None):
         self.f = f
         self.Zr = np.zeros(len(f))
         self.Zi = np.zeros(len(f))
@@ -64,9 +61,7 @@ class Impedance(Plot):
             self.Zr = np.real(Z)
             self.Zi = np.imag(Z)
             if len(self.f) != len(self.Zr):
-                print(
-                    "[!] frequency array and impedance data have different lengths"
-                )
+                print("[!] frequency array and impedance data have different lengths")
 
         self.isResonatorImpedance = False
         self.isRWImpedance = False
@@ -174,9 +169,7 @@ class Impedance(Plot):
 
         return [self.f, self.Zr + 1j * self.Zi]
 
-    def getImpedanceFromCST(
-        self, path, unit="GHz", skip_header=2, skip_footer=0
-    ):
+    def getImpedanceFromCST(self, path, unit="GHz", skip_header=2, skip_footer=0):
         """Creating the impedance curve from CST file.
 
         This methods creates an impedance curve using a txt file, usually
@@ -199,9 +192,7 @@ class Impedance(Plot):
             Impedance curve. Returns the list of numpy arrays [frequency,
             complex impedance].
         """
-        data = np.genfromtxt(
-            path, skip_header=skip_header, skip_footer=skip_footer
-        )
+        data = np.genfromtxt(path, skip_header=skip_header, skip_footer=skip_footer)
 
         if unit == "GHz":
             self.f = data[:, 0] * 1e9
@@ -212,9 +203,7 @@ class Impedance(Plot):
         try:
             self.Zi = data[:, 2]
         except Exception:
-            print(
-                "[!] No imaginary part found in the CST file. Setting it to zero."
-            )
+            print("[!] No imaginary part found in the CST file. Setting it to zero.")
             self.Zi = np.zeros_like(self.Zr)
 
         self.Z = self.Zr + 1j * self.Zi

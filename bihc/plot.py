@@ -63,9 +63,7 @@ rcParams = {
 matplotlib.rcParams.update(rcParams)
 
 
-def progressbar(
-    it, prefix="", size=60, out=sys.stdout, count=None
-):  # Python3.6+
+def progressbar(it, prefix="", size=60, out=sys.stdout, count=None):  # Python3.6+
     if count is None:
         count = len(it)
 
@@ -89,7 +87,6 @@ def progressbar(
 
 class Plot:
     def plotLongitudinalProfile(self, tmin=-1, tmax=-1):
-
         [t, s] = self.longitudinalProfile
 
         if tmin == -1:
@@ -113,7 +110,6 @@ class Plot:
         plt.show()
 
     def plotPowerSpectrum(self, fmin=0, fmax=2, save=True, transparent=True):
-
         [f, S] = self.spectrum
 
         plt.figure()
@@ -186,7 +182,6 @@ class Plot:
         return f, S, timeStamps[-1]
 
     def plotImpedance(self, fMin=0, fMax=2e9):
-
         plt.figure()
         plt.plot(self.f / 1e9, self.Zr, label="Re[Z]")
         plt.plot(self.f / 1e9, self.Zi, color="r", label="Im[Z]", alpha=0.7)
@@ -202,10 +197,7 @@ class Plot:
         plt.legend()
         plt.show()
 
-    def plotSpectrumAndImpedance(
-        self, Z
-    ):  # TODO: not normalize but have 2 y axis
-
+    def plotSpectrumAndImpedance(self, Z):  # TODO: not normalize but have 2 y axis
         [f, S] = self.spectrum
         Zreal = Z.Zr
         Zf = Z.f
@@ -257,7 +249,6 @@ class Plot:
         plt.show()
 
     def plotCollide(beam1, beam2):
-
         [t1, s1] = beam1.longitudinalProfile
         [t2, s2] = beam2.longitudinalProfile
         s2 = s2[::-1]
@@ -274,9 +265,7 @@ class Plot:
 
             plt.figure()
             plt.plot(t1[mask] * 1e6, s1[mask], label="beam1", color="b")
-            plt.plot(
-                t2[mask] * 1e6, s2[mask], label="beam2", color="r", alpha=0.7
-            )
+            plt.plot(t2[mask] * 1e6, s2[mask], label="beam2", color="r", alpha=0.7)
             # plt.plot(t2[mask]*1e6,(s2+s1)[mask],label='beam1+beam2',color='g',alpha=0.7)
             plt.grid(True, color="gray", linestyle=":")
             plt.ylim(
@@ -290,7 +279,6 @@ class Plot:
             plt.show()
 
     def plot2Beam(beam1, beam2, shift=0):
-
         [t1, s1] = beam1.longitudinalProfile
         [t2, s2] = beam2.longitudinalProfile
         deltaT = t1[1] - t1[0]
@@ -316,7 +304,6 @@ class Plot:
     def saveLongitudinalDistribution(
         self, path, phase_shift=0, normalise=False, plot=False
     ):
-
         # phase_shift is intendet to be in ns
         [t, s] = self.longitudinalProfile
         phase_shift = phase_shift * 1e-9

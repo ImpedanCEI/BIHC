@@ -62,9 +62,7 @@ def test_sps_scheme_preserves_train_structure():
 
     first_train = scheme[:nbunches]
     gap = scheme[nbunches : nbunches + batchspacing]
-    second_train = scheme[
-        nbunches + batchspacing : 2 * nbunches + batchspacing
-    ]
+    second_train = scheme[nbunches + batchspacing : 2 * nbunches + batchspacing]
 
     assert first_train == [True] * nbunches
     assert gap == [False] * batchspacing

@@ -116,7 +116,6 @@ class Beam(Impedance, Power, Plot):
         exp=2.5,
         verbose=False,
     ):
-
         self.M = M  # Default max numebr of buckets
         self.A_GLOBAL = A
         self.BUNCH_LENGTH_GLOBAL = bunchLength / 4  # Bunch lenght (sigma) [s]
@@ -130,7 +129,9 @@ class Beam(Impedance, Power, Plot):
         self.exp = exp
         self.J = 1
         self.fillMode = fillMode
-        self._fillNumber = fillNumber  # Fill number relative to a particular fill of the machine
+        self._fillNumber = (
+            fillNumber  # Fill number relative to a particular fill of the machine
+        )
 
         self._isSpectrumReady = False
         self.isATimberFill = False
@@ -292,9 +293,7 @@ class Beam(Impedance, Power, Plot):
                 "! When using spectrum == 'user', set the spectrum data via:\n \
                    >>> beam.setSpectrum(newSpectrum)\n"
             )
-            return (
-                self._spectrum
-            )  # spectrum must be provided through the setter
+            return self._spectrum  # spectrum must be provided through the setter
 
         else:
             if self._spectrumtype == "numeric":
@@ -342,26 +341,19 @@ class Beam(Impedance, Power, Plot):
                     )
 
                 elif self._bunchShape == "GAUSSIAN":
-                    for p in progressbar(
-                        range(len(S)), "Computing analytic FFT: ", 20
-                    ):
+                    for p in progressbar(range(len(S)), "Computing analytic FFT: ", 20):
                         lambdas[p] = np.exp(
-                            -(p * p * wrev * wrev * sigma * sigma)
-                            / (2 * c * c)
+                            -(p * p * wrev * wrev * sigma * sigma) / (2 * c * c)
                         )
                         S[p] = np.abs(
-                            A
-                            * lambdas[p]
-                            * np.sum(an * np.exp(1j * p * wrev * n * t0))
+                            A * lambdas[p] * np.sum(an * np.exp(1j * p * wrev * n * t0))
                         )
 
                 elif self._bunchShape == "COS2":
                     for p in progressbar(
                         range(1, len(S)), "Computing analytic FFT: ", 20
                     ):  # TODO fix
-                        Fc = (
-                            (F**2) * (sigmacos**2) * ((p * wrev) ** 2) / (c**2)
-                        )
+                        Fc = (F**2) * (sigmacos**2) * ((p * wrev) ** 2) / (c**2)
                         lambdas[p] = (
                             -1.14
                             * np.sqrt(2 * np.pi)
@@ -369,14 +361,11 @@ class Beam(Impedance, Power, Plot):
                             / (sigmacos * p * wrev / c * (-2 + Fc))
                             * (np.sqrt(2 / np.pi))
                             * np.sin(
-                                (np.pi * sigmacos * p * wrev * F)
-                                / (np.sqrt(2) * c)
+                                (np.pi * sigmacos * p * wrev * F) / (np.sqrt(2) * c)
                             )
                         )
                         S[p] = np.abs(
-                            A
-                            * lambdas[p]
-                            * np.sum(an * np.exp(1j * p * wrev * n * t0))
+                            A * lambdas[p] * np.sum(an * np.exp(1j * p * wrev * n * t0))
                         )
 
                 elif self._bunchShape == "PARABOLIC":
@@ -389,17 +378,11 @@ class Beam(Impedance, Power, Plot):
                         lambdas[p] = (
                             -3
                             * c**3
-                            / (
-                                (np.sqrt(5) ** 3)
-                                * (sigmapar**3)
-                                * (p * wrev) ** 3
-                            )
+                            / ((np.sqrt(5) ** 3) * (sigmapar**3) * (p * wrev) ** 3)
                             * CosSin
                         )
                         S[p] = np.abs(
-                            A
-                            * lambdas[p]
-                            * np.sum(an * np.exp(1j * p * wrev * n * t0))
+                            A * lambdas[p] * np.sum(an * np.exp(1j * p * wrev * n * t0))
                         )
 
                 f = (
@@ -475,10 +458,7 @@ class Beam(Impedance, Power, Plot):
                 self.filledSlots += 1  # TODO: how to match the bunch length
                 if self._bunchShape == "BINOMIAL":
                     lambda_0 = (2 * gamma(1.5 + self.exp)) / (
-                        (
-                            self._bunchLength[i]
-                            * (2 * np.sqrt(3 + 2 * self.exp))
-                        )
+                        (self._bunchLength[i] * (2 * np.sqrt(3 + 2 * self.exp)))
                         * np.sqrt(np.pi)
                         * gamma(1 + self.exp)
                     )  # normalization factor
@@ -487,10 +467,7 @@ class Beam(Impedance, Power, Plot):
                         - 4
                         * (
                             (tTemp - self.phi[i])
-                            / (
-                                self._bunchLength[i]
-                                * (2 * np.sqrt(3 + 2 * self.exp))
-                            )
+                            / (self._bunchLength[i] * (2 * np.sqrt(3 + 2 * self.exp)))
                         )
                         ** 2
                     )  # Binomial definition from RF-BR
@@ -529,10 +506,7 @@ class Beam(Impedance, Power, Plot):
                 elif self._bunchShape == "COS2":
                     tc = self._bunchLength[i] * 2.77  # 4*0.854
                     sTemp = (
-                        1
-                        / tc
-                        * (np.cos(np.pi * (tTemp - self.phi[i]) / (2 * tc)))
-                        ** 2
+                        1 / tc * (np.cos(np.pi * (tTemp - self.phi[i]) / (2 * tc))) ** 2
                     )  # cos^2 function
                     mask = (np.abs(tTemp - self.phi[i])) < self.l
                     mask2 = abs(tTemp) < tc
@@ -544,10 +518,7 @@ class Beam(Impedance, Power, Plot):
                     # sTemp=(1-(1/(4*0.744653*self._bunchLength[i]**2))*(tTemp- self.phi[i])**2)  #Parabolic function
                     self.exp = 1
                     lambda_0 = (2 * gamma(1.5 + self.exp)) / (
-                        (
-                            self._bunchLength[i]
-                            * (2 * np.sqrt(3 + 2 * self.exp))
-                        )
+                        (self._bunchLength[i] * (2 * np.sqrt(3 + 2 * self.exp)))
                         * np.sqrt(np.pi)
                         * gamma(1 + self.exp)
                     )  # normalization factor
@@ -556,15 +527,10 @@ class Beam(Impedance, Power, Plot):
                         - 4
                         * (
                             (tTemp - self.phi[i])
-                            / (
-                                self._bunchLength[i]
-                                * (2 * np.sqrt(3 + 2 * self.exp))
-                            )
+                            / (self._bunchLength[i] * (2 * np.sqrt(3 + 2 * self.exp)))
                         )
                         ** 2
-                    ) ** (
-                        self.exp
-                    )  # Parabolic definition, same as Binomial with exp=1
+                    ) ** (self.exp)  # Parabolic definition, same as Binomial with exp=1
                     mask = (np.abs(tTemp - self.phi[i])) < self.l
                     mask2 = sTemp > 0
                     sTemp = sTemp * mask * mask2
@@ -586,8 +552,7 @@ class Beam(Impedance, Power, Plot):
                             return np.sqrt(np.pi)
                         elif q >= 1.005827 and q < 3.0:
                             return (
-                                np.sqrt(np.pi)
-                                * Gamma((3.0 - q) / 2.0 / (q - 1.0))
+                                np.sqrt(np.pi) * Gamma((3.0 - q) / 2.0 / (q - 1.0))
                             ) / (np.sqrt(q - 1.0) * Gamma(1.0 / (q - 1.0)))
                         else:
                             raise Exception("q>3.0")
@@ -607,9 +572,7 @@ class Beam(Impedance, Power, Plot):
                     q = self.q  # [TODO] pass 1 q-val per bunch
                     b = 1 / ((self._bunchLength[i] ** 2) * (5 - 3 * q))
                     mu = self.phi[i]
-                    sTemp = (
-                        np.sqrt(b) / _Cq(q) * _eq(-b * (tTemp - mu) ** 2, q)
-                    )
+                    sTemp = np.sqrt(b) / _Cq(q) * _eq(-b * (tTemp - mu) ** 2, q)
 
                     mask = (np.abs(tTemp - self.phi[i])) < self.l
                     mask2 = sTemp > 0
@@ -640,9 +603,7 @@ class Beam(Impedance, Power, Plot):
         t = np.linspace(np.min(tn), np.max(tn), len(s))
 
         self.totalBeamCharge = self.Np * e * self.filledSlots
-        if (
-            self.Np_arr is not None
-        ):  # weigth the longitudinal profile amplitudes
+        if self.Np_arr is not None:  # weigth the longitudinal profile amplitudes
             for i, Npi in enumerate(self.Np_arr):
                 s[i * self.ppbk : (i + 1) * self.ppbk] = (
                     s[i * self.ppbk : (i + 1) * self.ppbk] * Npi / self.Np
@@ -668,9 +629,7 @@ class Beam(Impedance, Power, Plot):
         self.profile_1_bunch = profile_1_bunch
         self.longitudinalProfile = [t, s]
 
-    def setBeamFromFillNumber(
-        self, fillNumber, fillMode="FLATTOP", beamNumber=1
-    ):
+    def setBeamFromFillNumber(self, fillNumber, fillMode="FLATTOP", beamNumber=1):
         """Set beam from fill number
 
         Retrieves beam fill information from Timber provided a fill Number
@@ -776,15 +735,9 @@ class Beam(Impedance, Power, Plot):
 
         self._bunchLength = self._bunchLength[0 : self.M]
         if self.verbose:
-            print(
-                f"Avg. bunch length off all bunches: {np.mean(self._bunchLength)}"
-            )
-            print(
-                f"Max. bunch length off all bunches: {np.max(self._bunchLength)}"
-            )
-            print(
-                f"Min. bunch length off all bunches: {np.min(self._bunchLength)}"
-            )
+            print(f"Avg. bunch length off all bunches: {np.mean(self._bunchLength)}")
+            print(f"Max. bunch length off all bunches: {np.max(self._bunchLength)}")
+            print(f"Min. bunch length off all bunches: {np.min(self._bunchLength)}")
 
         self.phi = self.phi[0 : self.M]
         self.setNpFromFillNumber()
@@ -850,9 +803,9 @@ class Beam(Impedance, Power, Plot):
 
                     if start_line:
                         try:
-                            self._fillingScheme[
-                                int((int(row[0]) - 1) / 10)
-                            ] = True  # we take beam one
+                            self._fillingScheme[int((int(row[0]) - 1) / 10)] = (
+                                True  # we take beam one
+                            )
                         except Exception:
                             break
 
@@ -877,16 +830,12 @@ class Beam(Impedance, Power, Plot):
             )
         elif len(self._fillingScheme) < self.M:
             padding = [False] * (self.M - len(self._fillingScheme))
-            self._fillingScheme = np.concatenate(
-                (self._fillingScheme, padding), axis=0
-            )
+            self._fillingScheme = np.concatenate((self._fillingScheme, padding), axis=0)
 
         self._bunchLength = np.zeros(
             self.M
         )  # std vector of a single turn in the machine
-        self.A = np.zeros(
-            self.M
-        )  # amplitude vector of a single turn in the machine
+        self.A = np.zeros(self.M)  # amplitude vector of a single turn in the machine
         self.phi = np.zeros(self.M)
         for j in range(self.M):
             if self._fillingScheme[j]:
