@@ -296,6 +296,7 @@ class Impedance(Plot):
         import matplotlib
         import matplotlib.pyplot as plt
 
+        self.freqregions = np.array([])
         backend = matplotlib.get_backend().lower()
         is_inline = "inline" in backend
         is_widget = "ipympl" in backend or "nbagg" in backend
@@ -327,8 +328,7 @@ class Impedance(Plot):
             if response:
                 vals = response.replace(",", " ").split()
                 self.freqregions = np.array([float(v) for v in vals]) * 1e9
-            else:
-                self.freqregions = np.array([])
+
             plt.close(fig)
             print(f"Selected frequency regions: {self.freqregions} Hz")
             return self.freqregions
@@ -336,7 +336,7 @@ class Impedance(Plot):
         # ---------------------------------------------------- notebook widget
         if is_widget:
             ax.set_title(
-                "Left click --> pick | Right click --> undo | Click Done when finished",
+                "Left click to pick | Right click to undo | Click Done when finished",
                 color="red",
             )
             picked = []
@@ -345,12 +345,12 @@ class Impedance(Plot):
             def on_click(event):
                 if event.inaxes != ax or event.xdata is None:
                     return
-                if event.button == 1:  # left click \u2192 add
+                if event.button == 1:  # left click → add
                     picked.append(event.xdata)
                     vl = ax.axvline(event.xdata, color="r", linestyle="--", alpha=0.7)
                     vline_artists.append(vl)
                     fig.canvas.draw_idle()
-                elif event.button == 3:  # right click \u2192 undo last
+                elif event.button == 3:  # right click → undo last
                     if picked:
                         picked.pop()
                         vline_artists.pop().remove()
@@ -362,40 +362,73 @@ class Impedance(Plot):
                 import ipywidgets as widgets
                 from IPython.display import display as ipy_display
 
+                status_label = widgets.Label(value="Selected: none")
                 done_btn = widgets.Button(
                     description="Done", button_style="success", icon="check"
                 )
+                out = widgets.Output()
+
+                def _update_status():
+                    if picked:
+                        entries = ", ".join(f"{p:.4f} GHz" for p in picked)
+                        status_label.value = f"Selected: {entries}"
+                    else:
+                        status_label.value = "Selected: none"
+
+                # Patch on_click to update the live label after each pick/undo
+                _orig_on_click = on_click
+
+                def on_click(event):  # noqa: F811
+                    _orig_on_click(event)
+                    _update_status()
+
+                fig.canvas.mpl_connect("button_press_event", on_click)
 
                 def on_done(b):
                     self.freqregions = np.array(picked) * 1e9
-                    print(f"Selected frequency regions: {self.freqregions} Hz")
+                    done_btn.disabled = True
+                    status_label.value = (
+                        f"Done — {len(self.freqregions)} region(s) stored in "
+                        "self.freqregions"
+                    )
+                    with out:
+                        print(
+                            f"Selected frequency regions: "
+                            f"{self.freqregions * 1e-9} GHz"
+                        )
                     plt.close(fig)
-                    done_btn.close()
 
                 done_btn.on_click(on_done)
                 plt.show()
-                ipy_display(done_btn)
+                ipy_display(widgets.VBox([status_label, done_btn, out]))
+                print(
+                    "Click on the plot to pick frequencies. "
+                    "Access self.freqregions after clicking Done."
+                )
             except ImportError:
                 plt.show()
                 print(
-                    "Pick frequencies by clicking on the plot. "
+                    "Click on the plot to pick frequencies. "
                     "Close the figure when done — "
                     "results will be stored in self.freqregions."
                 )
 
                 def on_close(event):
                     self.freqregions = np.array(picked) * 1e9
-                    print(f"Selected frequency regions: {self.freqregions} Hz")
+                    print(
+                        f"Selected frequency regions: "
+                        f"{self.freqregions * 1e-9} GHz"
+                    )
 
                 fig.canvas.mpl_connect("close_event", on_close)
 
-            # Return immediately; self.freqregions is populated when Done is clicked
+            # Kernel returns immediately; self.freqregions is populated on Done
             self.freqregions = np.array([])
             return self.freqregions
 
         # ------------------------------------------------------- desktop / .py
         ax.set_title(
-            "Spacebar --> pick | Delete --> unpick | Enter --> Finish",
+            "Spacebar to pick | Delete to unpick | Enter to finish",
             color="red",
         )
         points = plt.ginput(
