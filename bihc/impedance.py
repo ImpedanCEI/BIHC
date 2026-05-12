@@ -258,20 +258,47 @@ class Impedance(Plot):
         return obj
 
     def getFrequencyRegions(self, vlines=None, figsize=[12, 6], dpi=200):
-        """Interactively select points
-        of the impedance curve. The list of
-        points will be returned and saved in
-        `self.freqregions`. How to use:
-        - place cursor + Spacebar --> pick
-        - Delete --> unpick
-        - Enter --> End picking
+        """Interactively select frequency points of the impedance curve.
+
+        The picked frequencies are stored in ``self.freqregions`` and returned.
+        Behaviour depends on the active Matplotlib backend:
+
+        * **Interactive / script** (e.g. ``Qt5Agg``, ``TkAgg``):
+          Spacebar --> pick | Delete --> unpick | Enter --> Finish
+
+        * **Jupyter notebook with** ``%matplotlib widget`` **(ipympl)**:
+          Left click --> pick | Right click --> undo last pick.
+          A *Done* button is displayed below the figure; click it to finish.
+
+          .. note::
+             The function returns immediately with an empty array.
+             Results are stored in ``self.freqregions`` when *Done* is pressed.
+
+        * **Jupyter notebook with** ``%matplotlib inline``:
+          A static plot is shown and you are prompted to type the frequencies
+          (in GHz) as a space- or comma-separated list.
+
+        Parameters
+        ----------
+        vlines : numpy.ndarray, optional
+            Frequencies [Hz] at which to draw dashed reference lines.
+        figsize : list, default [12, 6]
+            Figure size ``[width, height]`` in inches.
+        dpi : int, default 200
+            Figure resolution.
 
         Returns
         -------
-        freqregions: list
-            np.array of frequencies of picked points [Hz]
+        freqregions : numpy.ndarray
+            Selected frequencies [Hz].  In ``%matplotlib widget`` mode the
+            array is empty on return and is populated once *Done* is clicked.
         """
+        import matplotlib
         import matplotlib.pyplot as plt
+
+        backend = matplotlib.get_backend().lower()
+        is_inline = "inline" in backend
+        is_widget = "ipympl" in backend or "nbagg" in backend
 
         fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
         ax.plot(self.f * 1e-9, self.Zr, color="k")
@@ -288,17 +315,94 @@ class Impedance(Plot):
 
         ax.set_ylabel(r"Impedance [$\Omega$]")
         ax.set_xlabel("Frequency [GHz]")
+        fig.tight_layout()
+
+        # ---------------------------------------------------------------- inline
+        if is_inline:
+            ax.set_title("Static view — enter frequencies below", color="red")
+            plt.show()
+            response = input(
+                "Enter frequencies in GHz separated by spaces or commas: "
+            ).strip()
+            if response:
+                vals = response.replace(",", " ").split()
+                self.freqregions = np.array([float(v) for v in vals]) * 1e9
+            else:
+                self.freqregions = np.array([])
+            plt.close(fig)
+            print(f"Selected frequency regions: {self.freqregions} Hz")
+            return self.freqregions
+
+        # ---------------------------------------------------- notebook widget
+        if is_widget:
+            ax.set_title(
+                "Left click --> pick | Right click --> undo | Click Done when finished",
+                color="red",
+            )
+            picked = []
+            vline_artists = []
+
+            def on_click(event):
+                if event.inaxes != ax or event.xdata is None:
+                    return
+                if event.button == 1:  # left click \u2192 add
+                    picked.append(event.xdata)
+                    vl = ax.axvline(event.xdata, color="r", linestyle="--", alpha=0.7)
+                    vline_artists.append(vl)
+                    fig.canvas.draw_idle()
+                elif event.button == 3:  # right click \u2192 undo last
+                    if picked:
+                        picked.pop()
+                        vline_artists.pop().remove()
+                        fig.canvas.draw_idle()
+
+            fig.canvas.mpl_connect("button_press_event", on_click)
+
+            try:
+                import ipywidgets as widgets
+                from IPython.display import display as ipy_display
+
+                done_btn = widgets.Button(
+                    description="Done", button_style="success", icon="check"
+                )
+
+                def on_done(b):
+                    self.freqregions = np.array(picked) * 1e9
+                    print(f"Selected frequency regions: {self.freqregions} Hz")
+                    plt.close(fig)
+                    done_btn.close()
+
+                done_btn.on_click(on_done)
+                plt.show()
+                ipy_display(done_btn)
+            except ImportError:
+                plt.show()
+                print(
+                    "Pick frequencies by clicking on the plot. "
+                    "Close the figure when done — "
+                    "results will be stored in self.freqregions."
+                )
+
+                def on_close(event):
+                    self.freqregions = np.array(picked) * 1e9
+                    print(f"Selected frequency regions: {self.freqregions} Hz")
+
+                fig.canvas.mpl_connect("close_event", on_close)
+
+            # Return immediately; self.freqregions is populated when Done is clicked
+            self.freqregions = np.array([])
+            return self.freqregions
+
+        # ------------------------------------------------------- desktop / .py
         ax.set_title(
             "Spacebar --> pick | Delete --> unpick | Enter --> Finish",
             color="red",
         )
-        fig.tight_layout()
-
-        # get frequencies
         points = plt.ginput(
             n=0, timeout=0, mouse_add=None, mouse_pop=None, mouse_stop=None
         )
-        self.freqregions = np.array(points)[:, 0] * 1e9
-        plt.close()
-
+        points = np.asarray(points, dtype=float)
+        self.freqregions = points[:, 0] * 1e9 if points.size else np.array([])
+        plt.close(fig)
+        print(f"Selected frequency regions: {self.freqregions} Hz")
         return self.freqregions
