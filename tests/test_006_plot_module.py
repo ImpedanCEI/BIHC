@@ -104,3 +104,63 @@ def test_plot2beam_handles_shift(plot_harness, show_spy):
     partner = PlotHarness()
     Plot.plot2Beam(plot_harness, partner, shift=plot_harness.longitudinalProfile[0][1])
     assert len(show_spy) == 1
+
+
+def test_get_frequency_regions_inline_backend_uses_text_input(monkeypatch):
+    freqs = np.linspace(0.0, 1e9, 5)
+    Z = Impedance(f=freqs)
+    Z.Zr = np.linspace(0.0, 1.0, 5)
+
+    monkeypatch.setattr(
+        "matplotlib.get_backend",
+        lambda: "module://matplotlib_inline.backend_inline",
+    )
+    monkeypatch.setattr("builtins.input", lambda prompt="": "0.1, 0.25 0.5")
+
+    freqregions = Z.getFrequencyRegions()
+
+    assert np.allclose(freqregions, np.array([0.1, 0.25, 0.5]) * 1e9)
+
+
+def test_get_frequency_regions_inline_backend_empty_input(monkeypatch):
+    freqs = np.linspace(0.0, 1e9, 5)
+    Z = Impedance(f=freqs)
+    Z.Zr = np.linspace(0.0, 1.0, 5)
+
+    monkeypatch.setattr(
+        "matplotlib.get_backend",
+        lambda: "module://matplotlib_inline.backend_inline",
+    )
+    monkeypatch.setattr("builtins.input", lambda prompt="": "")
+
+    freqregions = Z.getFrequencyRegions()
+
+    assert freqregions.size == 0
+
+
+def test_get_frequency_regions_widget_backend_returns_empty_immediately(monkeypatch):
+    """In widget mode the function must return immediately with an empty array;
+    self.freqregions is populated only after the Done button is clicked."""
+    freqs = np.linspace(0.0, 1e9, 5)
+    Z = Impedance(f=freqs)
+    Z.Zr = np.linspace(0.0, 1.0, 5)
+
+    monkeypatch.setattr(
+        "matplotlib.get_backend",
+        lambda: "module://ipympl.backend_nbagg",
+    )
+    # Simulate ipywidgets not installed so we take the simpler fallback path
+    import builtins
+    real_import = builtins.__import__
+
+    def _no_ipywidgets(name, *args, **kwargs):
+        if name == "ipywidgets":
+            raise ImportError("mocked")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", _no_ipywidgets)
+
+    result = Z.getFrequencyRegions()
+
+    assert result.size == 0
+    assert hasattr(Z, "freqregions")
