@@ -61,7 +61,7 @@ ldb.get(ldb.search('LHC%BEAM_ENERGY%')[0], t1='2022-06-15 15:10:30.0000')
 ```
 
 ## Guide to use BIHC on SWAN
-> Guide to perform `bihc` calculations on CERN's SWAN notebook platform: https://swan-k8s.cern.ch
+> Guide to perform `bihc` calculations on CERN's SWAN notebook platform: https://swan.cern.ch
 
 ![swan logo](img/SWAN_0.png)
 
@@ -71,7 +71,7 @@ The recommended setup is 4 cores 16 Gb to speed up calculations. Remember to che
 ![swan environment configuration](img/SWAN_env.png)
 
 #### :warning: Accessing accelerator data from Timber
-If one needs to access data from Timber, the correct Software stack would be `105a NXCALS PRO` that comes with `pytimber` pre-installed and has the SPARK environment mounted.
+If one needs to access data from Timber, the correct Software stack would be `106a NXCALS PRO` that comes with `pytimber` pre-installed and has the SPARK environment mounted.
 
 ### Open the project
 Select the project folder to open:
@@ -93,3 +93,7 @@ Another option is to open a terminal:
 ![swan open terminal button](img/SWAN_terminal.png)
 
 This will give you access to the linux terminal of your kernel environment. There one can simple write `pip install bihc` to install the package and also access the files and python from the terminal.
+
+### Connect to a spark session
+As of pytimber v4.x.x.x, one needs to create a `spark` session. After opening the notebook, click on the star at the top (3rd symbol from the right) to configure and connect to a spark session (see also [here](https://confluence.cern.ch/pages/viewpage.action?pageId=413119283&spaceKey=PYT&title=New%2BPyTimber%2B4.x.x.x%2Binstallation)).
+This will create the `spark` variable (note that it may take some time).

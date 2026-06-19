@@ -20,6 +20,7 @@ provided a beam shape and bunch length.
 
 import math
 import sys
+import time
 
 import numpy as np
 from scipy.constants import c, e
@@ -115,10 +116,11 @@ class Beam(Impedance, Power, Plot):
         fmax=2e9,
         exp=2.5,
         verbose=False,
+        spark=None,
     ):
         self.M = M  # Default max numebr of buckets
         self.A_GLOBAL = A
-        self.BUNCH_LENGTH_GLOBAL = bunchLength / 4  # Bunch lenght (sigma) [s]
+        self.BUNCH_LENGTH_GLOBAL = bunchLength / 4  # Bunch length (sigma) [s]
 
         self.PHI_GLOBAL = phi
         self.realMachineLength = realMachineLength
@@ -212,7 +214,7 @@ class Beam(Impedance, Power, Plot):
         # Computes the beam longitudinal profile
         if fillNumber > 0:
             # if user specifies a fill number, data is extracted from timber
-            self.setBeamFromFillNumber(fillNumber, fillMode, beamNumber)
+            self.setBeamFromFillNumber(fillNumber, fillMode, beamNumber, spark=spark)
         elif sum(self._fillingScheme) > 0:
             # if the array is not all False values
             self.setCustomBeamWithFillingScheme()
@@ -629,7 +631,8 @@ class Beam(Impedance, Power, Plot):
         self.profile_1_bunch = profile_1_bunch
         self.longitudinalProfile = [t, s]
 
-    def setBeamFromFillNumber(self, fillNumber, fillMode="FLATTOP", beamNumber=1):
+    def setBeamFromFillNumber(self, fillNumber, fillMode="FLATTOP",
+                              beamNumber=1, spark=None):
         """Set beam from fill number
 
         Retrieves beam fill information from Timber provided a fill Number
@@ -669,7 +672,12 @@ class Beam(Impedance, Power, Plot):
             + "! Warning: This method only works on SWAN for the moment"
             + "\x1b[0m"
         )
-        db = pytimber.LoggingDB()
+        if spark is not None:
+            db = pytimber.LoggingDB(spark_session=spark)
+        else:
+            # without spark, the older version of pytimber may still work
+            db = pytimber.LoggingDB()
+
         bunchLengths = "LHC.BQM.B" + str(beamNumber) + ":BUNCH_LENGTHS"
         filledBuckets = "LHC.BQM.B" + str(beamNumber) + ":FILLED_BUCKETS"
 
@@ -686,9 +694,11 @@ class Beam(Impedance, Power, Plot):
                 "Mode selected: ",
                 self.fillMode,
                 "starts at: ",
-                pytimber.dumpdate(t1),
+                time.strftime("%Y-%m-%d %H:%M:%S.SSS",time.localtime(t1)
+                    ).replace("SSS","%03d" % ((t1-np.floor(t1))*1000)),
                 "ends at",
-                pytimber.dumpdate(t2),
+                time.strftime("%Y-%m-%d %H:%M:%S.SSS",time.localtime(t2)
+                    ).replace("SSS","%03d" % ((t2-np.floor(t2))*1000)),
             )
 
         fb = db.get(filledBuckets, ts, t2)
@@ -709,17 +719,19 @@ class Beam(Impedance, Power, Plot):
             if np.sum(std[i]) != 0:
                 break
             i = i - 1
+        self.beamDate = time.strftime("%Y-%m-%d %H:%M:%S.SSS",
+            time.localtime(timeStamps[i])).replace("SSS",
+            "%03d" % ((timeStamps[i]-np.floor(timeStamps[i]))*1000))
         if self.verbose:
-            print("Date of the loaded data:", pytimber.dumpdate(timeStamps[i]))
+            print("Date of the loaded data:", self.beamDate)
         std = std[i]
 
-        self.beamDate = pytimber.dumpdate(timeStamps[i])
         self._bunchLength = np.zeros(len(std))
         self.phi = np.zeros(len(std))
         FB = np.zeros(len(fb))
 
         for j in range(len(fb)):
-            good = isinstance(fb[j], (float))
+            good = isinstance(fb[j], (np.int32))
             if good and fb[j] != 0:
                 FB[j] = int((fb[j] - 1) / 10)
             else:
@@ -727,8 +739,8 @@ class Beam(Impedance, Power, Plot):
 
         for j in range(
             len(std)
-        ):  # std is a sorted vector where std[i[j]] rappresent the correct position in the time flow
-            stdIsGood = isinstance(std[j], (float))
+        ):  # std is a sorted vector where std[i[j]] represent the correct position in the time flow
+            stdIsGood = isinstance(std[j], (np.float32))
             if (stdIsGood) and (FB[j] != -1) and (FB[j] < self.M):
                 self._bunchLength[int(FB[j])] = std[j] / 4
                 self._fillingScheme[int(FB[j])] = True
@@ -740,7 +752,7 @@ class Beam(Impedance, Power, Plot):
             print(f"Min. bunch length off all bunches: {np.min(self._bunchLength)}")
 
         self.phi = self.phi[0 : self.M]
-        self.setNpFromFillNumber()
+        self.setNpFromFillNumber(spark=spark)
         self._setBunches()
 
     def setCustomBeam(self):
@@ -849,7 +861,7 @@ class Beam(Impedance, Power, Plot):
 
         self._setBunches()
 
-    def setNpFromFillNumber(self):
+    def setNpFromFillNumber(self, spark=None):
         """Set Intensity from fill number
 
         Retrieves intensity  information from Timber provided a fill Number
@@ -870,7 +882,12 @@ class Beam(Impedance, Power, Plot):
                 "This method uses pytimber. Please follow the installation guide to set it in your python environment"
             )
 
-        db = pytimber.LoggingDB()
+        if spark is not None:
+            db = pytimber.LoggingDB(spark_session=spark)
+        else:
+            # without spark, the older version of pytimber may still work
+            db = pytimber.LoggingDB()
+
         bunchIntensities = (
             "LHC.BCTFR.A6R4.B" + str(self._beamNumber) + ":BUNCH_INTENSITY"
         )
@@ -897,7 +914,9 @@ class Beam(Impedance, Power, Plot):
         self._NpIsComputed = True
         if self.verbose:
             print("Np updated: ", self.Np / 1e11, "e11")
-            print("Np calculated at: ", pytimber.dumpdate(t2))
+            print("Np calculated at: ", time.strftime(
+                "%Y-%m-%d %H:%M:%S.SSS",time.localtime(t2)).replace(
+                "SSS","%03d" % ((t2-np.floor(t2))*1000)))
 
     def setBeamsFromSumWithShift(self, beam1, beam2, shift):
         """Set beam object from the sum of two beam objects
