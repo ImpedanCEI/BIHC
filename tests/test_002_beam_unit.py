@@ -7,6 +7,7 @@
 import numpy as np
 import pytest
 from scipy.constants import e as qe
+from scipy.integrate import trapz
 
 from bihc.beam import Beam
 
@@ -36,7 +37,7 @@ def test_beam_custom_scheme_sets_profiles_and_charge():
 
     t, profile = beam.longitudinalProfile
     assert t.shape == profile.shape
-    area = np.trapz(beam.profile_1_bunch[1], beam.profile_1_bunch[0])
+    area = trapz(beam.profile_1_bunch[1], beam.profile_1_bunch[0])
     assert area > 0
 
 
