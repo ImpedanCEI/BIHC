@@ -34,7 +34,7 @@ an1 = bt+ st +bt+ st+ bt+ st+ bt+ stt
 an = an1 * ninj + sc # This is the final true false sequence that is the beam distribution
 
 # Data retrival from timber
-custom_beam = bihc.Beam(bunchShape='GAUSSIAN', beamNumber=1, fillingScheme=an, Nb=Np, d=t0, verbose=False)
+custom_beam = bihc.Beam(bunchShape='GAUSSIAN', fillingScheme=an, Np=Np, t0=t0, verbose=False)
 
 # built-in plotting
 custom_beam.plotLongitudinalProfile()
@@ -86,7 +86,7 @@ The impedance curve used is from a generic Pillbox cavity simulated with CST stu
 
 :::{admonition} Note
 This example uses data from the CERN Timber database and requires access to NxCALS.
-See the [Installation guide](installation.md) for how to setup `pytimber` to acces the Timber database from CERN Lxplus. Pytimber is also available from CERN SWAN python notebooks using the `102b NXCALS PRO` configuration.
+See the [Installation guide](installation.md) on how to setup `pytimber` to acces the Timber database from CERN Lxplus or CERN SWAN service.
 :::
 
 ```python
@@ -347,8 +347,8 @@ The impact of the bunch shape is notorious, since the truncated distributions th
 ```python
 #   Importing an impedance curve (Resonator)
 # ----------------------------------------------
-Z = bihc.Impedance()
-Z.getResonatorImpedance(Rs=7e3, Qr=1e2, fr=1.75e9, f=b_gauss.spectrum[0])
+Z = bihc.Impedance(f=b_gauss.spectrum[0])
+Z.getResonatorImpedance(Rs=7e3, Qr=1e2, fr=1.75e9)
 
 # ---------  Plotting in frequency -------------
 # Storing spectra
@@ -404,8 +404,8 @@ A second comparison is done using a resistive wall impedance (broadband). The im
 ```python
 # Importing an impedance curve (Resistive wall)
 # ----------------------------------------------
-Z = bihc.Impedance()
-Z.getRWImpedance(L=1.0, b=15e-3, sigma=5.7e7, f=f_gauss)
+Z = bihc.Impedance(f=f_gauss)
+Z.getRWImpedance(L=1.0, b=15e-3, sigma=5.7e7)
 
 # ---------  Plotting in frequency -------------
 fig, axs = plt.subplots(5,1, figsize=(8,10), dpi=100)

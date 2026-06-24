@@ -14,11 +14,22 @@ scientific plotting.
 * author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 """
 
+from __future__ import annotations
+
 import sys
+from collections.abc import Iterable, Iterator
+from io import TextIOBase
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from bihc.impedance import Impedance
+
+_T = TypeVar("_T")
 
 rcParams = {
     # Set color cycle: blue, green, yellow, red, violet, gray
@@ -63,7 +74,13 @@ rcParams = {
 matplotlib.rcParams.update(rcParams)
 
 
-def progressbar(it, prefix="", size=60, out=sys.stdout, count=None):  # Python3.6+
+def progressbar(
+    it: Iterable[_T],
+    prefix: str = "",
+    size: int = 60,
+    out: Any = sys.stdout,
+    count: int | None = None,
+) -> Iterator[_T]:  # Python3.6+
     if count is None:
         count = len(it)
 
@@ -86,7 +103,7 @@ def progressbar(it, prefix="", size=60, out=sys.stdout, count=None):  # Python3.
 
 
 class Plot:
-    def plotLongitudinalProfile(self, tmin=-1, tmax=-1):
+    def plotLongitudinalProfile(self, tmin: float = -1, tmax: float = -1) -> None:
         [t, s] = self.longitudinalProfile
 
         if tmin == -1:
@@ -109,7 +126,13 @@ class Plot:
         plt.grid(True, color="gray", linestyle=":")
         plt.show()
 
-    def plotPowerSpectrum(self, fmin=0, fmax=2, save=True, transparent=True):
+    def plotPowerSpectrum(
+        self,
+        fmin: float = 0,
+        fmax: float = 2,
+        save: bool = True,
+        transparent: bool = True,
+    ) -> None:
         [f, S] = self.spectrum
 
         plt.figure()
@@ -133,7 +156,9 @@ class Plot:
 
         plt.show()
 
-    def plotPowerSpectrumFromTimber(startDate, beamNumber, save=True):
+    def plotPowerSpectrumFromTimber(
+        startDate: str, beamNumber: int, save: bool = True
+    ) -> tuple[NDArray[np.floating[Any]], NDArray[np.floating[Any]], Any]:
         try:
             import pytimber
         except ImportError:
@@ -181,7 +206,7 @@ class Plot:
 
         return f, S, timeStamps[-1]
 
-    def plotImpedance(self, fMin=0, fMax=2e9):
+    def plotImpedance(self, fMin: float = 0, fMax: float = 2e9) -> None:
         plt.figure()
         plt.plot(self.f / 1e9, self.Zr, label="Re[Z]")
         plt.plot(self.f / 1e9, self.Zi, color="r", label="Im[Z]", alpha=0.7)
@@ -197,7 +222,9 @@ class Plot:
         plt.legend()
         plt.show()
 
-    def plotSpectrumAndImpedance(self, Z):  # TODO: not normalize but have 2 y axis
+    def plotSpectrumAndImpedance(
+        self, Z: Impedance
+    ) -> None:  # TODO: not normalize but have 2 y axis
         [f, S] = self.spectrum
         Zreal = Z.Zr
         Zf = Z.f
@@ -248,7 +275,7 @@ class Plot:
         axx.set_ylabel(r"Impedance [$\Omega$]")
         plt.show()
 
-    def plotCollide(beam1, beam2):
+    def plotCollide(beam1: Any, beam2: Any) -> None:
         [t1, s1] = beam1.longitudinalProfile
         [t2, s2] = beam2.longitudinalProfile
         s2 = s2[::-1]
@@ -278,7 +305,7 @@ class Plot:
             plt.legend()
             plt.show()
 
-    def plot2Beam(beam1, beam2, shift=0):
+    def plot2Beam(beam1: Any, beam2: Any, shift: float = 0) -> None:
         [t1, s1] = beam1.longitudinalProfile
         [t2, s2] = beam2.longitudinalProfile
         deltaT = t1[1] - t1[0]
@@ -302,8 +329,12 @@ class Plot:
         plt.show()
 
     def saveLongitudinalDistribution(
-        self, path, phase_shift=0, normalise=False, plot=False
-    ):
+        self,
+        path: str,
+        phase_shift: float = 0,
+        normalise: bool = False,
+        plot: bool = False,
+    ) -> None:
         # phase_shift is intendet to be in ns
         [t, s] = self.longitudinalProfile
         phase_shift = phase_shift * 1e-9

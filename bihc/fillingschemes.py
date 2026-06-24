@@ -10,9 +10,11 @@ de presence of a bunch and False indicates
 an empty slot
 """
 
+from __future__ import annotations
+
 
 # SPS user defined filling general
-def fillingSchemeSPS(nbunches, ntrains, batchspacing=9):
+def fillingSchemeSPS(nbunches: int, ntrains: int, batchspacing: int = 9) -> list[bool]:
     """
     Returns the filling scheme for the SPS
 
@@ -36,7 +38,9 @@ def fillingSchemeSPS(nbunches, ntrains, batchspacing=9):
 
 
 # LHC user defined filling general
-def fillingSchemeLHC(ninj, nbunches, ntrains, batchspacing=7, injspacing=37):
+def fillingSchemeLHC(
+    ninj: int, nbunches: int, ntrains: int, batchspacing: int = 7, injspacing: int = 37
+) -> list[bool]:
     """
     Returns the filling scheme for the LHC
     using the standard pattern:
@@ -90,7 +94,9 @@ def fillingSchemeLHC(ninj, nbunches, ntrains, batchspacing=7, injspacing=37):
 # Case-specific filling schemes:
 
 
-def fillingSchemeSPS_standard(ntrains, nbunches=72, batchspacing=9):
+def fillingSchemeSPS_standard(
+    ntrains: int, nbunches: int = 72, batchspacing: int = 9
+) -> list[bool]:
     """
     Returns standard the filling scheme for the SPS
 
@@ -112,7 +118,9 @@ def fillingSchemeSPS_standard(ntrains, nbunches=72, batchspacing=9):
     return an
 
 
-def fillingSchemeSPS_BCMS(ntrains, nbunches=48, batchspacing=8):
+def fillingSchemeSPS_BCMS(
+    ntrains: int, nbunches: int = 48, batchspacing: int = 8
+) -> list[bool]:
     """
     Returns the filling scheme for the SPS
 
@@ -135,7 +143,7 @@ def fillingSchemeSPS_BCMS(ntrains, nbunches=48, batchspacing=8):
     return an
 
 
-def fillingSchemeSPS_8b4e(ntrains, batchspacing=8):
+def fillingSchemeSPS_8b4e(ntrains: int, batchspacing: int = 8) -> list[bool]:
     """
     Returns the filling scheme for the SPS
     using the 8b4e pattern
@@ -160,8 +168,12 @@ def fillingSchemeSPS_8b4e(ntrains, batchspacing=8):
 
 
 def fillingSchemeLHC_standard(
-    ninj, nbunches=72, ntrains=4, batchspacing=7, injspacing=37
-):
+    ninj: int,
+    nbunches: int = 72,
+    ntrains: int = 4,
+    batchspacing: int = 7,
+    injspacing: int = 37,
+) -> list[bool]:
     """
     Returns the filling scheme for the LHC
     using the standard pattern:
@@ -211,7 +223,9 @@ def fillingSchemeLHC_standard(
     return an
 
 
-def fillingSchemeLHC_8b4e(ninj, ntrains=1, batchspacing=7, injspacing=37):
+def fillingSchemeLHC_8b4e(
+    ninj: int, ntrains: int = 1, batchspacing: int = 7, injspacing: int = 37
+) -> list[bool]:
     """
     Returns the filling scheme for the SPS
     using the 8b4e pattern
@@ -254,7 +268,7 @@ def fillingSchemeLHC_8b4e(ninj, ntrains=1, batchspacing=7, injspacing=37):
 
 
 # SPS user defined filling scheme: AWAKE single bunch
-def fillingSchemeSPS_AWAKE(nbunches=1, ntrains=1):
+def fillingSchemeSPS_AWAKE(nbunches: int = 1, ntrains: int = 1) -> list[bool]:
     """
     Returns the filling scheme for the SPS
 

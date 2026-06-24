@@ -15,9 +15,17 @@ frequency.
 * author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import numpy as np
+from numpy.typing import NDArray
 from scipy.constants import c, e
 from tqdm import tqdm
+
+if TYPE_CHECKING:
+    from bihc.impedance import Impedance
 
 
 class Power:
@@ -27,7 +35,7 @@ class Power:
     It is inherited by Beam class
     """
 
-    def getPloss(self, Z):
+    def getPloss(self, Z: Impedance) -> tuple[float, NDArray[np.floating[Any]]]:
         """
         Computes the power loss for a given impedance object
         Implemented by Francesco Giordano
@@ -81,7 +89,9 @@ class Power:
 
         return P_loss, P_density
 
-    def getShiftedPloss(self, Z, shift=20e6):
+    def getShiftedPloss(
+        self, Z: Impedance, shift: float = 20e6
+    ) -> tuple[NDArray[np.integer[Any]], NDArray[np.floating[Any]]]:
         """
         Computes the power loss, shifting the impedance
         curve rigidly in steps given by `shift`, to overlap
@@ -134,7 +144,9 @@ class Power:
 
         return shifts, power
 
-    def getShiftedPowerSpectrum(self, Z, shift=20e6):
+    def getShiftedPowerSpectrum(
+        self, Z: Impedance, shift: float = 20e6
+    ) -> tuple[NDArray[np.integer[Any]], NDArray[np.floating[Any]]]:
         """
         Computes the power loss spectrum, shifting the impedance
         curve rigidly in steps given by `shift`, to overlap
@@ -187,8 +199,14 @@ class Power:
         return shifts, power_spectrum
 
     def get2BeamPloss(
-        self, Z_0, tau_s=None, s=None, offset1=None, offset2=None, Z_1=None
-    ):
+        self,
+        Z_0: Impedance,
+        tau_s: NDArray[np.floating[Any]] | None = None,
+        s: NDArray[np.floating[Any]] | None = None,
+        offset1: NDArray[np.floating[Any]] | None = None,
+        offset2: NDArray[np.floating[Any]] | None = None,
+        Z_1: Impedance | None = None,
+    ) -> list[float]:
         """
         Computes the power loss for the two beams case
         given impedance object and the pahse_shift between

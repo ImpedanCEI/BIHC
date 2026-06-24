@@ -15,7 +15,13 @@ the frequency vector, the second is the impedance.
 * author: Francesco Giordano, Elena de la Fuente, Leonardo Sito
 """
 
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any
+
 import numpy as np
+from numpy.typing import NDArray
 
 from bihc.plot import Plot
 
@@ -52,7 +58,12 @@ class Impedance(Plot):
         Imaginary part of the impedance in the speciefied frequency points [Ohm].
     """
 
-    def __init__(self, f=np.linspace(0.1, 2e9, int(1e5)), Z=None, CST_file=None):
+    def __init__(
+        self,
+        f: NDArray[np.floating[Any]] = np.linspace(0.1, 2e9, int(1e5)),
+        Z: NDArray[np.complexfloating[Any, Any]] | None = None,
+        CST_file: str | None = None,
+    ) -> None:
         self.f = f
         self.Zr = np.zeros(len(f))
         self.Zi = np.zeros(len(f))
@@ -69,7 +80,7 @@ class Impedance(Plot):
         if CST_file is not None:
             self.getImpedanceFromCST(CST_file)
 
-    def __add__(self, Zn):
+    def __add__(self, Zn: Impedance) -> Impedance:
         Z = Impedance(self.f)
 
         if not np.array_equal(self.f, Zn.f):
@@ -84,7 +95,9 @@ class Impedance(Plot):
 
         return Z
 
-    def getResonatorImpedance(self, Rs, Qr, fr):
+    def getResonatorImpedance(
+        self, Rs: float, Qr: float, fr: float
+    ) -> list[NDArray[np.floating[Any]]]:
         """Creating the impedance curve from the broad-band resonator model.
 
         This methods creates an impedance curve using the broad-band resonator
@@ -123,7 +136,9 @@ class Impedance(Plot):
 
         return [self.f, self.Zr + 1j * self.Zi]
 
-    def getRWImpedance(self, L, b, sigma):
+    def getRWImpedance(
+        self, L: float, b: float, sigma: float
+    ) -> list[NDArray[np.floating[Any]]]:
         """Creating the impedance curve from the resistive wall impedance model.
 
         This methods creates an impedance curve using the resistive wall
@@ -169,7 +184,9 @@ class Impedance(Plot):
 
         return [self.f, self.Zr + 1j * self.Zi]
 
-    def getImpedanceFromCST(self, path, unit="GHz", skip_header=2, skip_footer=0):
+    def getImpedanceFromCST(
+        self, path: str, unit: str = "GHz", skip_header: int = 2, skip_footer: int = 0
+    ) -> list[NDArray[np.floating[Any]]]:
         """Creating the impedance curve from CST file.
 
         This methods creates an impedance curve using a txt file, usually
@@ -210,7 +227,13 @@ class Impedance(Plot):
 
         return [self.f, self.Z]
 
-    def getImpedanceFromFunc(self, func, f=None):
+    def getImpedanceFromFunc(
+        self,
+        func: Callable[
+            [NDArray[np.floating[Any]]], NDArray[np.complexfloating[Any, Any]]
+        ],
+        f: NDArray[np.floating[Any]] | None = None,
+    ) -> list[NDArray[np.floating[Any]]]:
         """Gets impedance from a python function
         in the form of Z = func(f)
 
@@ -236,7 +259,7 @@ class Impedance(Plot):
 
         return [self.f, self.Z]
 
-    def getImpedanceFromPandas(self, path, unit="GHz"):
+    def getImpedanceFromPandas(self, path: str, unit: str = "GHz") -> Any:
         import pandas as pd
 
         data = pd.read_csv(path)
@@ -252,12 +275,17 @@ class Impedance(Plot):
 
         return data
 
-    def copy(self):
+    def copy(self) -> Impedance:
         obj = type(self).__new__(self.__class__)
         obj.__dict__.update(self.__dict__)
         return obj
 
-    def getFrequencyRegions(self, vlines=None, figsize=[12, 6], dpi=200):
+    def getFrequencyRegions(
+        self,
+        vlines: NDArray[np.floating[Any]] | None = None,
+        figsize: list[float] = [12, 6],
+        dpi: int = 200,
+    ) -> NDArray[np.floating[Any]]:
         """Interactively select frequency points of the impedance curve.
 
         The picked frequencies are stored in ``self.freqregions`` and returned.
@@ -393,8 +421,7 @@ class Impedance(Plot):
                     )
                     with out:
                         print(
-                            f"Selected frequency regions: "
-                            f"{self.freqregions * 1e-9} GHz"
+                            f"Selected frequency regions: {self.freqregions * 1e-9} GHz"
                         )
                     plt.close(fig)
 
@@ -415,10 +442,7 @@ class Impedance(Plot):
 
                 def on_close(event):
                     self.freqregions = np.array(picked) * 1e9
-                    print(
-                        f"Selected frequency regions: "
-                        f"{self.freqregions * 1e-9} GHz"
-                    )
+                    print(f"Selected frequency regions: {self.freqregions * 1e-9} GHz")
 
                 fig.canvas.mpl_connect("close_event", on_close)
 
