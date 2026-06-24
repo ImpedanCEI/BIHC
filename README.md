@@ -1,6 +1,7 @@
 # BIHC
 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
 [![Documentation Status](https://readthedocs.org/projects/bihc/badge/?version=latest)](https://bihc.readthedocs.io/en/latest/?badge=latest) ![PyPI - Version](https://img.shields.io/pypi/v/bihc?color=green)
 [![nightly_tests_CPU_py3.14](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml/badge.svg)](https://github.com/ImpedanCEI/BIHC/actions/workflows/nightly_tests_CPU_p3.14.yml)
 
