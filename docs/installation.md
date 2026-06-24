@@ -2,12 +2,6 @@
 
 This section explains how to set up the environment to start using BIHC package for power loss computations. For installing `pytimber` check the section *Installation with pytimber in CERN lxplus*. `pytimber` is also accesible from CERN SWAN python notebooks using the `102b NXCALS PRO` configuration.
 
-<div class="warning">
-<div class="admonition-title">
-Warning
-</div>
-This documentation is currently under development
-</div>
 
 #### Developers: Download BIHC repository from Github
 ```
