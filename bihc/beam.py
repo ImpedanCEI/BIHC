@@ -21,8 +21,10 @@ provided a beam shape and bunch length.
 import math
 import sys
 import time
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 from scipy.constants import c, e
 from scipy.special import gamma
 
@@ -51,6 +53,10 @@ class Beam(Impedance, Power, Plot):
         Beam profile shape : 'GAUSSIAN', 'BINOMIAL' , 'COS2' or 'q-GAUSSIAN'
     qvalue : float, default 1.2
         q-Gaussian q-value for the 'q-GAUSSIAN' beam profile opt
+    exp : float
+        Binomial exponent used for the 'BINOMIAL' bunch shape.
+    LPCfile : str
+        Base name (without extension) of the LPC filling scheme file, if one was provided.
     phi : float, default 0
         Offset of the bunch profile distribution in time [s]
     t0 : float, default 0
@@ -91,33 +97,39 @@ class Beam(Impedance, Power, Plot):
         Beam power spectrum in frequency. Returns the list of numpy arrays [frequency, powerspectrum]
     totalBeamCharge : float
         Beam charge computed from intensity and number of filled slots, in Coulombs [C]
+    profile_1_bunch : numpy.ndarray list
+        Time profile for a single bunch slot. Returns the list of numpy arrays [time, profile].
+        Available after the first access of ``longitudinalProfile`` or ``spectrum``.
+    lambdas : numpy.ndarray list
+        Analytic spectrum envelope. Returns the list of numpy arrays [frequency, envelope].
+        Only available when ``spectrum='analytic'`` and after the first access of ``spectrum``.
     """
 
     def __init__(
         self,
-        M=1e6,
-        A=1,
-        fillNumber=0,
-        bunchLength=1.2e-9,
-        phi=0,
-        realMachineLength=True,
-        ppbk=250,
-        t0=None,
-        Np=2.3e11,
-        bunchShape="GAUSSIAN",
-        LPCfile=None,
-        qvalue=1.2,
-        beamNumber=1,
-        fillMode="FLATTOP",
-        fillingScheme=[False] * 3564,
-        machine="LHC",
-        spectrum="numeric",
-        frev=None,
-        fmax=2e9,
-        exp=2.5,
-        verbose=False,
-        spark=None,
-    ):
+        M: int = 1e6,
+        A: int = 1,
+        fillNumber: int = 0,
+        bunchLength: float = 1.2e-9,
+        phi: float = 0,
+        realMachineLength: bool = True,
+        ppbk: int = 250,
+        t0: float | None = None,
+        Np: float | NDArray[np.floating[Any]] = 2.3e11,
+        bunchShape: str = "GAUSSIAN",
+        LPCfile: str | None = None,
+        qvalue: float = 1.2,
+        beamNumber: int = 1,
+        fillMode: str = "FLATTOP",
+        fillingScheme: list[bool] = [False] * 3564,
+        machine: str = "LHC",
+        spectrum: str = "numeric",
+        frev: float | None = None,
+        fmax: float = 2e9,
+        exp: float = 2.5,
+        verbose: bool = False,
+        spark: Any = None,
+    ) -> None:
         self.M = M  # Default max numebr of buckets
         self.A_GLOBAL = A
         self.BUNCH_LENGTH_GLOBAL = bunchLength / 4  # Bunch length (sigma) [s]
@@ -229,22 +241,22 @@ class Beam(Impedance, Power, Plot):
         [self.f, self.S] = self.spectrum
 
     @property
-    def bunchLength(self):
+    def bunchLength(self) -> NDArray[np.floating[Any]]:
         return self._bunchLength
 
     @bunchLength.setter
-    def bunchLength(self, newBunchLength):
+    def bunchLength(self, newBunchLength: float) -> None:
         print("updating bunch length")
         self._bunchLength = np.zeros(self.M)
         self._bunchLength[self._fillingScheme] = newBunchLength / 4
         self._setBunches()
 
     @property
-    def bunchShape(self):
+    def bunchShape(self) -> str:
         return self._bunchShape
 
     @bunchShape.setter
-    def bunchShape(self, newShape):
+    def bunchShape(self, newShape: str) -> None:
         shapeList = ["GAUSSIAN", "BINOMIAL", "PARABOLIC", "COS2", "q-GAUSSIAN"]
         print("updating bunch shape...")
         if newShape in shapeList:
@@ -257,11 +269,11 @@ class Beam(Impedance, Power, Plot):
             )
 
     @property
-    def fillNumber(self):
+    def fillNumber(self) -> int:
         return self._fillNumber
 
     @fillNumber.setter
-    def fillNumber(self, newFillNumber):
+    def fillNumber(self, newFillNumber: int) -> None:
         print("updating fill number...")
         if newFillNumber > 0:
             self._fillNumber = newFillNumber
@@ -270,7 +282,7 @@ class Beam(Impedance, Power, Plot):
             raise ValueError("fillNumber should be a positive value")
 
     @property
-    def spectrum(self):
+    def spectrum(self) -> list[NDArray[np.floating[Any]]]:
         """spectrum (property)
 
         Computes spectrum and power spectrum from the
@@ -402,7 +414,7 @@ class Beam(Impedance, Power, Plot):
             return self._spectrum
 
     # @spectrum.setter
-    def setSpectrum(self, newSpectrum):
+    def setSpectrum(self, newSpectrum: list[NDArray[np.floating[Any]]]) -> None:
         """Setter for new spectrum data
         Needs to be used when using:
         >>> Beam(specturm='user' )
@@ -416,7 +428,11 @@ class Beam(Impedance, Power, Plot):
         self.S = S
         # raise Exception("Spectrum can not be assigned")
 
-    def setBunches(self, newLongitudinalProfile, interp=True):
+    def setBunches(
+        self,
+        newLongitudinalProfile: list[NDArray[np.floating[Any]]],
+        interp: bool = True,
+    ) -> None:
         [t, s] = newLongitudinalProfile
 
         if interp:
@@ -427,7 +443,7 @@ class Beam(Impedance, Power, Plot):
         self.profile_1_bunch = [t[0 : self.ppbk], s[0 : self.ppbk]]
         self.longitudinalProfile = [t, s]
 
-    def _setBunches(self):
+    def _setBunches(self) -> None:
         """_setBunches method
 
         Computes the longitudinal profile of the bunches
@@ -631,8 +647,13 @@ class Beam(Impedance, Power, Plot):
         self.profile_1_bunch = profile_1_bunch
         self.longitudinalProfile = [t, s]
 
-    def setBeamFromFillNumber(self, fillNumber, fillMode="FLATTOP",
-                              beamNumber=1, spark=None):
+    def setBeamFromFillNumber(
+        self,
+        fillNumber: int,
+        fillMode: str = "FLATTOP",
+        beamNumber: int = 1,
+        spark: Any = None,
+    ) -> None:
         """Set beam from fill number
 
         Retrieves beam fill information from Timber provided a fill Number
@@ -694,11 +715,13 @@ class Beam(Impedance, Power, Plot):
                 "Mode selected: ",
                 self.fillMode,
                 "starts at: ",
-                time.strftime("%Y-%m-%d %H:%M:%S.SSS",time.localtime(t1)
-                    ).replace("SSS","%03d" % ((t1-np.floor(t1))*1000)),
+                time.strftime("%Y-%m-%d %H:%M:%S.SSS", time.localtime(t1)).replace(
+                    "SSS", "%03d" % ((t1 - np.floor(t1)) * 1000)
+                ),
                 "ends at",
-                time.strftime("%Y-%m-%d %H:%M:%S.SSS",time.localtime(t2)
-                    ).replace("SSS","%03d" % ((t2-np.floor(t2))*1000)),
+                time.strftime("%Y-%m-%d %H:%M:%S.SSS", time.localtime(t2)).replace(
+                    "SSS", "%03d" % ((t2 - np.floor(t2)) * 1000)
+                ),
             )
 
         fb = db.get(filledBuckets, ts, t2)
@@ -719,9 +742,9 @@ class Beam(Impedance, Power, Plot):
             if np.sum(std[i]) != 0:
                 break
             i = i - 1
-        self.beamDate = time.strftime("%Y-%m-%d %H:%M:%S.SSS",
-            time.localtime(timeStamps[i])).replace("SSS",
-            "%03d" % ((timeStamps[i]-np.floor(timeStamps[i]))*1000))
+        self.beamDate = time.strftime(
+            "%Y-%m-%d %H:%M:%S.SSS", time.localtime(timeStamps[i])
+        ).replace("SSS", "%03d" % ((timeStamps[i] - np.floor(timeStamps[i])) * 1000))
         if self.verbose:
             print("Date of the loaded data:", self.beamDate)
         std = std[i]
@@ -755,7 +778,7 @@ class Beam(Impedance, Power, Plot):
         self.setNpFromFillNumber(spark=spark)
         self._setBunches()
 
-    def setCustomBeam(self):
+    def setCustomBeam(self) -> None:
         """Set custom beam without a filling scheme
 
         Sets beam with all bunches set to True for all bucket
@@ -772,7 +795,7 @@ class Beam(Impedance, Power, Plot):
 
         self._setBunches()
 
-    def setBeamFromLPC(self):
+    def setBeamFromLPC(self) -> None:
         """Set beam from LPC tool csv output
 
         Sets beam reading the rows of the .csv file
@@ -827,7 +850,7 @@ class Beam(Impedance, Power, Plot):
         self.phi = np.ones(self.M) * self.PHI_GLOBAL
         self._setBunches()
 
-    def setCustomBeamWithFillingScheme(self):
+    def setCustomBeamWithFillingScheme(self) -> None:
         """Set custom beam with a filling scheme
 
         Sets beam with bunches where the filling scheme list
@@ -861,7 +884,7 @@ class Beam(Impedance, Power, Plot):
 
         self._setBunches()
 
-    def setNpFromFillNumber(self, spark=None):
+    def setNpFromFillNumber(self, spark: Any = None) -> None:
         """Set Intensity from fill number
 
         Retrieves intensity  information from Timber provided a fill Number
@@ -914,11 +937,16 @@ class Beam(Impedance, Power, Plot):
         self._NpIsComputed = True
         if self.verbose:
             print("Np updated: ", self.Np / 1e11, "e11")
-            print("Np calculated at: ", time.strftime(
-                "%Y-%m-%d %H:%M:%S.SSS",time.localtime(t2)).replace(
-                "SSS","%03d" % ((t2-np.floor(t2))*1000)))
+            print(
+                "Np calculated at: ",
+                time.strftime("%Y-%m-%d %H:%M:%S.SSS", time.localtime(t2)).replace(
+                    "SSS", "%03d" % ((t2 - np.floor(t2)) * 1000)
+                ),
+            )
 
-    def setBeamsFromSumWithShift(self, beam1, beam2, shift):
+    def setBeamsFromSumWithShift(
+        self, beam1: "Beam", beam2: "Beam", shift: float
+    ) -> None:
         """Set beam object from the sum of two beam objects
 
         Parameters
