@@ -18,6 +18,8 @@ sys.path.insert(0, os.path.abspath("../../BIHC/"))
 sys.path.insert(0, os.path.abspath("../"))
 sys.path.append(os.path.abspath(".."))
 
+from bihc import __version__  # noqa: E402
+
 # -- Project information -----------------------------------------------------
 
 project = "bihc"
@@ -25,7 +27,7 @@ copyright = "2022, CERN, BE-ABP-CEI"
 author = "Francesco Giordano, Elena de la Fuente, Benoit Salvant, Leonardo Sito, Carlo Zannini, Giovanni Rumolo"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.2"
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 
