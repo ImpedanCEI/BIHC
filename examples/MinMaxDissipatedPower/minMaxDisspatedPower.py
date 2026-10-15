@@ -51,7 +51,7 @@ Z.getImpedanceFromCST(impedance_file)
 ploss, ploss_density = beam.getPloss(Z)
 
 # ---------------- Rigid Shift power loss ------------------------------
-shift = 20e6  # distance between shift steps [Hz]
+shift = 20e6  # scan extent on each side [Hz]
 shifts, power = beam.getShiftedPloss(Z, shift=shift)
 
 print(
