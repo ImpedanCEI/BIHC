@@ -35,6 +35,18 @@ $$
 
 Where, $j$ is the imaginary unit, $\omega$ is the angular frequency conjugate variable of the time delay $\tau = \frac{s}{v}$ and, $v$ is the particle velocity.
 
+## Beam spectrum
+
+The longitudinal beam profile is the charge passing a fixed point during one turn. An FFT of this profile, normalized by its total charge, gives the beam spectrum $\Lambda(\omega)$ at harmonics separated by the revolution frequency $f_0$ [^8], named spectral lines. The **envelope** of these liens is set by the individual bunch profile: shorter bunches have more high-frequency content.
+
+The filling pattern sets the **spectral lines** beneath that envelope. Bunches separated by the slot time $T_{\mathrm{slot}}$ reinforce lines near multiples of $1/T_{\mathrm{slot}}$ (40 MHz for 25 ns slots), while train gaps add nearby lines.
+
+![Gaussian bunch, longitudinal profiles for standard and 8b4e SPS beams, and their one-turn FFT spectra](img/beam-spectrum.svg)
+
+*SPS standard and 8b4e profiles with four trains, 25 ns slots, and Gaussian bunches of rms length $\sigma_t=1$ ns. The upper-right profiles are vertically offset; the FFTs cover the full 924-slot turn. The lower-right panel shows the strongest line per 1 MHz interval to reveal the envelope.*
+
+The power-loss sum below weights each line by $|\Lambda|^2$ and by the real impedance at that frequency. A narrow impedance peak can therefore dissipate much more power when it coincides with a strong line; the [shifted power-loss scan](#power-loss-with-a-shifted-impedance) explores this sensitivity.
+
 ## Single Beam and Two counter rotating beams scenarios.
 Single beam case [^3]:
 
@@ -58,6 +70,16 @@ $$
 
 Where, $s$ is the location from the interaction point at which the power loss is being computed, $Z^0_z$ and $Z^1_z$ are the longitudinal impedances of order 0 and 1, $\Delta y_1(s)$ and $\Delta y_2(s)$ are the offsets from the geometrical center of respectively Beam 1 and Beam 2, $\tau_s = 2s/c$, with $c$ the speed of light, is the relative time delay of arrival at $s$ of the two beams.
 
+## Power loss with a shifted impedance
+
+The [beam spectrum](#beam-spectrum) supplies the spectral-line weights $|\Lambda|^2$ in the power-loss sum. Uncertainty in resonance frequencies can change how an impedance peak overlaps those lines, including the extra spectral lines from patterns such as 8b4e. `beam.getShiftedPloss(Z, shift=F)` scans a rigid frequency displacement of the entire real impedance. On the beam frequency grid, with spacing $\Delta f$, its power at integer step $k$ is
+
+$$
+P(k) = 2(f_0 e N_{beam})^2 \sum_{j: f_j \geq 0} |\Lambda(2\pi f_j)|^2 \operatorname{Re} Z_z\bigl(2\pi(f_j-k\Delta f)\bigr).
+$$
+
+The impedance is interpolated onto the beam grid before the scan and set to zero where the displaced samples fall outside that grid. A positive $k$ moves impedance features to higher frequencies. For $F\geq\Delta f$, the scan covers $k=-n,\ldots,n-1$, where $n=\lfloor F/\Delta f\rfloor$; the method returns these integer steps and their power losses in watts. Multiplying a step by $\Delta f$ gives its frequency offset. The largest and smallest returned values give the worst and best overlap within the chosen scan range. BIHC evaluates the full scan by cross correlation; all impedance features move together.
+
 ## About `bihc` python package
 `bihc` is a computational package that integrates over a decade of experience in beam-induced heating calculations from the Impedance and Coherent Effects Section (see [^1], [^3], [^4], [^5], [^6], [^7]) into a comprehensive and flexible Python-based tool.
 
@@ -79,4 +101,4 @@ The package has been presented at the 68th ICFA Advanced Beam Dynamics Workshop 
 
 [^7]: F. Giordano, ‘Simulation Analysis and Machine Learning Based Detection of Beam-Induced Heating in Particle Accelerator at CERN’, University of Naples Federico II, 2020.
 
-[^8]: L. Sito, E. de la Fuente, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” in Proc. 68th Adv. Beam Dyn. Workshop High-Intensity High-Brightness Hadron Beams (HB’23), Geneva, Switzerland, Apr. 2024, no. 68, pp. 611–614. doi: 10.18429/JACoW-HB2023-THBP52.
+[^8]: E. de la Fuente, L. Sito, F. Giordano, G. Rumolo, B. Salvant, and C. Zannini, “A Python Package to Compute Beam-Induced Heating in Particle Accelerators and Applications,” in Proc. 68th Adv. Beam Dyn. Workshop High-Intensity High-Brightness Hadron Beams (HB’23), Geneva, Switzerland, Apr. 2024, no. 68, pp. 611–614. doi: 10.18429/JACoW-HB2023-THBP52.
