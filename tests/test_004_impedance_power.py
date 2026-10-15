@@ -113,6 +113,42 @@ def test_shifted_ploss_scans_frequency_grid(noop_tqdm):
     assert np.array_equal(beam.Zmax.f, freqs)
 
 
+def test_shifted_ploss_matches_zero_padded_direct_scan():
+    freqs = np.arange(-2, 6, dtype=float) * 1e6
+    amps = np.array([0.5, 0.4, 0.8, 0.3, 0.9, 0.6, 0.2, 0.1])
+    beam = _beam_with_custom_spectrum(
+        freqs=freqs, amps=amps, time_span=1e-6, filled_slots=2, np_bunch=1e10
+    )
+    Z = _impedance_from(
+        np.arange(0, 4, dtype=float) * 1e6,
+        real=np.array([0.0, 2.0, 8.0, 1.0]),
+    )
+    shifts, power = beam.getShiftedPloss(Z, shift=3e6)
+
+    impedance = np.interp(freqs, Z.f, Z.Zr, right=0.0)
+    weights = np.zeros_like(freqs)
+    positive = freqs >= 0
+    weights[positive] = (
+        2 * (qe * amps[positive] * beam.filledSlots * beam.Np / 1e-6) ** 2
+    )
+    shifted = []
+    expected = []
+    for step in shifts:
+        current = np.roll(impedance, step)
+        if step > 0:
+            current[:step] = 0.0
+        elif step < 0:
+            current[step:] = 0.0
+        shifted.append(current)
+        expected.append(np.sum(weights * current))
+
+    assert np.array_equal(shifts, np.arange(-3, 3))
+    assert np.allclose(power, expected)
+    assert np.allclose(beam.Zmax.Zr, shifted[np.argmax(expected)])
+    assert np.allclose(beam.Z.Zr, impedance)
+    assert power[np.flatnonzero(shifts == 0)[0]] == pytest.approx(beam.getPloss(Z)[0])
+
+
 def test_shifted_power_spectrum_returns_density_grid(noop_tqdm):
     freqs = np.linspace(0.0, 4e6, 5)
     amps = np.linspace(0.2, 1.0, 5)
