@@ -21,6 +21,7 @@ provided a beam shape and bunch length.
 import math
 import sys
 import time
+import warnings
 from typing import Any
 
 import numpy as np
@@ -75,15 +76,28 @@ class Beam(Impedance, Power, Plot):
     machine : str, default 'LHC'
         Name of the machine to operate with : 'PS', 'SPS', 'SPS-SFTPRO', 'LHC'
     spectrum : str, default 'numeric'
-        Whether to calculate the spectrum with a numerical FFT 'numeric', from the analytical formula 'analytic', or from input 'user'
+        Whether to calculate the spectrum with a real FFT 'numeric', the
+        analytical formula 'analytic', or from input 'user'.
     realMachineLength : bool, default True
         Flag to adapt bucket size to real machine length
-    ppbk : int, default 250
-        Number of time samples per bucket
+    ppbk : int or None, default 250
+        Number of time samples per bucket. For a numeric spectrum, this sets
+        the sampling rate and thus the Nyquist frequency. When ``fmax`` is
+        supplied for a numeric spectrum, use at least 250 samples per bucket
+        and raise this value if needed so the Nyquist frequency is at least
+        1.5 times ``fmax`` and the sample spacing is at most the shortest
+        bunch's rms length. A warning reports any increase in ``ppbk``.
+        Without ``fmax``, a warning is issued if the sample spacing exceeds
+        that length.
     frev : float, default None
         Revolution frequency in [Hz] to sample the analytic beam spectrum computation
-    fmax : float, default 2e9
-        Maximum frequency in [Hz] up to which to compute the beam spectrum
+    fmax : float or None, default None
+        Maximum spectrum frequency in [Hz]. When supplied for a numeric
+        spectrum, it limits the returned frequencies and raises ``ppbk`` if
+        necessary. Without it, the numeric range extends to the Nyquist
+        limit set by ``ppbk``. For an analytic spectrum, None uses
+        ``1 / (3 * (bunchLength / 4))`` based on the shortest positive
+        bunch length.
     verbose : bool, default True
         Flag to control console output
 
@@ -92,7 +106,8 @@ class Beam(Impedance, Power, Plot):
     longitudinalProfile : numpy.ndarray list
         Beam longitudinal distribution in time, normalized. Returns the list of numpy arrays [time, profile]
     spectrum : numpy.ndarray list
-        Beam spectrum in frequency. Returns the list of numpy arrays [frequency, spectrum]
+        Beam spectrum in frequency. Numeric spectra contain nonnegative
+        frequencies only. Returns [frequency, spectrum].
     powerSpectrum : numpy.ndarray list
         Beam power spectrum in frequency. Returns the list of numpy arrays [frequency, powerspectrum]
     totalBeamCharge : float
@@ -113,7 +128,7 @@ class Beam(Impedance, Power, Plot):
         bunchLength: float = 1.2e-9,
         phi: float = 0,
         realMachineLength: bool = True,
-        ppbk: int = 250,
+        ppbk: int | None = 250,
         t0: float | None = None,
         Np: float | NDArray[np.floating[Any]] = 2.3e11,
         bunchShape: str = "GAUSSIAN",
@@ -125,18 +140,18 @@ class Beam(Impedance, Power, Plot):
         machine: str = "LHC",
         spectrum: str = "numeric",
         frev: float | None = None,
-        fmax: float = 2e9,
+        fmax: float | None = None,
         exp: float = 2.5,
         verbose: bool = False,
         spark: Any = None,
     ) -> None:
         self.M = M  # Default max numebr of buckets
         self.A_GLOBAL = A
-        self.BUNCH_LENGTH_GLOBAL = bunchLength / 4  # Bunch length (sigma) [s]
+        self.sigma_time = bunchLength / 4  # Bunch length (sigma) [s]
 
         self.PHI_GLOBAL = phi
         self.realMachineLength = realMachineLength
-        self.ppbk = ppbk
+        self.ppbk = 250 if ppbk is None else ppbk
 
         self._bunchShape = bunchShape  # Bunche shape (analytical function)
         self.q = qvalue  # q value for the q-gaussian distribution 1>q>3
@@ -151,9 +166,12 @@ class Beam(Impedance, Power, Plot):
         self.isATimberFill = False
         self.verbose = verbose
         self._machine = machine  # Select the machine you are working with
+        if spectrum not in ("numeric", "analytic", "user"):
+            raise ValueError("spectrum must be 'numeric', 'analytic', or 'user'")
         self._spectrumtype = spectrum
         self.frev = frev
         self.fmax = fmax
+        self._limitNumericSpectrum = fmax is not None
 
         # Some parameters are set in a different way depending on the machine you are working with
         if self._machine == "LHC":
@@ -205,6 +223,33 @@ class Beam(Impedance, Power, Plot):
             self.t0 = self.T_1_TURN / self.BUCKET_MAX  # forced to be integer
         else:
             self.t0 = t0
+
+        if fmax is not None and (not np.isfinite(fmax) or fmax <= 0):
+            raise ValueError("fmax must be a positive finite frequency")
+
+        if self.fmax is None or (fmax is not None and self._spectrumtype == "numeric"):
+            bunch_sigmas = np.atleast_1d(self.sigma_time)
+            bunch_sigmas = bunch_sigmas[bunch_sigmas > 0]
+            if len(bunch_sigmas) == 0:
+                raise ValueError("bunchLength must be positive")
+            shortest_sigma = np.min(bunch_sigmas)
+            if self.fmax is None:
+                self.fmax = 1 / (3 * shortest_sigma)
+        if fmax is not None and self._spectrumtype == "numeric":
+            requested_ppbk = self.ppbk
+            self.ppbk = max(
+                250,
+                self.ppbk,
+                math.ceil(self.t0 / shortest_sigma),
+                math.ceil(3 * self.t0 * self.fmax),
+            )
+            if self.ppbk > requested_ppbk:
+                warnings.warn(
+                    f"ppbk increased from {requested_ppbk} to {self.ppbk} "
+                    f"to sample the numeric spectrum through fmax={self.fmax:g} Hz.",
+                    UserWarning,
+                    stacklevel=2,
+                )
 
         self.l = self.t0 / 2
         self._bunchLength = np.zeros(self.M)
@@ -292,7 +337,8 @@ class Beam(Impedance, Power, Plot):
         Returns
         -------
         spectrum : numpy.ndarray list
-            Beam spectrum in frequency. Returns the list of numpy arrays [frequency, spectrum]
+            Beam spectrum in frequency. Numeric spectra contain nonnegative
+            frequencies only. Returns [frequency, spectrum].
         """
 
         if self._isSpectrumReady:
@@ -314,17 +360,17 @@ class Beam(Impedance, Power, Plot):
                 [t, s] = self.longitudinalProfile
                 s = s / (self.filledSlots * self.J)  # why is it normalized?
                 deltaT = t[10] - t[9]
-                fc = (
-                    1 / deltaT
-                )  # in frequency we have a periodic signal of period fc where fc is 1/deltaT where the sampling step
-                # We are interested only in the range between -fc/2 and fc/2 ( In particular (0,fc/2) beacouse x is real)
-                S = np.fft.fft(s, len(s))
-                S = np.fft.fftshift(S)
-                S = S * deltaT
-                deltaF = fc / len(s)
-                f = np.linspace(
-                    -fc / 2, fc / 2 - deltaF, len(S)
-                )  # vector of K point from min_value to max_value (Domain in frequency)
+                S = np.fft.rfft(s)
+                S *= deltaT
+                f = np.fft.rfftfreq(len(s), deltaT)
+                if len(s) % 2 == 0:
+                    # The previous full FFT omitted the positive Nyquist bin.
+                    S = S[:-1]
+                    f = f[:-1]
+                if self._limitNumericSpectrum:
+                    size = np.searchsorted(f, self.fmax * (1 + 1e-12), side="right")
+                    S = S[:size]
+                    f = f[:size]
 
             else:  # analytic formula (C.Zannini)
                 print(
@@ -339,7 +385,7 @@ class Beam(Impedance, Power, Plot):
                 n = np.arange(1, self.M + 1)
                 c = 299792458
                 wrev = 2 * np.pi * self.frev
-                sigma = self.BUNCH_LENGTH_GLOBAL * c  # sigma in m
+                sigma = self.sigma_time * c  # sigma in m
                 sigmacos = 0.854 * sigma  # match FWHM to the gaussian sigma
                 sigmapar = 0.744653 * sigma
                 F = 1.2413
@@ -407,8 +453,9 @@ class Beam(Impedance, Power, Plot):
             if self.verbose:
                 print("DC component: ", np.max(np.abs(S)))
 
-            self._spectrum = [f, np.abs(S)]
-            self.powerSpectrum = [f, np.abs(S) ** 2]
+            amplitude = np.abs(S)
+            self._spectrum = [f, amplitude]
+            self.powerSpectrum = [f, amplitude**2]
             self._isSpectrumReady = True
 
             return self._spectrum
@@ -463,12 +510,27 @@ class Beam(Impedance, Power, Plot):
                 )
 
         deltaD = self.t0 / self.ppbk
+        if self._spectrumtype == "numeric":
+            bunch_lengths = self._bunchLength[self._bunchLength > 0]
+            if len(bunch_lengths):
+                shortest_bunch = np.min(bunch_lengths)
+                if deltaD > shortest_bunch:
+                    minimum_ppbk = math.ceil(self.t0 / shortest_bunch)
+                    warnings.warn(
+                        f"ppbk={self.ppbk} gives {deltaD * 1e12:.1f} ps between "
+                        f"samples, above the shortest bunch's rms length "
+                        f"({shortest_bunch * 1e12:.1f} ps); use "
+                        f"ppbk >= {minimum_ppbk} and "
+                        "verify power-loss convergence.",
+                        UserWarning,
+                        stacklevel=4,
+                    )
         tTemp = np.arange(-self.t0 / 2, self.t0 / 2, deltaD)
 
         print("Elaborating Data...")
 
-        s = np.zeros(len(tTemp))  # [0] * len(t)
-        sTemp = np.zeros(len(s))
+        s = np.zeros(self.M * len(tTemp))
+        sTemp = np.zeros(len(tTemp))
         self.filledSlots = 0
 
         for i in range(self.M):
@@ -599,10 +661,7 @@ class Beam(Impedance, Power, Plot):
 
             else:
                 sTemp = np.zeros(len(tTemp))
-            if i == 0:
-                s = sTemp
-            else:
-                s = np.concatenate((s, sTemp), axis=0)
+            s[i * len(tTemp) : (i + 1) * len(tTemp)] = sTemp
 
         t_max = self.t0 * self.M - self.t0 / 2
 
@@ -789,7 +848,7 @@ class Beam(Impedance, Power, Plot):
 
         self._fillingScheme[0 : self.M] = [True] * self.M
         self._bunchLength[self._fillingScheme] = (
-            self.BUNCH_LENGTH_GLOBAL
+            self.sigma_time
         )  # std vector of a single turn in the machine
         self.phi = np.ones(self.M) * self.PHI_GLOBAL
 
@@ -845,7 +904,7 @@ class Beam(Impedance, Power, Plot):
                             break
 
         self._bunchLength[self._fillingScheme] = (
-            self.BUNCH_LENGTH_GLOBAL
+            self.sigma_time
         )  # std vector of a single turn in the machine
         self.phi = np.ones(self.M) * self.PHI_GLOBAL
         self._setBunches()
@@ -875,10 +934,10 @@ class Beam(Impedance, Power, Plot):
         for j in range(self.M):
             if self._fillingScheme[j]:
                 self.A[j] = self.A_GLOBAL
-                if type(self.BUNCH_LENGTH_GLOBAL) is float:
-                    self._bunchLength[j] = self.BUNCH_LENGTH_GLOBAL
+                if type(self.sigma_time) is float:
+                    self._bunchLength[j] = self.sigma_time
                 else:
-                    self._bunchLength[j] = self.BUNCH_LENGTH_GLOBAL[j]
+                    self._bunchLength[j] = self.sigma_time[j]
 
                 self.phi[j] = self.PHI_GLOBAL
 
