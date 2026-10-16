@@ -6,6 +6,7 @@
 """Filling schemes as boolean slot sequences.
 
 True indicates a bunch; False indicates an empty slot.
+Train and batch refer to the same group of bunches.
 """
 
 from __future__ import annotations
@@ -23,21 +24,21 @@ def fillingSchemeFCCee(
     ninj: int = 1,
     injspacing: int = 0,
 ) -> list[bool]:
-    """Return the FCC-ee BPM-study train pattern by default.
+    """Return the FCC-ee filling scheme.
 
-    The default has 40 trains of 280 bunches on a 12,120-slot ring, with
-    23 empty slots between trains. Only bunch occupancy is represented.
+    The default has 40 trains/batches of 280 bunches on a 12,120-slot ring,
+    with 23 empty slots between them. Only bunch occupancy is represented.
 
     Parameters
     ----------
     nslots : int, default 12120
         Total number of slots in the ring.
     ntrains : int, default 40
-        Number of trains per injection.
+        Number of trains/batches per injection.
     nbunches : int, default 280
-        Number of filled slots per train.
+        Number of filled slots per train/batch.
     batchspacing : int, default 23
-        Number of empty slots between trains.
+        Number of empty slots between trains/batches.
     ninj : int, default 1
         Number of injections.
     injspacing : int, default 0
@@ -62,6 +63,42 @@ def fillingSchemeFCCee(
             f"Filling scheme length: {len(filling)} > available machine slots: {nslots}"
         )
     return filling + [False] * (nslots - len(filling))
+
+
+def fillingSchemeFCCee_ZH() -> list[bool]:
+    """Return the FCC-ee ZH pattern: two injections of 150 bunches.
+
+    Each injection has 75 two-bunch trains/batches, with 19 empty slots
+    between them. The injections have 3,764 empty slots between them.
+    The 12,120-slot scheme contains 300 bunches.
+    """
+    return fillingSchemeFCCee(
+        ninj=2, ntrains=75, nbunches=2, batchspacing=19, injspacing=3764
+    )
+
+
+def fillingSchemeFCCee_WW() -> list[bool]:
+    """Return the FCC-ee WW pattern: eight injections of 232 bunches.
+
+    Each injection has 58 four-bunch trains/batches, with 16 empty slots
+    between them. Adjacent injections have 371 empty slots between them.
+    The 12,120-slot scheme contains 1,856 bunches.
+    """
+    return fillingSchemeFCCee(
+        ninj=8, ntrains=58, nbunches=4, batchspacing=16, injspacing=371
+    )
+
+
+def fillingSchemeFCCee_ttbar() -> list[bool]:
+    """Return the FCC-ee ttbar pattern: two injections of 32 bunches.
+
+    Each injection has 16 two-bunch trains/batches, with 151 empty slots
+    between them. The injections have 3,763 empty slots between them.
+    The 12,120-slot scheme contains 64 bunches.
+    """
+    return fillingSchemeFCCee(
+        ninj=2, ntrains=16, nbunches=2, batchspacing=151, injspacing=3763
+    )
 
 
 # LHC filling schemes
