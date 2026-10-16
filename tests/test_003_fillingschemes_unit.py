@@ -12,6 +12,9 @@ import pytest
 
 from bihc.fillingschemes import (
     fillingSchemeFCCee,
+    fillingSchemeFCCee_ttbar,
+    fillingSchemeFCCee_WW,
+    fillingSchemeFCCee_ZH,
     fillingSchemeLHC,
     fillingSchemeLHC_8b4e,
     fillingSchemeLHC_standard,
@@ -50,6 +53,40 @@ def test_fccee_scheme_defaults_to_study_pattern():
     assert sum(scheme) == 40 * 280
     assert scheme[:280] == [True] * 280
     assert scheme[280:303] == [False] * 23
+
+
+@pytest.mark.parametrize(
+    (
+        "scheme_factory",
+        "ntrains",
+        "groups_per_train",
+        "group_size",
+        "group_gap",
+        "train_gap",
+    ),
+    [
+        (fillingSchemeFCCee_ZH, 2, 75, 2, 19, 3764),
+        (fillingSchemeFCCee_WW, 8, 58, 4, 16, 371),
+        (fillingSchemeFCCee_ttbar, 2, 16, 2, 151, 3763),
+    ],
+)
+def test_fccee_mode_patterns(
+    scheme_factory, ntrains, groups_per_train, group_size, group_gap, train_gap
+):
+    scheme = scheme_factory()
+    train_length = groups_per_train * group_size + (groups_per_train - 1) * group_gap
+    next_train = train_length + train_gap
+
+    assert len(scheme) == 12120
+    assert sum(scheme) == ntrains * groups_per_train * group_size
+    assert scheme[:group_size] == [True] * group_size
+    assert scheme[group_size : group_size + group_gap] == [False] * group_gap
+    assert (
+        scheme[group_size + group_gap : 2 * group_size + group_gap]
+        == [True] * group_size
+    )
+    assert scheme[train_length:next_train] == [False] * train_gap
+    assert scheme[next_train : next_train + group_size] == [True] * group_size
 
 
 def test_lhc_scheme_counts_true_slots():

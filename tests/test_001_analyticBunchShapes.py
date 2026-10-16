@@ -26,6 +26,7 @@ def test_analytic_gaussian():
         bunchShape=prof,
         verbose=False,
         spectrum="analytic",
+        fmax=2e9,
     )
 
     # Get spectrum and profile
@@ -49,6 +50,7 @@ def test_analytic_parabolic():
         bunchShape=prof,
         verbose=False,
         spectrum="analytic",
+        fmax=2e9,
     )
 
     # Get spectrum and profile
@@ -72,6 +74,7 @@ def test_analytic_cos2():
         bunchShape=prof,
         verbose=False,
         spectrum="analytic",
+        fmax=2e9,
     )
 
     # Get spectrum and profile

@@ -96,6 +96,37 @@ def test_power_loss_matches_manual_formula():
     assert np.allclose(density[mask], expected_density)
 
 
+@pytest.mark.filterwarnings("ignore:ppbk=.*:UserWarning")
+def test_numeric_real_fft_matches_full_fft_power_loss():
+    scheme = [True, False, True, False, False, True]
+    beam = Beam(
+        M=len(scheme),
+        fillingScheme=scheme,
+        machine="PS",
+        realMachineLength=False,
+        spectrum="numeric",
+        ppbk=32,
+        bunchLength=1e-9,
+        Np=1e11,
+        verbose=False,
+    )
+    t, profile = beam.longitudinalProfile
+    dt = t[10] - t[9]
+    full_fft = np.fft.fftshift(np.fft.fft(profile / beam.filledSlots)) * dt
+    full_f = np.linspace(
+        -1 / (2 * dt), 1 / (2 * dt) - 1 / (len(profile) * dt), len(profile)
+    )
+    Z = _impedance_from(
+        np.linspace(0, 1 / dt, 100),
+        real=np.linspace(1, 2, 100),
+    )
+    actual = beam.getPloss(Z)[0]
+    assert np.all(beam.spectrum[0] >= 0)
+    assert len(beam.spectrum[0]) == len(profile) // 2
+    beam.setSpectrum([full_f, np.abs(full_fft)])
+    assert actual == pytest.approx(beam.getPloss(Z)[0], rel=1e-12)
+
+
 def test_shifted_ploss_scans_frequency_grid(noop_tqdm):
     freqs = np.linspace(0.0, 3e6, 4)
     amps = np.linspace(0.1, 0.4, 4)
