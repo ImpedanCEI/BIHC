@@ -121,7 +121,8 @@ class Power:
         Zmod = Z.copy()
         Zmod.f, Zmod.Zr, Zmod.Zi = f, Zint.copy(), np.zeros_like(Zint)
 
-        size = int(shift / deltaF)
+        # Keep an exact-bin shift when the frequency ratio rounds just below it.
+        size = int(np.floor(shift / deltaF + 1e-9))
         shifts = np.arange(-size, size, 1, dtype=int)  # shifting every frev
 
         if not len(shifts):
@@ -186,7 +187,8 @@ class Power:
             mask = Zmod.f > fmax
             Zmod.Zr[mask] = 0.0
 
-        size = int(shift / deltaF)
+        # Keep an exact-bin shift when the frequency ratio rounds just below it.
+        size = int(np.floor(shift / deltaF + 1e-9))
         shifts = np.arange(-size, size, 1, dtype=int)  # shifting every frev
 
         power_spectrum = []
