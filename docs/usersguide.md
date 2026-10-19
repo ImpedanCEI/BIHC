@@ -2,6 +2,16 @@
 
 This section offers a description of the example suite available in BIHC package. This section asumes that the user has followed the Installation guide and has installed BIHC succesfully.
 
+## Numeric spectrum frequency sampling
+
+For a numeric spectrum, the sampling interval is the FCC or machine slot duration divided by `ppbk`. Its Nyquist limit is $f_\mathrm{Nyquist}=\mathrm{ppbk}/(2t_0)$, and the FFT contains frequencies up to this limit. If both `ppbk` and `fmax` are omitted, BIHC estimates `fmax` from the shortest rms bunch duration $\sigma_t=\mathrm{bunchLength}/4$ using the ideal Gaussian power spectrum's $-40$ dB point:
+
+$$
+f_\max=\frac{\sqrt{\ln(10^4)}}{2\pi\sigma_t}\approx\frac{0.483}{\sigma_t}.
+$$
+
+This gives a bunch length based Nyquist target for q-Gaussian and other profiles. With both arguments omitted, BIHC calculates `ppbk` to reach that target, with a minimum of 250 samples per slot and no additional safety factor. If only `ppbk` is supplied, BIHC preserves it and the numeric spectrum reaches its resulting Nyquist limit. If `fmax` is supplied, BIHC calculates `ppbk` to reach that Nyquist target without applying the 250-sample minimum; when both arguments are supplied, `fmax` takes precedence and recalculates `ppbk`. The `fmax` argument sets numeric sampling resolution rather than truncating the returned FFT.
+
 ## User defined beam filling scheme
 
 This example shows the definition of a filling  scheme as a list of True or Falses values. It is then used along some parameters of the bunches
@@ -151,7 +161,7 @@ bl = 1.2e-9         # bunch length [s]
 Np = 2.3e11         # bunch intensity [protons/bunch]
 bunchShape = 'GAUSSIAN'     # bunch profile shape in time
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e-9                 # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                  # Target Nyquist frequency of the beam spectrum [Hz]
 
 beamBcms1 = bihc.Beam(LPCfile=file1, Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode, fmax=fmax)
 beamBcms2 = bihc.Beam(LPCfile=file2,  Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode,fmax=fmax)
@@ -219,7 +229,7 @@ Np = 2.3e11                 # bunch intensity [protons/bunch]
 bunchShape = 'q-GAUSSIAN'     # bunch profile shape in time
 qvalue = 1.2                # value of q parameter in the q-gaussian distribution
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                  # Target Nyquist frequency of the beam spectrum [Hz]
 
 beam = bihc.Beam(Np=Np, bunchLength=bl, fillingScheme=fillingScheme,
                 bunchShape=bunchShape, qvalue=qvalue,
@@ -268,7 +278,7 @@ bl = 1.2e-9                 # bunch length [s]
 Np = 2.3e11                 # bunch intensity [protons/bunch]
 bunchShape = 'GAUSSIAN'     # bunch profile shape in time
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e9                 # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                 # Target Nyquist frequency of the beam spectrum [Hz]
 
 beam = bihc.Beam(LPCfile=file, Np=Np, bunchLength=bl, bunchShape=bunchShape,
                 machine='LHC', fillMode=fillMode, spectrum='numeric', fmax=fmax)
@@ -315,7 +325,7 @@ file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
 bl = 1.2e-9                 # bunch length [s]
 Np = 2.3e11                 # bunch intensity [protons/bunch]
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                  # Target Nyquist frequency of the beam spectrum [Hz]
 ppbk = 250 					# number of samples per slot
 verbose = False 				# Enable terminal verbosy output
 

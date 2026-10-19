@@ -4,11 +4,9 @@
 * author: Elena de la Fuente
 """
 
-import warnings
-
 import numpy as np
 import pytest
-from scipy.constants import e as qe
+from scipy.constants import e
 
 try:
     from scipy.integrate import trapezoid
@@ -29,7 +27,6 @@ def _make_scheme(length, true_indices):
     return scheme
 
 
-@pytest.mark.filterwarnings("ignore:ppbk=.*:UserWarning")
 def test_beam_custom_scheme_sets_profiles_and_charge():
     scheme = _make_scheme(6, [0, 2, 5])
     beam = Beam(
@@ -44,7 +41,7 @@ def test_beam_custom_scheme_sets_profiles_and_charge():
     )
 
     assert beam.filledSlots == 3
-    assert beam.totalBeamCharge == pytest.approx(beam.filledSlots * beam.Np * qe)
+    assert beam.totalBeamCharge == pytest.approx(beam.filledSlots * beam.Np * e)
 
     t, profile = beam.longitudinalProfile
     assert t.shape == profile.shape
@@ -61,7 +58,6 @@ def test_beam_custom_scheme_sets_profiles_and_charge():
             assert not np.any(segment)
 
 
-@pytest.mark.filterwarnings("ignore:ppbk=.*:UserWarning")
 def test_beam_rejects_invalid_bunch_shape():
     scheme = _make_scheme(4, [0, 1, 2, 3])
     beam = Beam(
@@ -90,7 +86,7 @@ def test_beam_rejects_removed_real_fft_option():
         )
 
 
-def test_numeric_beam_warns_when_ppbk_undersamples_bunch_length():
+def test_sampling_uses_shortest_bunch():
     parameters = dict(
         M=2,
         fillingScheme=[True, True],
@@ -100,13 +96,8 @@ def test_numeric_beam_warns_when_ppbk_undersamples_bunch_length():
         bunchLength=np.array([40e-9, 20e-9]),
         verbose=False,
     )
-    with pytest.warns(UserWarning, match="ppbk=16"):
-        Beam(ppbk=16, **parameters)
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        Beam(ppbk=24, **parameters)
-    assert not caught
+    Beam(ppbk=16, **parameters)
+    Beam(ppbk=24, **parameters)
 
 
 def test_numeric_beam_keeps_default_ppbk_without_explicit_fmax():
@@ -120,44 +111,51 @@ def test_numeric_beam_keeps_default_ppbk_without_explicit_fmax():
         spectrum="numeric",
         verbose=False,
     )
-
     assert beam.ppbk == 250
-    assert beam.spectrum[0][-1] > beam.fmax
+    assert beam.fmax == beam.ppbk / (2 * beam.t0)
+    assert beam.spectrum[0][-1] <= beam.fmax
 
 
-@pytest.mark.parametrize(
-    "ppbk, fmax, increased",
-    [(None, 1e9, False), (8, 1e9, True), (1000, 1e9, False), (8, 0.1e9, True)],
-)
-def test_explicit_fmax_limits_numeric_spectrum_and_preserves_safe_ppbk(
-    ppbk, fmax, increased
-):
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        beam = Beam(
-            M=2,
-            fillingScheme=[True, False],
-            machine="PS",
-            realMachineLength=False,
-            t0=20e-9,
-            bunchLength=4e-9,
-            ppbk=ppbk,
-            fmax=fmax,
-            spectrum="numeric",
-            verbose=False,
-        )
+def test_fmax_adjusts_default_ppbk():
+    beam = Beam(
+        M=2,
+        fillingScheme=[True, False],
+        machine="PS",
+        realMachineLength=False,
+        t0=20e-9,
+        bunchLength=4e-9,
+        fmax=10e9,
+        spectrum="numeric",
+        verbose=False,
+    )
 
-    if ppbk is not None:
-        assert beam.ppbk >= ppbk
-    assert beam.ppbk >= 250
-    assert any("ppbk increased" in str(w.message) for w in caught) == increased
-    assert beam.t0 / beam.ppbk <= beam.sigma_time
-    assert beam.ppbk / (2 * beam.t0) >= 1.5 * beam.fmax
-    assert beam.spectrum[0][-1] <= beam.fmax * (1 + 1e-12)
-    assert beam.fmax - beam.spectrum[0][-1] < beam.spectrum[0][1]
+    assert beam.ppbk == 400
+    assert beam.ppbk / (2 * beam.t0) >= 10e9
+    assert beam.fmax == beam.ppbk / (2 * beam.t0)
+    assert beam.spectrum[0][-1] <= beam.fmax
 
 
-@pytest.mark.filterwarnings("ignore:ppbk=.*:UserWarning")
+def test_explicit_fmax_overrides_ppbk(capsys):
+    beam = Beam(
+        M=2,
+        fillingScheme=[True, False],
+        machine="PS",
+        realMachineLength=False,
+        t0=20e-9,
+        bunchLength=4e-9,
+        ppbk=25,
+        fmax=1e9,
+        spectrum="numeric",
+        verbose=False,
+    )
+    output = capsys.readouterr().out
+
+    assert beam.ppbk == 40
+    assert "ppbk=25 overridden by fmax" in output
+    assert beam.fmax == beam.ppbk / (2 * beam.t0)
+    assert beam.spectrum[0][-1] > 0.5e9
+
+
 def test_set_bunches_overrides_profile_data():
     scheme = _make_scheme(4, [0])
     beam = Beam(

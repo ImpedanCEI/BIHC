@@ -21,7 +21,6 @@ provided a beam shape and bunch length.
 import math
 import sys
 import time
-import warnings
 from typing import Any
 
 import numpy as np
@@ -80,24 +79,26 @@ class Beam(Impedance, Power, Plot):
         analytical formula 'analytic', or from input 'user'.
     realMachineLength : bool, default True
         Flag to adapt bucket size to real machine length
-    ppbk : int or None, default 250
+    ppbk : int or None, default None
         Number of time samples per bucket. For a numeric spectrum, this sets
-        the sampling rate and thus the Nyquist frequency. When ``fmax`` is
-        supplied for a numeric spectrum, use at least 250 samples per bucket
-        and raise this value if needed so the Nyquist frequency is at least
-        1.5 times ``fmax`` and the sample spacing is at most the shortest
-        bunch's rms length. A warning reports any increase in ``ppbk``.
-        Without ``fmax``, a warning is issued if the sample spacing exceeds
-        that length.
+        the sampling rate and thus the Nyquist frequency. If omitted, BIHC
+        calculates enough samples for the selected ``fmax``
+        target. When ``fmax`` is omitted too, the calculated value has a
+        minimum of 250 samples per bucket. If both ``ppbk`` and ``fmax`` are
+        supplied, ``fmax`` takes precedence and BIHC recalculates ``ppbk``.
+        With only ``ppbk`` supplied, BIHC preserves it and the spectrum
+        reaches its Nyquist limit.
     frev : float, default None
         Revolution frequency in [Hz] to sample the analytic beam spectrum computation
     fmax : float or None, default None
-        Maximum spectrum frequency in [Hz]. When supplied for a numeric
-        spectrum, it limits the returned frequencies and raises ``ppbk`` if
-        necessary. Without it, the numeric range extends to the Nyquist
-        limit set by ``ppbk``. For an analytic spectrum, None uses
-        ``1 / (3 * (bunchLength / 4))`` based on the shortest positive
-        bunch length.
+        Target Nyquist frequency in [Hz]. If omitted, BIHC estimates it from
+        the shortest positive rms bunch duration using the Gaussian
+        ``-40 dB`` power point,
+        ``sqrt(log(1e4)) / (2 * pi * sigma_t)``, where
+        ``sigma_t = bunchLength / 4``. For a numeric spectrum, BIHC calculates
+        ``ppbk`` so Nyquist reaches this target. If supplied together with
+        ``ppbk``, ``fmax`` takes precedence and ``ppbk`` is recalculated.
+        The numeric FFT is returned through its Nyquist limit.
     verbose : bool, default True
         Flag to control console output
 
@@ -128,7 +129,7 @@ class Beam(Impedance, Power, Plot):
         bunchLength: float = 1.2e-9,
         phi: float = 0,
         realMachineLength: bool = True,
-        ppbk: int | None = 250,
+        ppbk: int | None = None,
         t0: float | None = None,
         Np: float | NDArray[np.floating[Any]] = 2.3e11,
         bunchShape: str = "GAUSSIAN",
@@ -151,7 +152,6 @@ class Beam(Impedance, Power, Plot):
 
         self.PHI_GLOBAL = phi
         self.realMachineLength = realMachineLength
-        self.ppbk = 250 if ppbk is None else ppbk
 
         self._bunchShape = bunchShape  # Bunche shape (analytical function)
         self.q = qvalue  # q value for the q-gaussian distribution 1>q>3
@@ -170,8 +170,6 @@ class Beam(Impedance, Power, Plot):
             raise ValueError("spectrum must be 'numeric', 'analytic', or 'user'")
         self._spectrumtype = spectrum
         self.frev = frev
-        self.fmax = fmax
-        self._limitNumericSpectrum = fmax is not None
 
         # Some parameters are set in a different way depending on the machine you are working with
         if self._machine == "LHC":
@@ -224,32 +222,7 @@ class Beam(Impedance, Power, Plot):
         else:
             self.t0 = t0
 
-        if fmax is not None and (not np.isfinite(fmax) or fmax <= 0):
-            raise ValueError("fmax must be a positive finite frequency")
-
-        if self.fmax is None or (fmax is not None and self._spectrumtype == "numeric"):
-            bunch_sigmas = np.atleast_1d(self.sigma_time)
-            bunch_sigmas = bunch_sigmas[bunch_sigmas > 0]
-            if len(bunch_sigmas) == 0:
-                raise ValueError("bunchLength must be positive")
-            shortest_sigma = np.min(bunch_sigmas)
-            if self.fmax is None:
-                self.fmax = 1 / (3 * shortest_sigma)
-        if fmax is not None and self._spectrumtype == "numeric":
-            requested_ppbk = self.ppbk
-            self.ppbk = max(
-                250,
-                self.ppbk,
-                math.ceil(self.t0 / shortest_sigma),
-                math.ceil(3 * self.t0 * self.fmax),
-            )
-            if self.ppbk > requested_ppbk:
-                warnings.warn(
-                    f"ppbk increased from {requested_ppbk} to {self.ppbk} "
-                    f"to sample the numeric spectrum through fmax={self.fmax:g} Hz.",
-                    UserWarning,
-                    stacklevel=2,
-                )
+        self._setSpectrumSampling(ppbk, fmax)
 
         self.l = self.t0 / 2
         self._bunchLength = np.zeros(self.M)
@@ -284,6 +257,93 @@ class Beam(Impedance, Power, Plot):
 
         # Computes spectrum and power spectrum
         [self.f, self.S] = self.spectrum
+
+    def _setSpectrumSampling(self, ppbk: int | None, fmax: float | None) -> None:
+        """Set the spectrum limit and numeric sampling resolution.
+
+        For numeric spectra, omitted ``fmax`` is estimated from the shortest
+        rms bunch duration ``sigma_t = bunchLength / 4`` using the Gaussian
+        ``-40 dB`` power point, ``sqrt(log(1e4)) / (2 * pi * sigma_t)``.
+        This is a reference for q-Gaussian and other profiles. The sampling
+        interval is selected so ``ppbk / (2 * t0)`` reaches the target, with
+        no additional Nyquist margin. With both inputs omitted, ``ppbk`` is
+        calculated with a minimum of 250 samples per bucket. If ``ppbk`` alone
+        is supplied, it is preserved and the numeric FFT extends to its
+        Nyquist limit. If both values are supplied, ``fmax`` takes precedence
+        and ``ppbk`` is recalculated to reach it. For analytic spectra,
+        omitted ``fmax`` uses the same Gaussian reference.
+        """
+        default_ppbk = 250
+
+        bunch_sigmas = np.atleast_1d(self.sigma_time)
+        bunch_sigmas = bunch_sigmas[bunch_sigmas > 0]
+        if len(bunch_sigmas) == 0:
+            raise ValueError("bunchLength must be positive")
+        shortest_sigma = np.min(bunch_sigmas)
+        gaussian_40db_factor = math.sqrt(math.log(1e4)) / (2 * math.pi)
+        bunch_fmax = gaussian_40db_factor / shortest_sigma
+
+        if fmax is not None and (not np.isfinite(fmax) or fmax <= 0):
+            raise ValueError("fmax must be a positive finite frequency")
+        if self._spectrumtype != "numeric":
+            self.ppbk = default_ppbk if ppbk is None else ppbk
+            self.fmax = bunch_fmax if fmax is None else fmax
+            return
+
+        sampling_target = bunch_fmax if fmax is None else fmax
+        required_ppbk = math.ceil(np.nextafter(2 * self.t0 * sampling_target, -np.inf))
+        calculated_ppbk = (
+            required_ppbk if fmax is not None else max(default_ppbk, required_ppbk)
+        )
+
+        message = None
+        if fmax is not None:
+            self.ppbk = calculated_ppbk
+            max_resolvable_frequency = self.ppbk / (2 * self.t0)
+            self.fmax = max_resolvable_frequency
+            if ppbk is not None and ppbk != calculated_ppbk:
+                message = (
+                    f"ppbk={ppbk} overridden by fmax; using ppbk={self.ppbk}. "
+                    f"Numeric spectrum reaches Nyquist at "
+                    f"{max_resolvable_frequency / 1e9:g} GHz."
+                )
+            elif ppbk is None and self.ppbk > default_ppbk:
+                max_resolvable_frequency = self.ppbk / (2 * self.t0)
+                message = (
+                    f"ppbk increased: {default_ppbk} → {self.ppbk}. "
+                    f"Numeric spectrum reaches Nyquist at "
+                    f"{max_resolvable_frequency / 1e9:g} GHz."
+                )
+            else:
+                return
+        elif ppbk is not None:
+            self.ppbk = ppbk
+            max_resolvable_frequency = self.ppbk / (2 * self.t0)
+            self.fmax = max_resolvable_frequency
+            if self.ppbk < calculated_ppbk:
+                message = (
+                    f"ppbk={self.ppbk} preserved; numeric spectrum reaches "
+                    f"Nyquist at {max_resolvable_frequency / 1e9:g} GHz."
+                    f"\nUse ppbk ≥ {calculated_ppbk} to reach the bunch-length "
+                    "based -40 dB target."
+                )
+            else:
+                return
+        else:
+            self.ppbk = calculated_ppbk
+            max_resolvable_frequency = self.ppbk / (2 * self.t0)
+            self.fmax = max_resolvable_frequency
+            if self.ppbk > default_ppbk:
+                message = (
+                    f"ppbk increased: {default_ppbk} → {self.ppbk}. "
+                    f"Numeric spectrum reaches Nyquist at "
+                    f"{max_resolvable_frequency / 1e9:g} GHz."
+                )
+            else:
+                return
+
+        if message is not None:
+            print(f"\033[93m{message}\033[0m")
 
     @property
     def bunchLength(self) -> NDArray[np.floating[Any]]:
@@ -338,7 +398,8 @@ class Beam(Impedance, Power, Plot):
         -------
         spectrum : numpy.ndarray list
             Beam spectrum in frequency. Numeric spectra contain nonnegative
-            frequencies only. Returns [frequency, spectrum].
+            frequencies through the Nyquist limit. Returns
+            [frequency, spectrum].
         """
 
         if self._isSpectrumReady:
@@ -367,11 +428,6 @@ class Beam(Impedance, Power, Plot):
                     # The previous full FFT omitted the positive Nyquist bin.
                     S = S[:-1]
                     f = f[:-1]
-                if self._limitNumericSpectrum:
-                    size = np.searchsorted(f, self.fmax * (1 + 1e-12), side="right")
-                    S = S[:size]
-                    f = f[:size]
-
             else:  # analytic formula (C.Zannini)
                 print(
                     "\033[93m"
@@ -510,21 +566,6 @@ class Beam(Impedance, Power, Plot):
                 )
 
         deltaD = self.t0 / self.ppbk
-        if self._spectrumtype == "numeric":
-            bunch_lengths = self._bunchLength[self._bunchLength > 0]
-            if len(bunch_lengths):
-                shortest_bunch = np.min(bunch_lengths)
-                if deltaD > shortest_bunch:
-                    minimum_ppbk = math.ceil(self.t0 / shortest_bunch)
-                    warnings.warn(
-                        f"ppbk={self.ppbk} gives {deltaD * 1e12:.1f} ps between "
-                        f"samples, above the shortest bunch's rms length "
-                        f"({shortest_bunch * 1e12:.1f} ps); use "
-                        f"ppbk >= {minimum_ppbk} and "
-                        "verify power-loss convergence.",
-                        UserWarning,
-                        stacklevel=4,
-                    )
         tTemp = np.arange(-self.t0 / 2, self.t0 / 2, deltaD)
 
         print("Elaborating Data...")
