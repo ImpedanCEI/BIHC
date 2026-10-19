@@ -420,7 +420,7 @@ class Beam(Impedance, Power, Plot):
             if self._spectrumtype == "numeric":
                 [t, s] = self.longitudinalProfile
                 s = s / (self.filledSlots * self.J)  # why is it normalized?
-                deltaT = t[10] - t[9]
+                deltaT = t[1] - t[0]
                 S = np.fft.rfft(s)
                 S *= deltaT
                 f = np.fft.rfftfreq(len(s), deltaT)
