@@ -180,6 +180,20 @@ def test_shifted_ploss_matches_zero_padded_direct_scan():
     assert power[np.flatnonzero(shifts == 0)[0]] == pytest.approx(beam.getPloss(Z)[0])
 
 
+def test_shifted_ploss_integer_grid():
+    """Integer frequency samples must preserve fractional power weights."""
+    freqs = np.arange(4) * 1_000_000
+    amps = np.array([0.1, 0.2, 0.3, 0.4])
+    beam = _beam_with_custom_spectrum(freqs, amps, time_span=1e-6, np_bunch=1e10)
+    beam.setSpectrum([freqs, amps])
+    Z = _impedance_from(freqs, real=np.array([0.0, 1.0, 2.0, 1.0]))
+
+    shifts, power = beam.getShiftedPloss(Z, shift=1e6)
+
+    assert beam.getPloss(Z)[0] > 0
+    assert power[shifts == 0][0] == pytest.approx(beam.getPloss(Z)[0])
+
+
 def test_shifted_power_spectrum_returns_density_grid(noop_tqdm):
     freqs = np.linspace(0.0, 4e6, 5)
     amps = np.linspace(0.2, 1.0, 5)
@@ -209,6 +223,32 @@ def test_two_beam_ploss_accepts_tau_list(noop_tqdm):
     assert results[0] == pytest.approx(0.0)
     assert results[1] > results[0]
     assert hasattr(beam, "P_loss")
+
+
+def test_two_beam_capped_spectrum(noop_tqdm):
+    """A wider primary impedance must work without a secondary impedance."""
+    beam = Beam(
+        M=2,
+        fillingScheme=[True, False],
+        machine="PS",
+        realMachineLength=False,
+        t0=20e-9,
+        bunchLength=4e-9,
+        spectrum="numeric",
+        fmax=100e6,
+        verbose=False,
+    )
+    Z0 = _impedance_from(np.linspace(0, 200e6, 11), real=np.full(11, 10.0))
+    tau = np.array([1e-9])
+
+    result = beam.get2BeamPloss(Z0, tau_s=tau)
+
+    f, S = beam.spectrum
+    t = beam.longitudinalProfile[0]
+    current = 2 * qe * beam.filledSlots * beam.Np * S / (t[-1] - t[0])
+    expected = np.sum(current**2 * 10.0 * (1 - np.cos(2 * np.pi * f * tau[0])))
+    assert result[0] == pytest.approx(expected)
+    assert result[0] > 0
 
 
 def test_two_beam_ploss_with_offsets_and_secondary_impedance(noop_tqdm):

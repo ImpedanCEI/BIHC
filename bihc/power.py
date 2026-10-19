@@ -130,7 +130,7 @@ class Power:
 
         t = self.longitudinalProfile[0]
         f0 = 1 / (t[-1] - t[0])
-        weights = np.zeros_like(f)
+        weights = np.zeros_like(f, dtype=float)
         positive = f >= 0
         weights[positive] = 2 * (f0 * e * S[positive] * self.filledSlots * self.Np) ** 2
 
@@ -266,7 +266,6 @@ class Power:
 
             Zf_0 = Z_0.f[mask]
             Zreal_0 = Z_0.Zr[mask]
-            Zreal_1 = Z_1.Zr[mask]
             mask3 = f >= 0
             f = f[mask3]
             S = S[mask3]
