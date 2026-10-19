@@ -258,7 +258,6 @@ class Power:
 
             Zf_0 = Z_0.f[mask]
             Zreal_0 = Z_0.Zr[mask]
-            Zreal_1 = Z_1.Zr[mask]
             mask3 = f >= 0
             f = f[mask3]
             S = S[mask3]
