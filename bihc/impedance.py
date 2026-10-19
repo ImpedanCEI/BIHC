@@ -72,7 +72,10 @@ class Impedance(Plot):
             self.Zr = np.real(Z)
             self.Zi = np.imag(Z)
             if len(self.f) != len(self.Zr):
-                print("[!] frequency array and impedance data have different lengths")
+                print(
+                    "\033[93m[!] frequency array and impedance data have different "
+                    "lengths\033[0m"
+                )
 
         self.isResonatorImpedance = False
         self.isRWImpedance = False
@@ -192,6 +195,8 @@ class Impedance(Plot):
         This methods creates an impedance curve using a txt file, usually
         exported from CST.
 
+        Negative values in the real part are set to zero with a warning.
+
         Parameters
         ----------
         path : str
@@ -217,10 +222,23 @@ class Impedance(Plot):
             self.f = data[:, 0] * 1e6
 
         self.Zr = data[:, 1]
+        negative_real = self.Zr < 0
+        if np.any(negative_real):
+            print(
+                "\033[93m[!] Found "
+                f"{np.count_nonzero(negative_real)} negative real longitudinal "
+                "impedance value(s) in the CST file; setting them to zero."
+                "\033[0m"
+            )
+            self.Zr[negative_real] = 0.0
+
         try:
             self.Zi = data[:, 2]
         except Exception:
-            print("[!] No imaginary part found in the CST file. Setting it to zero.")
+            print(
+                "\033[93m[!] No imaginary part found in the CST file. "
+                "Setting it to zero.\033[0m"
+            )
             self.Zi = np.zeros_like(self.Zr)
 
         self.Z = self.Zr + 1j * self.Zi
