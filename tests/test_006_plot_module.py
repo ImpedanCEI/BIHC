@@ -106,7 +106,7 @@ def test_plot2beam_handles_shift(plot_harness, show_spy):
     assert len(show_spy) == 1
 
 
-def test_get_frequency_regions_inline_backend_uses_text_input(monkeypatch):
+def test_get_frequency_regions_inline_backend_uses_text_input(monkeypatch, show_spy):
     freqs = np.linspace(0.0, 1e9, 5)
     Z = Impedance(f=freqs)
     Z.Zr = np.linspace(0.0, 1.0, 5)
@@ -120,9 +120,10 @@ def test_get_frequency_regions_inline_backend_uses_text_input(monkeypatch):
     freqregions = Z.getFrequencyRegions()
 
     assert np.allclose(freqregions, np.array([0.1, 0.25, 0.5]) * 1e9)
+    assert len(show_spy) == 1
 
 
-def test_get_frequency_regions_inline_backend_empty_input(monkeypatch):
+def test_get_frequency_regions_inline_backend_empty_input(monkeypatch, show_spy):
     freqs = np.linspace(0.0, 1e9, 5)
     Z = Impedance(f=freqs)
     Z.Zr = np.linspace(0.0, 1.0, 5)
@@ -136,9 +137,12 @@ def test_get_frequency_regions_inline_backend_empty_input(monkeypatch):
     freqregions = Z.getFrequencyRegions()
 
     assert freqregions.size == 0
+    assert len(show_spy) == 1
 
 
-def test_get_frequency_regions_widget_backend_returns_empty_immediately(monkeypatch):
+def test_get_frequency_regions_widget_backend_returns_empty_immediately(
+    monkeypatch, show_spy
+):
     """In widget mode the function must return immediately with an empty array;
     self.freqregions is populated only after the Done button is clicked."""
     freqs = np.linspace(0.0, 1e9, 5)
@@ -151,6 +155,7 @@ def test_get_frequency_regions_widget_backend_returns_empty_immediately(monkeypa
     )
     # Simulate ipywidgets not installed so we take the simpler fallback path
     import builtins
+
     real_import = builtins.__import__
 
     def _no_ipywidgets(name, *args, **kwargs):
@@ -164,3 +169,4 @@ def test_get_frequency_regions_widget_backend_returns_empty_immediately(monkeypa
 
     assert result.size == 0
     assert hasattr(Z, "freqregions")
+    assert len(show_spy) == 1
