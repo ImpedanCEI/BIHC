@@ -30,8 +30,7 @@ def fillingSchemeSPS_standard(ninj):
     nbunches: default, 48. number of bunches per train
     """
     # Define filling scheme: parameters
-    ntrain = 1  # SPS has 1 train per cycle
-    nslots = 920  # Defining total number of slots for SPS
+    nslots = 924  # Defining total number of slots for SPS
     nbunches = 72  # Defining a number of bunchs e.g. 18, 36, 72..
     batchspacing = 8  # Batch spacing in 25 ns slots (200 ns)
 
@@ -54,8 +53,7 @@ def fillingSchemeSPS_BCMS(ninj):
     nbunches: default, 48. number of bunches per train
     """
     # Define filling scheme: parameters
-    ntrain = 1  # SPS has 1 train per cycle
-    nslots = 920  # Defining total number of slots for SPS
+    nslots = 924  # Defining total number of slots for SPS
     nbunches = 48  # Defining a number of bunchs e.g. 18, 36, 72..
     batchspacing = 8  # Batch spacing in 25 ns slots (200 ns)
 
@@ -79,8 +77,7 @@ def fillingSchemeSPS_8b4e(ninj):
     nbunches: default, 48. number of bunches per train
     """
     # Define filling scheme: parameters
-    ntrain = 1  # SPS has 1 train per cycle
-    nslots = 920  # Defining total number of slots for SPS
+    nslots = 924  # Defining total number of slots for SPS
     nbunches = 8 * 7  # Defining number of bunches e.g. 18, 36, 72..
     nempty = 4 * 6  # Defining number of empty slots between bunches
     batchspacing = 8  # Batch spacing in 25 ns slots (200 ns)
@@ -182,7 +179,7 @@ axs[1].plot(
 axs[0].plot(b1.longitudinalProfile[0] * 1e9, b1.longitudinalProfile[1], label="1 train")
 
 for ax in axs:
-    ax.set_xlim(0, t0 * 920 * 1e9)
+    ax.set_xlim(0, t0 * 924 * 1e9)
     ax.set_ylabel("Intensity [p/b]")
     ax.set_xlabel("time [ns]")
     ax.legend()

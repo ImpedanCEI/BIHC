@@ -6,12 +6,16 @@
 
 import numpy as np
 import pytest
-from scipy.constants import e as qe
+from scipy.constants import e
+
 try:
     from scipy.integrate import trapezoid
 except ImportError:
     from scipy.integrate import trapz as trapezoid
-    print("[!] Using deprecated trapz function from scipy.integrate. Please update your scipy version.")
+
+    print(
+        "[!] Using deprecated trapz function from scipy.integrate. Please update your scipy version."
+    )
 
 from bihc.beam import Beam
 
@@ -37,12 +41,21 @@ def test_beam_custom_scheme_sets_profiles_and_charge():
     )
 
     assert beam.filledSlots == 3
-    assert beam.totalBeamCharge == pytest.approx(beam.filledSlots * beam.Np * qe)
+    assert beam.totalBeamCharge == pytest.approx(beam.filledSlots * beam.Np * e)
 
     t, profile = beam.longitudinalProfile
     assert t.shape == profile.shape
     area = trapezoid(beam.profile_1_bunch[1], beam.profile_1_bunch[0])
     assert area > 0
+
+    samples_per_slot = len(beam.profile_1_bunch[0])
+    for slot, filled in enumerate(scheme):
+        start = slot * samples_per_slot
+        segment = profile[start : start + samples_per_slot]
+        if filled:
+            np.testing.assert_array_equal(segment, beam.profile_1_bunch[1])
+        else:
+            assert not np.any(segment)
 
 
 def test_beam_rejects_invalid_bunch_shape():
@@ -60,6 +73,87 @@ def test_beam_rejects_invalid_bunch_shape():
 
     with pytest.raises(ValueError):
         beam.bunchShape = "TRIANGLE"
+
+
+def test_beam_rejects_removed_real_fft_option():
+    with pytest.raises(ValueError, match="spectrum"):
+        Beam(
+            M=1,
+            fillingScheme=[True],
+            machine="PS",
+            spectrum="numeric-rfft",
+            verbose=False,
+        )
+
+
+def test_sampling_uses_shortest_bunch():
+    parameters = dict(
+        M=2,
+        fillingScheme=[True, True],
+        machine="PS",
+        realMachineLength=False,
+        spectrum="numeric",
+        bunchLength=np.array([40e-9, 20e-9]),
+        verbose=False,
+    )
+    Beam(ppbk=16, **parameters)
+    Beam(ppbk=24, **parameters)
+
+
+def test_numeric_beam_keeps_default_ppbk_without_explicit_fmax():
+    beam = Beam(
+        M=1,
+        fillingScheme=[True],
+        machine="PS",
+        realMachineLength=False,
+        t0=20e-9,
+        bunchLength=4e-9,
+        spectrum="numeric",
+        verbose=False,
+    )
+    assert beam.ppbk == 250
+    assert beam.fmax == beam.ppbk / (2 * beam.t0)
+    assert beam.spectrum[0][-1] <= beam.fmax
+
+
+def test_fmax_adjusts_default_ppbk():
+    beam = Beam(
+        M=2,
+        fillingScheme=[True, False],
+        machine="PS",
+        realMachineLength=False,
+        t0=20e-9,
+        bunchLength=4e-9,
+        fmax=10e9,
+        spectrum="numeric",
+        verbose=False,
+    )
+
+    assert beam.ppbk == 400
+    assert beam.ppbk / (2 * beam.t0) >= 10e9
+    assert beam.fmax == beam.ppbk / (2 * beam.t0)
+    assert beam.spectrum[0][-1] <= beam.fmax
+
+
+def test_explicit_fmax_overrides_ppbk(capsys):
+    beam = Beam(
+        M=2,
+        fillingScheme=[True, False],
+        machine="PS",
+        realMachineLength=False,
+        t0=20e-9,
+        bunchLength=4e-9,
+        ppbk=25,
+        fmax=1e9,
+        spectrum="numeric",
+        verbose=False,
+    )
+    output = capsys.readouterr().out
+
+    assert beam.ppbk == 40
+    assert "ppbk=25 overridden by fmax" in output
+    assert beam.fmax == beam.ppbk / (2 * beam.t0)
+    assert beam.spectrum[0][-1] > 0.5e9
 
 
 def test_set_bunches_overrides_profile_data():

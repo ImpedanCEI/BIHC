@@ -96,6 +96,37 @@ def test_power_loss_matches_manual_formula():
     assert np.allclose(density[mask], expected_density)
 
 
+@pytest.mark.filterwarnings("ignore:ppbk=.*:UserWarning")
+def test_numeric_real_fft_matches_full_fft_power_loss():
+    scheme = [True, False, True, False, False, True]
+    beam = Beam(
+        M=len(scheme),
+        fillingScheme=scheme,
+        machine="PS",
+        realMachineLength=False,
+        spectrum="numeric",
+        ppbk=32,
+        bunchLength=1e-9,
+        Np=1e11,
+        verbose=False,
+    )
+    t, profile = beam.longitudinalProfile
+    dt = t[10] - t[9]
+    full_fft = np.fft.fftshift(np.fft.fft(profile / beam.filledSlots)) * dt
+    full_f = np.linspace(
+        -1 / (2 * dt), 1 / (2 * dt) - 1 / (len(profile) * dt), len(profile)
+    )
+    Z = _impedance_from(
+        np.linspace(0, 1 / dt, 100),
+        real=np.linspace(1, 2, 100),
+    )
+    actual = beam.getPloss(Z)[0]
+    assert np.all(beam.spectrum[0] >= 0)
+    assert len(beam.spectrum[0]) == len(profile) // 2
+    beam.setSpectrum([full_f, np.abs(full_fft)])
+    assert actual == pytest.approx(beam.getPloss(Z)[0], rel=1e-12)
+
+
 def test_shifted_ploss_scans_frequency_grid(noop_tqdm):
     freqs = np.linspace(0.0, 3e6, 4)
     amps = np.linspace(0.1, 0.4, 4)
@@ -111,6 +142,56 @@ def test_shifted_ploss_scans_frequency_grid(noop_tqdm):
     assert power.shape == shifts.shape
     assert hasattr(beam, "Zmax")
     assert np.array_equal(beam.Zmax.f, freqs)
+
+
+def test_shifted_ploss_matches_zero_padded_direct_scan():
+    freqs = np.arange(-2, 6, dtype=float) * 1e6
+    amps = np.array([0.5, 0.4, 0.8, 0.3, 0.9, 0.6, 0.2, 0.1])
+    beam = _beam_with_custom_spectrum(
+        freqs=freqs, amps=amps, time_span=1e-6, filled_slots=2, np_bunch=1e10
+    )
+    Z = _impedance_from(
+        np.arange(0, 4, dtype=float) * 1e6,
+        real=np.array([0.0, 2.0, 8.0, 1.0]),
+    )
+    shifts, power = beam.getShiftedPloss(Z, shift=3e6)
+
+    impedance = np.interp(freqs, Z.f, Z.Zr, right=0.0)
+    weights = np.zeros_like(freqs)
+    positive = freqs >= 0
+    weights[positive] = (
+        2 * (qe * amps[positive] * beam.filledSlots * beam.Np / 1e-6) ** 2
+    )
+    shifted = []
+    expected = []
+    for step in shifts:
+        current = np.roll(impedance, step)
+        if step > 0:
+            current[:step] = 0.0
+        elif step < 0:
+            current[step:] = 0.0
+        shifted.append(current)
+        expected.append(np.sum(weights * current))
+
+    assert np.array_equal(shifts, np.arange(-3, 3))
+    assert np.allclose(power, expected)
+    assert np.allclose(beam.Zmax.Zr, shifted[np.argmax(expected)])
+    assert np.allclose(beam.Z.Zr, impedance)
+    assert power[np.flatnonzero(shifts == 0)[0]] == pytest.approx(beam.getPloss(Z)[0])
+
+
+def test_shifted_ploss_integer_grid():
+    """Integer frequency samples must preserve fractional power weights."""
+    freqs = np.arange(4) * 1_000_000
+    amps = np.array([0.1, 0.2, 0.3, 0.4])
+    beam = _beam_with_custom_spectrum(freqs, amps, time_span=1e-6, np_bunch=1e10)
+    beam.setSpectrum([freqs, amps])
+    Z = _impedance_from(freqs, real=np.array([0.0, 1.0, 2.0, 1.0]))
+
+    shifts, power = beam.getShiftedPloss(Z, shift=1e6)
+
+    assert beam.getPloss(Z)[0] > 0
+    assert power[shifts == 0][0] == pytest.approx(beam.getPloss(Z)[0])
 
 
 def test_shifted_power_spectrum_returns_density_grid(noop_tqdm):
@@ -142,6 +223,32 @@ def test_two_beam_ploss_accepts_tau_list(noop_tqdm):
     assert results[0] == pytest.approx(0.0)
     assert results[1] > results[0]
     assert hasattr(beam, "P_loss")
+
+
+def test_two_beam_capped_spectrum(noop_tqdm):
+    """A wider primary impedance must work without a secondary impedance."""
+    beam = Beam(
+        M=2,
+        fillingScheme=[True, False],
+        machine="PS",
+        realMachineLength=False,
+        t0=20e-9,
+        bunchLength=4e-9,
+        spectrum="numeric",
+        fmax=100e6,
+        verbose=False,
+    )
+    Z0 = _impedance_from(np.linspace(0, 200e6, 11), real=np.full(11, 10.0))
+    tau = np.array([1e-9])
+
+    result = beam.get2BeamPloss(Z0, tau_s=tau)
+
+    f, S = beam.spectrum
+    t = beam.longitudinalProfile[0]
+    current = 2 * qe * beam.filledSlots * beam.Np * S / (t[-1] - t[0])
+    expected = np.sum(current**2 * 10.0 * (1 - np.cos(2 * np.pi * f * tau[0])))
+    assert result[0] == pytest.approx(expected)
+    assert result[0] > 0
 
 
 def test_two_beam_ploss_with_offsets_and_secondary_impedance(noop_tqdm):

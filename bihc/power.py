@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import NDArray
 from scipy.constants import c, e
+from scipy.signal import correlate
 from tqdm import tqdm
 
 if TYPE_CHECKING:
@@ -94,7 +95,7 @@ class Power:
     ) -> tuple[NDArray[np.integer[Any]], NDArray[np.floating[Any]]]:
         """
         Computes the power loss, shifting the impedance
-        curve rigidly in steps given by `shift`, to overlap
+        curve rigidly over the range given by `shift`, to overlap
         with the spectral lines, giving a best (away from the
         line) and worst (on top of the line) case scenario.
 
@@ -105,41 +106,47 @@ class Power:
             the frequency information of the impedance map given
             by the user
         shift : float
-            Frequency shift to be applied in steps to the
-            impedance curve
+            Scan extent in Hz on each side of the impedance curve.
+            Individual offsets are one beam frequency bin apart.
         """
 
         [f, S] = self.spectrum
         deltaF = f[1] - f[0]
-        fmax = Z.f[-1]
 
         # if impedance file is too short, we zero padd it
         # Otherwise the interpolation will assume for the
         # missing frequencies a constant value
 
-        Zint = np.interp(f, Z.f, Z.Zr)
+        Zint = np.interp(f, Z.f, Z.Zr, right=0.0)
         Zmod = Z.copy()
-        Zmod.f, Zmod.Zr = f, Zint
+        Zmod.f, Zmod.Zr, Zmod.Zi = f, Zint.copy(), np.zeros_like(Zint)
 
-        if Zmod.f[-1] > fmax:
-            mask = Zmod.f > fmax
-            Zmod.Zr[mask] = 0.0
-
-        size = int(shift / deltaF)
+        # Keep an exact-bin shift when the frequency ratio rounds just below it.
+        size = int(np.floor(shift / deltaF + 1e-9))
         shifts = np.arange(-size, size, 1, dtype=int)  # shifting every frev
 
-        power = np.array([])
-        for step in tqdm(shifts, "Computing scan: ", total=2 * size):
-            Zmod.Zr = np.roll(Zint, step)
-            if step > 0:
-                Zmod.Zr[:step] = 0.0
-            if step < 0:
-                Zmod.Zr[: 2 * size - step] = 0.0
-            power = np.append(power, self.getPloss(Zmod)[0])
+        if not len(shifts):
+            raise ValueError("shift must span at least one beam frequency step")
 
-        Zmod.f, Zmod.Zr, Zmod.Zi = f, Zint, Zint * 0.0
+        t = self.longitudinalProfile[0]
+        f0 = 1 / (t[-1] - t[0])
+        weights = np.zeros_like(f, dtype=float)
+        positive = f >= 0
+        weights[positive] = 2 * (f0 * e * S[positive] * self.filledSlots * self.Np) ** 2
+
+        correlation = correlate(Zint, weights, mode="full", method="auto")
+        indices = len(f) - 1 - shifts
+        power = np.zeros(len(shifts))
+        valid = (indices >= 0) & (indices < len(correlation))
+        power[valid] = correlation[indices[valid]]
+
         self.Z = Zmod.copy()
-        Zmod.Zr = np.roll(Zint, shifts[np.argmax(power)])
+        best_shift = shifts[np.argmax(power)]
+        Zmod.Zr = np.roll(Zint, best_shift)
+        if best_shift > 0:
+            Zmod.Zr[:best_shift] = 0.0
+        elif best_shift < 0:
+            Zmod.Zr[best_shift:] = 0.0
         self.Zmax = Zmod.copy()
 
         return shifts, power
@@ -180,7 +187,8 @@ class Power:
             mask = Zmod.f > fmax
             Zmod.Zr[mask] = 0.0
 
-        size = int(shift / deltaF)
+        # Keep an exact-bin shift when the frequency ratio rounds just below it.
+        size = int(np.floor(shift / deltaF + 1e-9))
         shifts = np.arange(-size, size, 1, dtype=int)  # shifting every frev
 
         power_spectrum = []
@@ -258,7 +266,6 @@ class Power:
 
             Zf_0 = Z_0.f[mask]
             Zreal_0 = Z_0.Zr[mask]
-            Zreal_1 = Z_1.Zr[mask]
             mask3 = f >= 0
             f = f[mask3]
             S = S[mask3]

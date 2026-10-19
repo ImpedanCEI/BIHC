@@ -2,6 +2,16 @@
 
 This section offers a description of the example suite available in BIHC package. This section asumes that the user has followed the Installation guide and has installed BIHC succesfully.
 
+## Numeric spectrum frequency sampling
+
+For a numeric spectrum, the sampling interval is the FCC or machine slot duration divided by `ppbk`. Its Nyquist limit is $f_\mathrm{Nyquist}=\mathrm{ppbk}/(2t_0)$, and the FFT contains frequencies up to this limit. If both `ppbk` and `fmax` are omitted, BIHC estimates `fmax` from the shortest rms bunch duration $\sigma_t=\mathrm{bunchLength}/4$ using the ideal Gaussian power spectrum's $-40$ dB point:
+
+$$
+f_\max=\frac{\sqrt{\ln(10^4)}}{2\pi\sigma_t}\approx\frac{0.483}{\sigma_t}.
+$$
+
+This gives a bunch length based Nyquist target for q-Gaussian and other profiles. With both arguments omitted, BIHC calculates `ppbk` to reach that target, with a minimum of 250 samples per slot and no additional safety factor. If only `ppbk` is supplied, BIHC preserves it and the numeric spectrum reaches its resulting Nyquist limit. If `fmax` is supplied, BIHC calculates `ppbk` to reach that Nyquist target without applying the 250-sample minimum; when both arguments are supplied, `fmax` takes precedence and recalculates `ppbk`. The `fmax` argument sets numeric sampling resolution rather than truncating the returned FFT.
+
 ## User defined beam filling scheme
 
 This example shows the definition of a filling  scheme as a list of True or Falses values. It is then used along some parameters of the bunches
@@ -77,6 +87,20 @@ Z.getImpedanceFromCST('PillboxImpedance.txt')
 print(f'Custom beam power loss: {custom_beam.getPloss(Z)[0]} W')
 ```
 
+## FCC-ee study filling scheme
+
+`fillingSchemeFCCee()` returns the default FCC-ee study pattern: 40 trains of 280 bunches, 23 empty slots between trains, and 11,200 filled slots on a 12,120-slot ring. Its parameters can be overridden for other patterns. Beam intensity, bunch shape, and slot spacing are specified separately when creating a `bihc.Beam`.
+
+```python
+from bihc.fillingschemes import fillingSchemeFCCee
+
+scheme = fillingSchemeFCCee()
+assert len(scheme) == 12120
+assert sum(scheme) == 11200
+```
+
+For the planned FCC-ee example, pass `scheme` to `bihc.Beam` with the study's beam parameters.
+
 ## Timber filling scheme
 This example shows how to compute the dissipated power
 for a specific LHC fill Number.
@@ -137,7 +161,7 @@ bl = 1.2e-9         # bunch length [s]
 Np = 2.3e11         # bunch intensity [protons/bunch]
 bunchShape = 'GAUSSIAN'     # bunch profile shape in time
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e-9                 # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                  # Target Nyquist frequency of the beam spectrum [Hz]
 
 beamBcms1 = bihc.Beam(LPCfile=file1, Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode, fmax=fmax)
 beamBcms2 = bihc.Beam(LPCfile=file2,  Np=Np, bunchLength=bl, bunchShape=bunchShape, fillMode=fillMode,fmax=fmax)
@@ -157,7 +181,7 @@ print(f'8b4e_1972b_1967_1178_1886_224bpi_12inj power loss: {beam8b4e.getPloss(Z)
 
 ## Statistical min. max power loss
 
-This section showcases the method `beam.getShiftedPloss()`. With this method, the impedance curve is shifted rigidly in frequency steps defined by the `shifts` parameter. This allows to consider uncertainties in the simulated impedance curve or in the beam spectral lines.
+This section showcases the method `beam.getShiftedPloss()`. With this method, the impedance curve is shifted rigidly across the frequency range set by the `shift` parameter, in steps of one beam frequency bin. This allows to consider uncertainties in the simulated impedance curve or in the beam spectral lines.
 
 The maximum power will be obtained when the impedance peaks overlaps with one or more spectral lines. There is one example available for the SPS, using a user defined filling scheme (SPS standard 25ns, 4 batches). The other example is for the LHC, for which an LPC file is used as input.
 
@@ -205,7 +229,7 @@ Np = 2.3e11                 # bunch intensity [protons/bunch]
 bunchShape = 'q-GAUSSIAN'     # bunch profile shape in time
 qvalue = 1.2                # value of q parameter in the q-gaussian distribution
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                  # Target Nyquist frequency of the beam spectrum [Hz]
 
 beam = bihc.Beam(Np=Np, bunchLength=bl, fillingScheme=fillingScheme,
                 bunchShape=bunchShape, qvalue=qvalue,
@@ -221,7 +245,7 @@ Z.getImpedanceFromCST(impedance_file)
 ploss, ploss_density = beam.getPloss(Z)
 
 #---------------- Rigid Shift power loss ------------------------------
-shift = 40e6  # distance between shift steps [Hz]
+shift = 40e6  # scan extent on each side [Hz]
 shifts, power = beam.getShiftedPloss(Z, shift=shift)
 
 print(f'Minimum dissipated power: P_min = {np.min(power)}, at step {shifts[np.argmin(power)]}')
@@ -254,7 +278,7 @@ bl = 1.2e-9                 # bunch length [s]
 Np = 2.3e11                 # bunch intensity [protons/bunch]
 bunchShape = 'GAUSSIAN'     # bunch profile shape in time
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e9                 # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                 # Target Nyquist frequency of the beam spectrum [Hz]
 
 beam = bihc.Beam(LPCfile=file, Np=Np, bunchLength=bl, bunchShape=bunchShape,
                 machine='LHC', fillMode=fillMode, spectrum='numeric', fmax=fmax)
@@ -269,7 +293,7 @@ Z.getImpedanceFromCST(impedance_file)
 ploss, ploss_density = beam.getPloss(Z)
 
 #---------------- Rigid Shift power loss ------------------------------
-shift = 20e6  # distance between shift steps [Hz]
+shift = 20e6  # scan extent on each side [Hz]
 shifts, power = beam.getShiftedPloss(Z, shift=shift)
 
 print(f'Minimum dissipated power: P_min = {np.min(power)}, at step {shifts[np.argmin(power)]}')
@@ -301,7 +325,7 @@ file='25ns_2760b_2748_2494_2572_288bpi_13inj.csv'
 bl = 1.2e-9                 # bunch length [s]
 Np = 2.3e11                 # bunch intensity [protons/bunch]
 fillMode = 'FLATTOP'        # Energy
-fmax = 2e9                  # Maximum frequency of the beam spectrum [Hz]
+fmax = 2e9                  # Target Nyquist frequency of the beam spectrum [Hz]
 ppbk = 250 					# number of samples per slot
 verbose = False 				# Enable terminal verbosy output
 
